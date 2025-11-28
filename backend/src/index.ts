@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 
 import connectToDB from './config/db';
 import { APP_ORIGIN, NODE_ENV, PORT } from './constants/env';
+import errorHandler from './middleware/errorHandler';
+import { OK } from 'constants/http';
 
 dotenv.config();
 
@@ -20,11 +22,13 @@ app.use(
 );
 app.use(cookieParser());
 
-app.get('/', (req, res) => {
-  return res.status(200).json({ status: 'healthy' });
+app.get('/', (req, res, next) => {
+  return res.status(OK).json({ status: 'healthy' });
 });
 
-app.listen(4004, async () => {
+app.use(errorHandler);
+
+app.listen(PORT, async () => {
   console.log(
     `The server is running on port ${PORT} in ${NODE_ENV} environment ✅`
   );
