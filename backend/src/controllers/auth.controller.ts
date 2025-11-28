@@ -1,5 +1,8 @@
 import z from 'zod';
 import catchErrors from '../utils/catchErrors';
+import { createAccount } from '../services/auth.service';
+import { setAuthCookies } from '../utils/cookies';
+import { CREATED } from '../constants/http';
 
 // validation schema
 
@@ -19,11 +22,19 @@ const registerSchema = z
 // register controller wrapped into catchError function
 
 export const registerHandler = catchErrors(async (req, res, next) => {
+  // validation
+  console.log(req.body);
   const request = registerSchema.parse({
-    username: req.body.username,
-    email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
-    avatarUrl: req.body.avatarUrl ?? '',
+    ...req.body,
   });
+
+  // service
+
+  const { user, accessToken, refreshToken } = await createAccount(request);
+
+  // response
+
+  return setAuthCookies({ res, accessToken, refreshToken })
+    .status(CREATED)
+    .json({ success: true, message: 'The user was created', data: user });
 });
