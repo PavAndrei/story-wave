@@ -6,7 +6,8 @@ import cookieParser from 'cookie-parser';
 import connectToDB from './config/db';
 import { APP_ORIGIN, NODE_ENV, PORT } from './constants/env';
 import errorHandler from './middleware/errorHandler';
-import { OK } from 'constants/http';
+import { OK } from './constants/http';
+import authRoutes from './routes/auth.route';
 
 dotenv.config();
 
@@ -25,6 +26,8 @@ app.use(cookieParser());
 app.get('/', (req, res, next) => {
   return res.status(OK).json({ status: 'healthy' });
 });
+
+app.use('/auth', authRoutes);
 
 app.use(errorHandler);
 
