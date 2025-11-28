@@ -24,5 +24,6 @@ export const registerHandler = catchErrors(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    avatarUrl: req.body.avatarUrl ?? '',
   });
 });
