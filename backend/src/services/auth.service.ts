@@ -6,6 +6,8 @@ import VerificationCodeType from '../constants/verificationCodeTypes';
 import { oneYearFromNow } from '../utils/date';
 import SessionModel from '../models/session.model';
 import { JWT_REFRESH_SECRET, JWT_SECRET } from '../constants/env';
+import appAsert from '../utils/appAssert';
+import { CONFLICT } from '../constants/http';
 
 // define params for a new user
 
@@ -23,9 +25,11 @@ export const createAccount = async (data: createAccountParams) => {
 
   const existingUser = await UserModel.exists({ email: data.email });
 
-  if (existingUser) {
-    throw new Error('User already exists in data base');
-  }
+  // if (existingUser) {
+  //   throw new Error('User already exists in data base');
+  // }
+
+  appAsert(!existingUser, CONFLICT, 'User already exists in data base');
 
   // create a new user
 
@@ -70,5 +74,5 @@ export const createAccount = async (data: createAccountParams) => {
 
   // return user and tokens
 
-  return { user, accessToken, refreshToken };
+  return { user: user.omitPassword(), accessToken, refreshToken };
 };
