@@ -1,8 +1,10 @@
 import catchErrors from '../utils/catchErrors';
 import { createAccount, loginUser } from '../services/auth.service';
-import { setAuthCookies } from '../utils/cookies';
+import { setAuthCookies, clearAuthCookies } from '../utils/cookies';
 import { CREATED, OK } from '../constants/http';
 import { loginSchema, registerSchema } from './auth.schemas';
+import { verifyToken } from '../utils/jwt';
+import SessionModel from '../models/session.model';
 
 // register controller wrapped into catchError function
 
@@ -32,4 +34,19 @@ export const loginHandler = catchErrors(async (req, res) => {
   return setAuthCookies({ res, accessToken, refreshToken })
     .status(OK)
     .json({ success: true, message: 'Logged in successfully', data: user });
+});
+
+export const logooutHandler = catchErrors(async (req, res) => {
+  // logoout service logic to be implemented
+
+  const accessToken = req.cookies.accessToken;
+  const { payload, error } = verifyToken(accessToken);
+
+  if (payload) {
+    await SessionModel.findByIdAndDelete(payload.sessionId);
+  }
+
+  return clearAuthCookies(res)
+    .status(OK)
+    .json({ success: true, message: 'Logged out successfully' });
 });
