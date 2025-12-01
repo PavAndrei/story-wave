@@ -1,13 +1,20 @@
 import VerificationCodeModel from '../models/verificationCode.model';
 import UserModel from '../models/user.model';
 import VerificationCodeType from '../constants/verificationCodeTypes';
-import { ONE_DAY_MS, oneYearFromNow, thirtyDaysFromNow } from '../utils/date';
+import {
+  fiveMinutesAgo,
+  ONE_DAY_MS,
+  oneHourFromNow,
+  oneYearFromNow,
+  thirtyDaysFromNow,
+} from '../utils/date';
 import SessionModel from '../models/session.model';
 import appAsert from '../utils/appAssert';
 import {
   CONFLICT,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
+  TOO_MANY_REQUEST,
   UNAUTHORIZED,
 } from '../constants/http';
 import {
@@ -16,7 +23,7 @@ import {
   signToken,
   verifyToken,
 } from '../utils/jwt';
-import { SMTP_USER } from '../constants/env';
+import { APP_ORIGIN, SMTP_USER } from '../constants/env';
 import { sendEmail } from '../utils/emails';
 
 // define params for a new user
@@ -192,5 +199,51 @@ export const verifyEmail = async (code: string) => {
   // return user
   return {
     user: updatedUser.omitPassword(),
+  };
+};
+
+export const sendPasswordResetEmail = async (email: string) => {
+  // get user by email
+  const user = await UserModel.findOne({ email });
+  appAsert(user, NOT_FOUND, 'User with this email does not exist');
+
+  // check email rate limit
+  const rateLimit = fiveMinutesAgo();
+  const count = await VerificationCodeModel.countDocuments({
+    userId: user._id,
+    type: VerificationCodeType.PasswordReset,
+    createdAt: { $gt: rateLimit },
+  });
+  appAsert(
+    count <= 1,
+    TOO_MANY_REQUEST,
+    'Password reset email already sent recently, try later'
+  );
+
+  // One hour from now
+  const expiresAt = oneHourFromNow();
+
+  const verificationCode = await VerificationCodeModel.create({
+    userId: user._id,
+    type: VerificationCodeType.PasswordReset,
+    expiresAt,
+  });
+
+  // send email
+  const url = `${APP_ORIGIN}/password/reset?code=${
+    verificationCode._id
+  }&exp=${expiresAt.getTime()}`;
+
+  await sendEmail({
+    from: `"StoryWave" <${SMTP_USER}>`,
+    to: user.email,
+    subject: 'Password Reset Request',
+    html: `<p>You can reset your password by clicking <a href="${url}">here</a>. This link will expire in one hour.</p>`,
+  });
+
+  return {
+    success: true,
+    message: 'Password reset email sent successfully',
+    emailId: user.email,
   };
 };

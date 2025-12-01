@@ -3,6 +3,7 @@ import {
   createAccount,
   loginUser,
   refreshUserAccessToken,
+  sendPasswordResetEmail,
   verifyEmail,
 } from '../services/auth.service';
 import {
@@ -13,6 +14,7 @@ import {
 } from '../utils/cookies';
 import { CREATED, OK, UNAUTHORIZED } from '../constants/http';
 import {
+  emailSchema,
   loginSchema,
   registerSchema,
   verificationCodeSchema,
@@ -112,21 +114,16 @@ export const verifyEmailHandler = catchErrors(async (req, res) => {
     .json({ success: true, message: 'Email verified successfully' });
 });
 
-// export const sendTestEmailHandler = catchErrors(async (req, res) => {
-//   const transporter = nodemailer.createTransport({
-//     service: 'gmail',
-//     auth: {
-//       user: SMTP_USER, // твой email
-//       pass: SMTP_PASS, // пароль или App Password для Gmail
-//     },
-//   });
+export const sendPasswordResetHandler = catchErrors(async (req, res) => {
+  const email = emailSchema.parse(req.body.email);
 
-//   await transporter.sendMail({
-//     from: `"StoryWave" <${SMTP_USER}>`,
-//     to: 'andrpav9@gmail.com', // получатель
-//     subject: 'Test Email from StoryWave',
-//     html: '<h1>Hello!</h1><p>This is a test email from your backend.</p>',
-//   });
+  await sendPasswordResetEmail(email);
 
-//   return res.status(200).json({ success: true, message: 'Email sent!' });
-// });
+  return res
+    .status(OK)
+    .json({ success: true, message: 'Password reset email sent' });
+});
+
+export const resetPasswordHandler = catchErrors(async (req, res) => {
+  // Implementation for resetting the password goes here
+});

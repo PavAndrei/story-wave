@@ -26,6 +26,6 @@ export const sendEmail = async ({
     from,
     to,
     subject,
-    html: '<h1>Hello!</h1><p>This is a test email from your backend.</p>',
+    html,
   });
 };
