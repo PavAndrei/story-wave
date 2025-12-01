@@ -25,6 +25,7 @@ import {
 } from '../utils/jwt';
 import { APP_ORIGIN, SMTP_USER } from '../constants/env';
 import { sendEmail } from '../utils/emails';
+import { hashValue } from '../utils/bcrypt';
 
 // define params for a new user
 
@@ -245,5 +246,37 @@ export const sendPasswordResetEmail = async (email: string) => {
     success: true,
     message: 'Password reset email sent successfully',
     emailId: user.email,
+  };
+};
+
+export const resetPassword = async ({
+  password,
+  verificationCode,
+}: {
+  password: string;
+  verificationCode: string;
+}) => {
+  // get the verification code
+  const validCode = await VerificationCodeModel.findOne({
+    _id: verificationCode,
+    type: VerificationCodeType.PasswordReset,
+    expiresAt: { $gt: new Date() },
+  });
+  appAsert(validCode, NOT_FOUND, 'Invalid or expired verification code');
+
+  // update user password
+  const updatedUser = await UserModel.findByIdAndUpdate(validCode!.userId, {
+    password: await hashValue(password),
+  });
+  appAsert(updatedUser, INTERNAL_SERVER_ERROR, 'Failed to reset password');
+
+  // delete verification code
+  await validCode.deleteOne();
+
+  // delete all the sessions for that user
+  await SessionModel.deleteMany({ userId: updatedUser._id });
+
+  return {
+    user: updatedUser.omitPassword(),
   };
 };
