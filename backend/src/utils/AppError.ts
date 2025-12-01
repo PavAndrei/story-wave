@@ -1,4 +1,4 @@
-import AppErrorCode from '../constants/AppErrorCode';
+import AppErrorCode from '../constants/appErrorCode';
 import { HttpStatusCode } from '../constants/http';
 
 export class AppError extends Error {

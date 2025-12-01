@@ -4,13 +4,20 @@ import VerificationCodeType from '../constants/verificationCodeTypes';
 import { ONE_DAY_MS, oneYearFromNow, thirtyDaysFromNow } from '../utils/date';
 import SessionModel from '../models/session.model';
 import appAsert from '../utils/appAssert';
-import { CONFLICT, UNAUTHORIZED } from '../constants/http';
+import {
+  CONFLICT,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+  UNAUTHORIZED,
+} from '../constants/http';
 import {
   RefreshTokenPayload,
   refreshTokenSignOptions,
   signToken,
   verifyToken,
 } from '../utils/jwt';
+import { SMTP_USER } from '../constants/env';
+import { sendEmail } from '../utils/emails';
 
 // define params for a new user
 
@@ -53,6 +60,14 @@ export const createAccount = async (data: createAccountParams) => {
   });
 
   // send by email
+
+  await sendEmail({
+    from: `"StoryWave" <${SMTP_USER}>`,
+    to: user.email,
+    subject: 'Verify your email address',
+    html: `<p>Please verify your email by clicking <a href="https://yourapp.com/verify-email?code=${verificationCode._id}">here</a>.</p>`,
+  });
+
   // session
 
   const session = await SessionModel.create({ userId });
@@ -150,4 +165,32 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   });
 
   return { accessToken, newRefreshToken };
+};
+
+export const verifyEmail = async (code: string) => {
+  // get the verification code
+  const validCode = await VerificationCodeModel.findOne({
+    _id: code,
+    type: VerificationCodeType.EmailVerification,
+    expiresAt: { $gt: new Date() },
+  });
+
+  appAsert(validCode, NOT_FOUND, 'Invalid or expired verification code');
+
+  // update user verified status to true
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    validCode!.userId,
+    { verified: true },
+    { new: true }
+  );
+
+  appAsert(updatedUser, INTERNAL_SERVER_ERROR, 'Failed to verify user');
+
+  // delete verification code
+
+  await validCode.deleteOne();
+  // return user
+  return {
+    user: updatedUser.omitPassword(),
+  };
 };

@@ -20,3 +20,6 @@ export const APP_ORIGIN = getEnv('APP_ORIGIN'); // frontend application
 
 export const JWT_SECRET = getEnv('JWT_SECRET'); // token secret key
 export const JWT_REFRESH_SECRET = getEnv('JWT_REFRESH_SECRET'); // refresh token secret key
+
+export const SMTP_USER = getEnv('SMTP_USER'); // SMTP user for nodemailer
+export const SMTP_PASS = getEnv('SMTP_PASS'); // SMTP password for nodemailer

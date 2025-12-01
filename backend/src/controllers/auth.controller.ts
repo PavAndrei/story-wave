@@ -3,6 +3,7 @@ import {
   createAccount,
   loginUser,
   refreshUserAccessToken,
+  verifyEmail,
 } from '../services/auth.service';
 import {
   setAuthCookies,
@@ -11,7 +12,11 @@ import {
   getRefreshTokenCookieOptions,
 } from '../utils/cookies';
 import { CREATED, OK, UNAUTHORIZED } from '../constants/http';
-import { loginSchema, registerSchema } from './auth.schemas';
+import {
+  loginSchema,
+  registerSchema,
+  verificationCodeSchema,
+} from './auth.schemas';
 import { verifyToken } from '../utils/jwt';
 import SessionModel from '../models/session.model';
 import appAsert from '../utils/appAssert';
@@ -94,3 +99,34 @@ export const refreshHandler = catchErrors(async (req, res) => {
       message: 'Access token refreshed successfully',
     });
 });
+
+// verify email controller wrapped into catchError function
+export const verifyEmailHandler = catchErrors(async (req, res) => {
+  // validation
+  const verificationCode = verificationCodeSchema.parse(req.params.code);
+
+  await verifyEmail(verificationCode);
+
+  return res
+    .status(OK)
+    .json({ success: true, message: 'Email verified successfully' });
+});
+
+// export const sendTestEmailHandler = catchErrors(async (req, res) => {
+//   const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//       user: SMTP_USER, // твой email
+//       pass: SMTP_PASS, // пароль или App Password для Gmail
+//     },
+//   });
+
+//   await transporter.sendMail({
+//     from: `"StoryWave" <${SMTP_USER}>`,
+//     to: 'andrpav9@gmail.com', // получатель
+//     subject: 'Test Email from StoryWave',
+//     html: '<h1>Hello!</h1><p>This is a test email from your backend.</p>',
+//   });
+
+//   return res.status(200).json({ success: true, message: 'Email sent!' });
+// });
