@@ -1,7 +1,7 @@
 import { Request, RequestHandler } from 'express';
-import appAssert from '../utils/appAssert';
-import { UNAUTHORIZED } from '../constants/http';
-import { verifyToken } from '../utils/jwt';
+import appAssert from '../utils/appAssert.js';
+import { UNAUTHORIZED } from '../constants/http.js';
+import { verifyToken } from '../utils/jwt.js';
 import mongoose from 'mongoose';
 
 const authenticate: RequestHandler = (req, res, next) => {

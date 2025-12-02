@@ -1,9 +1,9 @@
 import { ErrorRequestHandler, Response } from 'express';
 import z from 'zod';
 
-import AppError from '../utils/AppError';
-import { clearAuthCookies, REFRESH_PATH } from '../utils/cookies';
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants/http';
+import AppError from '../utils/AppError.js';
+import { clearAuthCookies, REFRESH_PATH } from '../utils/cookies.js';
+import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from '../constants/http.js';
 
 // handling zod errors
 

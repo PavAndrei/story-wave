@@ -1,4 +1,4 @@
-import { SMTP_PASS, SMTP_USER } from '../constants/env';
+import { SMTP_PASS, SMTP_USER } from '../constants/env.js';
 import nodemailer from 'nodemailer';
 
 type SendEmailsParams = {

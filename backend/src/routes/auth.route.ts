@@ -6,7 +6,7 @@ import {
   verifyEmailHandler,
   sendPasswordResetHandler,
   resetPasswordHandler,
-} from '../controllers/auth.controller';
+} from '../controllers/auth.controller.js';
 import { Router } from 'express';
 
 const authRoutes = Router();

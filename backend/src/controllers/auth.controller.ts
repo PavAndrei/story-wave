@@ -1,4 +1,4 @@
-import catchErrors from '../utils/catchErrors';
+import catchErrors from '../utils/catchErrors.js';
 import {
   createAccount,
   loginUser,
@@ -6,24 +6,24 @@ import {
   resetPassword,
   sendPasswordResetEmail,
   verifyEmail,
-} from '../services/auth.service';
+} from '../services/auth.service.js';
 import {
   setAuthCookies,
   clearAuthCookies,
   getAccessTokenCookieOptions,
   getRefreshTokenCookieOptions,
-} from '../utils/cookies';
-import { CREATED, OK, UNAUTHORIZED } from '../constants/http';
+} from '../utils/cookies.js';
+import { CREATED, OK, UNAUTHORIZED } from '../constants/http.js';
 import {
   emailSchema,
   loginSchema,
   registerSchema,
   resetPasswordSchema,
   verificationCodeSchema,
-} from './auth.schemas';
-import { verifyToken } from '../utils/jwt';
-import SessionModel from '../models/session.model';
-import appAssert from '../utils/appAssert';
+} from './auth.schemas.js';
+import { verifyToken } from '../utils/jwt.js';
+import SessionModel from '../models/session.model.js';
+import appAssert from '../utils/appAssert.js';
 
 // register controller wrapped into catchError function
 export const registerHandler = catchErrors(async (req, res) => {

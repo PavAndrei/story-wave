@@ -1,31 +1,31 @@
-import VerificationCodeModel from '../models/verificationCode.model';
-import UserModel from '../models/user.model';
-import VerificationCodeType from '../constants/verificationCodeTypes';
+import VerificationCodeModel from '../models/verificationCode.model.js';
+import UserModel from '../models/user.model.js';
+import VerificationCodeType from '../constants/verificationCodeTypes.js';
 import {
   fiveMinutesAgo,
   ONE_DAY_MS,
   oneHourFromNow,
   oneYearFromNow,
   thirtyDaysFromNow,
-} from '../utils/date';
-import SessionModel from '../models/session.model';
-import appAssert from '../utils/appAssert';
+} from '../utils/date.js';
+import SessionModel from '../models/session.model.js';
+import appAssert from '../utils/appAssert.js';
 import {
   CONFLICT,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
   TOO_MANY_REQUEST,
   UNAUTHORIZED,
-} from '../constants/http';
+} from '../constants/http.js';
 import {
   RefreshTokenPayload,
   refreshTokenSignOptions,
   signToken,
   verifyToken,
-} from '../utils/jwt';
-import { APP_ORIGIN, SMTP_USER } from '../constants/env';
-import { sendEmail } from '../utils/emails';
-import { hashValue } from '../utils/bcrypt';
+} from '../utils/jwt.js';
+import { APP_ORIGIN, SMTP_USER } from '../constants/env.js';
+import { sendEmail } from '../utils/emails.js';
+import { hashValue } from '../utils/bcrypt.js';
 
 // define params for a new user
 

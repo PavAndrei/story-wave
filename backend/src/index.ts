@@ -3,15 +3,15 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-import connectToDB from './config/db';
-import { APP_ORIGIN, NODE_ENV, PORT } from './constants/env';
-import errorHandler from './middleware/errorHandler';
-import { setRequestExtensions } from './middleware/requestExtension';
-import authenticate from './middleware/authentificate';
+import connectToDB from './config/db.js';
+import { APP_ORIGIN, NODE_ENV, PORT } from './constants/env.js';
+import errorHandler from './middleware/errorHandler.js';
+import { setRequestExtensions } from './middleware/requestExtension.js';
+import authenticate from './middleware/authentificate.js';
 
-import { OK } from './constants/http';
-import authRoutes from './routes/auth.route';
-import userRoutes from './routes/user.route';
+import { OK } from './constants/http.js';
+import authRoutes from './routes/auth.route.js';
+import userRoutes from './routes/user.route.js';
 
 dotenv.config();
 

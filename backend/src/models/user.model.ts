@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { compareValue, hashValue } from '../utils/bcrypt';
+import { compareValue, hashValue } from '../utils/bcrypt.js';
 
 export interface UserDocument extends mongoose.Document {
   username: string;
