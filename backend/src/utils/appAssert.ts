@@ -3,9 +3,9 @@ import AppError from './AppError';
 import { HttpStatusCode } from '../constants/http';
 import AppErrorCode from '../constants/appErrorCode';
 
-// type definition for the appAsert function
+// type definition for the appAssert function
 
-type AppAsert = (
+type AppAssert = (
   condition: any,
   HttpStatusCode: HttpStatusCode,
   message: string,
@@ -14,11 +14,11 @@ type AppAsert = (
 
 // Asserts a condition and throw an AppError if the condition is false
 
-const appAsert: AppAsert = (
+const appAssert: AppAssert = (
   condition: any,
   HttpStatusCode,
   message,
   appErrorCode
 ) => assert(condition, new AppError(HttpStatusCode, message, appErrorCode));
 
-export default appAsert;
+export default appAssert;

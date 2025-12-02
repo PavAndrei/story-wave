@@ -23,7 +23,7 @@ import {
 } from './auth.schemas';
 import { verifyToken } from '../utils/jwt';
 import SessionModel from '../models/session.model';
-import appAsert from '../utils/appAssert';
+import appAssert from '../utils/appAssert';
 
 // register controller wrapped into catchError function
 export const registerHandler = catchErrors(async (req, res) => {
@@ -79,7 +79,7 @@ export const refreshHandler = catchErrors(async (req, res) => {
   const refreshToken = req.cookies.refreshToken as string | undefined;
 
   // assert that refresh token exists
-  appAsert(refreshToken, UNAUTHORIZED, 'Refresh token not found');
+  appAssert(refreshToken, UNAUTHORIZED, 'Refresh token not found');
 
   // refresh user access token
   const { accessToken, newRefreshToken } = await refreshUserAccessToken(

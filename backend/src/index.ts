@@ -6,8 +6,12 @@ import cookieParser from 'cookie-parser';
 import connectToDB from './config/db';
 import { APP_ORIGIN, NODE_ENV, PORT } from './constants/env';
 import errorHandler from './middleware/errorHandler';
+import { setRequestExtensions } from './middleware/requestExtension';
+import authenticate from './middleware/authentificate';
+
 import { OK } from './constants/http';
 import authRoutes from './routes/auth.route';
+import userRoutes from './routes/user.route';
 
 dotenv.config();
 
@@ -28,6 +32,7 @@ app.get('/', (req, res, next) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/user', setRequestExtensions, authenticate, userRoutes);
 
 app.use(errorHandler);
 
