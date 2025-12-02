@@ -12,6 +12,7 @@ import authenticate from './middleware/authentificate.js';
 import { OK } from './constants/http.js';
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
+import sessionRoutes from './routes/session.route.js';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.get('/', (req, res, next) => {
 
 app.use('/auth', authRoutes);
 app.use('/user', setRequestExtensions, authenticate, userRoutes);
+app.use('/session', setRequestExtensions, authenticate, sessionRoutes);
 
 app.use(errorHandler);
 
