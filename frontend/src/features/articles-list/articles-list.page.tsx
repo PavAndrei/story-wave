@@ -7,6 +7,9 @@ const ArticleListPage = () => {
   //   queryFn: () => apiInstance("https://jsonplaceholder.typicode.com/todos/1"),
   // });
 
+  // Установить shandcn и tailwind
+  // 1 : 29 : 11
+
   return (
     <div>
       <h1>Article List Page</h1>
