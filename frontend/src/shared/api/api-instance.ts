@@ -24,6 +24,7 @@ export const apiInstance = async <T>(
   const result = await fetch(`${CONFIG.API_BASE_URL}${url}`, {
     ...init,
     headers,
+    credentials: "include",
   });
 
   if (!result.ok) {

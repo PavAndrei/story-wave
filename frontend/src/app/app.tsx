@@ -9,8 +9,8 @@ export const App = () => {
     location.pathname === ROUTES.LOGIN || location.pathname === ROUTES.REGISTER;
 
   return (
-    <div>
-      {isAuthPage && <AppHeader />}
+    <div className="text-slate-700 dark:text-slate-300">
+      {!isAuthPage && <AppHeader />}
       <Outlet />
     </div>
   );
