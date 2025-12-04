@@ -118,10 +118,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-html,
-body,
-#root {
-  height: 100%;
-  background-color: var(--color-slate-50);
-}

@@ -1,45 +1,21 @@
-import { useMutation } from "@tanstack/react-query";
-import { authApi } from "./api";
-import { Button } from "@/shared/ui/kit/button";
+import { ROUTES } from "@/shared/model/routes";
+import { AuthLayout } from "./auth-layout";
+import { href, Link } from "react-router-dom";
+import { RegisterForm } from "./register-form";
 
 const RegisterPage = () => {
-  // const mutation = useMutation({
-  //   mutationFn: authApi.register,
-
-  //   onSuccess: (data) => {
-  //     console.log("REGISTRATION SUCCESS:", data);
-  //   },
-
-  //   onError: (error) => {
-  //     console.error("REGISTRATION FAILED:", error);
-  //   },
-  // });
-
-  const mutation = useMutation({
-    mutationFn: () =>
-      authApi.register({
-        email: "andrpav9@gmail.com",
-        password: "123456",
-        confirmPassword: "123456",
-        username: "andrpav",
-      }),
-
-    onSuccess: (data) => {
-      console.log("REGISTRATION SUCCESS:", data);
-    },
-
-    onError: (error) => {
-      console.error("REGISTRATION FAILED:", error);
-    },
-  });
-
   return (
-    <div>
-      Register Page
-      <Button onClick={() => mutation.mutate()}>
-        {mutation.isPending ? "Loading..." : "Register"}
-      </Button>
-    </div>
+    <AuthLayout
+      title="Registration"
+      description="Join us and start writing stories"
+      form={<RegisterForm />}
+      footerText={
+        <>
+          <span>Already have an account</span>
+          <Link to={href(ROUTES.LOGIN)}>Log in</Link>
+        </>
+      }
+    ></AuthLayout>
   );
 };
 

@@ -9,7 +9,7 @@ export const App = () => {
     location.pathname === ROUTES.LOGIN || location.pathname === ROUTES.REGISTER;
 
   return (
-    <div className="text-slate-700 dark:text-slate-300">
+    <div className="min-h-screen flex flex-col text-slate-700 bg-slate-50 dark:text-slate-300">
       {!isAuthPage && <AppHeader />}
       <Outlet />
     </div>

@@ -7,6 +7,7 @@ import {
   NavigationMenuLink,
 } from "@/shared/ui/kit/navigation-menu";
 import { href, Link } from "react-router-dom";
+import { ROUTES } from "@/shared/model/routes";
 
 const navigationMenuItems = [
   {
@@ -49,7 +50,7 @@ export const AppHeader = () => {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex items-center gap-2.5">
-          <Link to={href("/login")}>
+          <Link to={href(ROUTES.LOGIN)}>
             <Button
               aria-label="log in"
               className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95"
@@ -57,7 +58,7 @@ export const AppHeader = () => {
               Log in
             </Button>
           </Link>
-          <Link to={href("/register")}>
+          <Link to={href(ROUTES.REGISTER)}>
             <Button
               aria-label="create an account"
               className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95"
