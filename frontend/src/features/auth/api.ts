@@ -16,7 +16,13 @@ export type AuthApiResponse = {
 
 export const authApi = {
   baseKey: "auth",
-  login: () => {},
+  login: (data: { email: string; password: string }) => {
+    return apiInstance<AuthApiResponse>(`/auth/login`, {
+      method: "POST",
+      json: data,
+      credentials: "include",
+    });
+  },
   register: (data: {
     username: string;
     email: string;
@@ -26,6 +32,7 @@ export const authApi = {
     return apiInstance<AuthApiResponse>(`/auth/register`, {
       method: "POST",
       json: data,
+      credentials: "include",
     });
   },
   refresh: () => {},
