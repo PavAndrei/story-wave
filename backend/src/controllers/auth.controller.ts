@@ -34,10 +34,10 @@ export const registerHandler = catchErrors(async (req, res) => {
   });
 
   // service
-  const { user, accessToken, refreshToken } = await createAccount(request);
+  const { user } = await createAccount(request);
 
   // return response
-  return setAuthCookies({ res, accessToken, refreshToken })
+  return res
     .status(CREATED)
     .json({ success: true, message: 'The user was created', data: user });
 });
@@ -109,11 +109,21 @@ export const verifyEmailHandler = catchErrors(async (req, res) => {
   // validation
   const verificationCode = verificationCodeSchema.parse(req.params.code);
 
-  await verifyEmail(verificationCode);
+  const { user, accessToken, refreshToken } = await verifyEmail(
+    verificationCode
+  );
 
-  return res
+  return setAuthCookies({ res, accessToken, refreshToken })
     .status(OK)
-    .json({ success: true, message: 'Email verified successfully' });
+    .json({
+      success: true,
+      message: 'Email verified successfully',
+      data: user,
+    });
+
+  // return res
+  //   .status(OK)
+  //   .json({ success: true, message: 'Email verified successfully' });
 });
 
 export const sendPasswordResetHandler = catchErrors(async (req, res) => {

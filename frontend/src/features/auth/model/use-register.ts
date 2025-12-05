@@ -18,7 +18,7 @@ export const useRegister = () => {
 
     onSuccess: (data) => {
       console.log("REGISTER SUCCESS:", data);
-      navigate(ROUTES.HOME);
+      navigate(ROUTES.VERIFY_PENDING);
     },
 
     onError: (error) => {

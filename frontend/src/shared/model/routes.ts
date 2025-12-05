@@ -5,6 +5,8 @@ export const ROUTES = {
   ABOUT: "/about",
   LOGIN: "/login",
   REGISTER: "/register",
+  VERIFY_PENDING: "/verify-pending",
+  VERIFY: "/verify-email/:code",
   EDITOR: "/editor",
   ARTICLES: "/articles",
   ARTICLE: "/articles/:articleId",
@@ -13,6 +15,9 @@ export const ROUTES = {
 export type PathParams = {
   [ROUTES.ARTICLE]: {
     articleId: string;
+  };
+  [ROUTES.VERIFY]: {
+    code: string;
   };
 };
 

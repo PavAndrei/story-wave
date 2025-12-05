@@ -30,6 +30,11 @@ export type LogoutApiResponse = {
   message: string;
 };
 
+export type VerifyEmailApiResponse = {
+  success: boolean;
+  message: string;
+};
+
 export const authApi = {
   baseKey: "auth",
   login: (data: { email: string; password: string }) => {
@@ -58,7 +63,11 @@ export const authApi = {
     });
   },
   refresh: () => {},
-  verifyEmailCode: () => {},
+  verifyEmailCode: (code: string) => {
+    return apiInstance<VerifyEmailApiResponse>(`/auth/email/verify/${code}`, {
+      method: "GET",
+    });
+  },
   forgotPassword: () => {},
   resetPassword: () => {},
 };

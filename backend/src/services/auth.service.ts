@@ -40,13 +40,10 @@ export type createAccountParams = {
 
 export const createAccount = async (data: createAccountParams) => {
   // check if that user hasn't been created before
-
   const existingUser = await UserModel.exists({ email: data.email });
-
   appAssert(!existingUser, CONFLICT, 'User already exists in data base');
 
   // create a new user
-
   const user = await UserModel.create({
     username: data.username,
     email: data.email,
@@ -56,7 +53,6 @@ export const createAccount = async (data: createAccountParams) => {
   const userId = user._id;
 
   // verification code
-
   const verificationCode = await VerificationCodeModel.create({
     userId: userId,
     type: VerificationCodeType.EmailVerification,
@@ -64,35 +60,34 @@ export const createAccount = async (data: createAccountParams) => {
   });
 
   // send by email
-
   await sendEmail({
     from: `"StoryWave" <${SMTP_USER}>`,
     to: user.email,
     subject: 'Verify your email address',
-    html: `<p>Please verify your email by clicking <a href="https://yourapp.com/verify-email?code=${verificationCode._id}">here</a>.</p>`,
+    html: `<p>Please verify your email by clicking <a href="${APP_ORIGIN}/verify-email/${verificationCode._id}">here</a>.</p>`,
   });
 
   // session
 
-  const session = await SessionModel.create({ userId });
+  // const session = await SessionModel.create({ userId });
 
   // refresh token
 
-  const refreshToken = signToken(
-    { sessionId: session._id },
-    refreshTokenSignOptions
-  );
+  // const refreshToken = signToken(
+  //   { sessionId: session._id },
+  //   refreshTokenSignOptions
+  // );
 
   // access token
 
-  const accessToken = signToken({
-    userId: userId,
-    sessionId: session._id,
-  });
+  // const accessToken = signToken({
+  //   userId: userId,
+  //   sessionId: session._id,
+  // });
 
   // return user and tokens
 
-  return { user: user.omitPassword(), accessToken, refreshToken };
+  return { user: user.omitPassword() };
 };
 
 export type LoginParams = {
@@ -101,31 +96,31 @@ export type LoginParams = {
 };
 
 export const loginUser = async ({ email, password }: LoginParams) => {
-  // get user by email
-
   const user = await UserModel.findOne({ email });
   appAssert(user, UNAUTHORIZED, 'Invalid email or password');
 
-  // validate password
+  // 1. Проверка verified
+  appAssert(
+    user.verified,
+    UNAUTHORIZED,
+    'Email is not verified. Please verify your email before logging in.'
+  );
 
+  // 2. Проверка пароля
   const isValidPassword = await user.comparePassword(password);
   appAssert(isValidPassword, UNAUTHORIZED, 'Invalid email or password');
 
-  const userId = user._id;
-
-  // create session
-
-  const session = await SessionModel.create({ userId });
+  // 3. Создаём сессию
+  const session = await SessionModel.create({ userId: user._id });
 
   const sessionInfo = { sessionId: session._id };
 
-  // refresh token
   const refreshToken = signToken(sessionInfo, refreshTokenSignOptions);
+  const accessToken = signToken({
+    ...sessionInfo,
+    userId: user._id,
+  });
 
-  // access token
-  const accessToken = signToken({ ...sessionInfo, userId: user._id });
-
-  // return user and tokens
   return {
     user: user.omitPassword(),
     accessToken,
@@ -172,7 +167,6 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
 };
 
 export const verifyEmail = async (code: string) => {
-  // get the verification code
   const validCode = await VerificationCodeModel.findOne({
     _id: code,
     type: VerificationCodeType.EmailVerification,
@@ -181,21 +175,37 @@ export const verifyEmail = async (code: string) => {
 
   appAssert(validCode, NOT_FOUND, 'Invalid or expired verification code');
 
-  // update user verified status to true
+  // 1. Обновляем verified
   const updatedUser = await UserModel.findByIdAndUpdate(
-    validCode!.userId,
+    validCode.userId,
     { verified: true },
     { new: true }
   );
 
   appAssert(updatedUser, INTERNAL_SERVER_ERROR, 'Failed to verify user');
 
-  // delete verification code
-
+  // 2. Удаляем verification code
   await validCode.deleteOne();
-  // return user
+
+  // 3. Создаём session
+  const session = await SessionModel.create({ userId: updatedUser._id });
+
+  // 4. Создаём токены
+  const refreshToken = signToken(
+    { sessionId: session._id },
+    refreshTokenSignOptions
+  );
+
+  const accessToken = signToken({
+    userId: updatedUser._id,
+    sessionId: session._id,
+  });
+
+  // 5. Возвращаем токены и user
   return {
     user: updatedUser.omitPassword(),
+    accessToken,
+    refreshToken,
   };
 };
 

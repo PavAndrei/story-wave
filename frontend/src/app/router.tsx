@@ -37,6 +37,14 @@ export const router = createBrowserRouter([
         lazy: () => import("@/features/auth/register.page"),
       },
       {
+        path: ROUTES.VERIFY_PENDING,
+        lazy: () => import("@/features/auth/verify-pending.page"),
+      },
+      {
+        path: ROUTES.VERIFY,
+        lazy: () => import("@/features/auth/verify-email.page"),
+      },
+      {
         path: ROUTES.HOME,
         loader: () => redirect(ROUTES.ARTICLES),
       },
