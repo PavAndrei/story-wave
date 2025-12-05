@@ -20,13 +20,17 @@ export const getSessionHandler = catchErrors(async (req, res) => {
   );
 
   return res.status(OK).json(
+    {
+      success: true,
+      message: 'Sessions found',
+      sessions: sessions.map((session) => ({
+        ...session.toObject(),
+        ...(session._id === req.sessionId && {
+          isCurrent: true,
+        }),
+      })),
+    }
     // mark the current session
-    sessions.map((session) => ({
-      ...session.toObject(),
-      ...(session._id === req.sessionId && {
-        isCurrent: true,
-      }),
-    }))
   );
 });
 

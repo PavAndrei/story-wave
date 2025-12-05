@@ -57,7 +57,7 @@ export const loginHandler = catchErrors(async (req, res) => {
 });
 
 // logout controller wrapped into catchError function
-export const logooutHandler = catchErrors(async (req, res) => {
+export const logoutHandler = catchErrors(async (req, res) => {
   // get access token from cookies
   const accessToken = req.cookies.accessToken as string | undefined;
   const { payload } = verifyToken(accessToken || '');

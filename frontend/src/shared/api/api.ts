@@ -14,6 +14,22 @@ export type AuthApiResponse = {
   };
 };
 
+export type SessionItem = {
+  _id: string;
+  createdAt: Date;
+};
+
+export type SessionApiResponse = {
+  success: boolean;
+  message: string;
+  sessions: SessionItem[];
+};
+
+export type LogoutApiResponse = {
+  success: boolean;
+  message: string;
+};
+
 export const authApi = {
   baseKey: "auth",
   login: (data: { email: string; password: string }) => {
@@ -35,9 +51,35 @@ export const authApi = {
       credentials: "include",
     });
   },
+  logout: () => {
+    return apiInstance<LogoutApiResponse>(`/auth/logout`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
   refresh: () => {},
-  logout: () => {},
   verifyEmailCode: () => {},
   forgotPassword: () => {},
   resetPassword: () => {},
+};
+
+export const sessionApi = {
+  baseKey: "session",
+  getSession: () => {
+    return apiInstance<SessionApiResponse>(`/session`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
+  deleteSession: (id: string) => {
+    return apiInstance(`/session/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  },
+};
+
+export const userApi = {
+  baseKey: "user",
+  getProfile: () => {},
 };
