@@ -106,24 +106,17 @@ export const refreshHandler = catchErrors(async (req, res) => {
 
 // verify email controller wrapped into catchError function
 export const verifyEmailHandler = catchErrors(async (req, res) => {
-  // validation
   const verificationCode = verificationCodeSchema.parse(req.params.code);
 
   const { user, accessToken, refreshToken } = await verifyEmail(
     verificationCode
   );
 
-  return setAuthCookies({ res, accessToken, refreshToken })
-    .status(OK)
-    .json({
-      success: true,
-      message: 'Email verified successfully',
-      data: user,
-    });
-
-  // return res
-  //   .status(OK)
-  //   .json({ success: true, message: 'Email verified successfully' });
+  return setAuthCookies({ res, accessToken, refreshToken }).status(OK).json({
+    success: true,
+    message: 'Email verified successfully',
+    data: user,
+  });
 });
 
 export const sendPasswordResetHandler = catchErrors(async (req, res) => {

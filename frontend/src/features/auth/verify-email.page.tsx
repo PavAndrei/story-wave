@@ -1,57 +1,22 @@
-import { authApi } from "@/shared/api/api";
+import { href, Link } from "react-router-dom";
 import { ROUTES } from "@/shared/model/routes";
-import { useEffect, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useVerifyEmail } from "./model/use-verify-email";
 
-export const VerifyEmailPage = () => {
-  const { code } = useParams();
-  const navigate = useNavigate();
+const VerifyEmailPage = () => {
+  const { isPending, isError } = useVerifyEmail();
 
-  const hasFetched = useRef(false);
+  if (isPending) return <p>Verifying your email...</p>;
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
-  );
+  if (isError)
+    return (
+      <div>
+        <h1>Verification failed</h1>
+        <p>The link is invalid or expired.</p>
+        <Link to={href(ROUTES.LOGIN)}>Go to Log In Page</Link>
+      </div>
+    );
 
-  useEffect(() => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
-    const verify = async () => {
-      try {
-        const data = await authApi.verifyEmailCode(code || "");
-
-        if (data.success) {
-          setStatus("success");
-        } else {
-          setStatus("error");
-        }
-      } catch {
-        setStatus("error");
-      }
-    };
-
-    verify();
-  }, [code]);
-
-  return (
-    <main className="p-10">
-      {status === "loading" && <p>Verifying email...</p>}
-
-      {status === "success" && (
-        <>
-          <h1>Email verified 🎉</h1>
-          <button onClick={() => navigate(ROUTES.LOGIN)}>Go to Login</button>
-        </>
-      )}
-
-      {status === "error" && (
-        <>
-          <h1>Verification failed</h1>
-          <button onClick={() => navigate(ROUTES.HOME)}>Go to Home Page</button>
-        </>
-      )}
-    </main>
-  );
+  return null;
 };
 
 export const Component = VerifyEmailPage;

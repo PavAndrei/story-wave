@@ -1,17 +1,8 @@
 import { apiInstance } from "@/shared/api/api-instance";
 
-export type AuthApiResponse = {
+export type RegistrationApiResponse = {
   success: boolean;
   message: string;
-  data?: {
-    username: string;
-    email: string;
-    verified: boolean;
-    _id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    __v: number;
-  };
 };
 
 export type SessionItem = {
@@ -30,15 +21,38 @@ export type LogoutApiResponse = {
   message: string;
 };
 
+export type LoginApiResponse = {
+  success?: boolean;
+  message: string;
+  data?: {
+    username: string;
+    email: string;
+    verified: boolean;
+    _id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    __v: number;
+  };
+};
+
 export type VerifyEmailApiResponse = {
   success: boolean;
   message: string;
+  data?: {
+    username: string;
+    email: string;
+    verified: boolean;
+    _id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    __v: number;
+  };
 };
 
 export const authApi = {
   baseKey: "auth",
   login: (data: { email: string; password: string }) => {
-    return apiInstance<AuthApiResponse>(`/auth/login`, {
+    return apiInstance<LoginApiResponse>(`/auth/login`, {
       method: "POST",
       json: data,
       credentials: "include",
@@ -50,7 +64,7 @@ export const authApi = {
     password: string;
     confirmPassword: string;
   }) => {
-    return apiInstance<AuthApiResponse>(`/auth/register`, {
+    return apiInstance<RegistrationApiResponse>(`/auth/register`, {
       method: "POST",
       json: data,
       credentials: "include",
@@ -66,6 +80,7 @@ export const authApi = {
   verifyEmailCode: (code: string) => {
     return apiInstance<VerifyEmailApiResponse>(`/auth/email/verify/${code}`, {
       method: "GET",
+      credentials: "include",
     });
   },
   forgotPassword: () => {},

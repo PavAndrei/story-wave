@@ -20,7 +20,12 @@ export const useLogin = () => {
     },
 
     onError: (error) => {
-      console.error("LOGIN FAILED:", error.message);
+      if (
+        error.message ===
+        "Email is not verified. Please verify your email before logging in."
+      ) {
+        navigate(ROUTES.VERIFY_PENDING);
+      }
     },
   });
 

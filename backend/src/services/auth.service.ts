@@ -67,26 +67,6 @@ export const createAccount = async (data: createAccountParams) => {
     html: `<p>Please verify your email by clicking <a href="${APP_ORIGIN}/verify-email/${verificationCode._id}">here</a>.</p>`,
   });
 
-  // session
-
-  // const session = await SessionModel.create({ userId });
-
-  // refresh token
-
-  // const refreshToken = signToken(
-  //   { sessionId: session._id },
-  //   refreshTokenSignOptions
-  // );
-
-  // access token
-
-  // const accessToken = signToken({
-  //   userId: userId,
-  //   sessionId: session._id,
-  // });
-
-  // return user and tokens
-
   return { user: user.omitPassword() };
 };
 
