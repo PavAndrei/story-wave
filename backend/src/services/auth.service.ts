@@ -64,7 +64,76 @@ export const createAccount = async (data: createAccountParams) => {
     from: `"StoryWave" <${SMTP_USER}>`,
     to: user.email,
     subject: 'Verify your email address',
-    html: `<p>Please verify your email by clicking <a href="${APP_ORIGIN}/verify-email/${verificationCode._id}">here</a>.</p>`,
+    html: `
+  <div style="
+    font-family: Arial, sans-serif;
+    background-color: #f1f5f9;
+    padding: 24px;
+    color: #334155;
+  ">
+    <div style="
+      max-width: 520px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    ">
+      <h1 style="
+        font-size: 22px;
+        margin-bottom: 12px;
+        color: #0e7490;
+        text-align: center;
+      ">
+        Verify Your Email Address
+      </h1>
+
+      <p style="font-size: 15px; line-height: 1.6; margin-bottom: 16px;">
+        Thank you for signing up to <strong>StoryWave</strong>!  
+        Before we give you full access to your account, we need to confirm that this email address belongs to you.
+      </p>
+
+      <p style="font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+        Please click the button below to verify your email.  
+        This helps us keep your account secure and ensures you receive important notifications.
+      </p>
+
+      <div style="text-align: center; margin-bottom: 28px;">
+        <a href="${APP_ORIGIN}/verify-email/${verificationCode._id}" 
+          style="
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #06b6d4;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+          "
+        >
+          Verify Email
+        </a>
+      </div>
+
+      <p style="font-size: 14px; color: #64748b; line-height: 1.6;">
+        If the button above doesn’t work, copy and paste this link into your browser:
+      </p>
+
+      <p style="font-size: 14px; word-break: break-all; color: #0e7490; margin-bottom: 24px;">
+        ${APP_ORIGIN}/verify-email/${verificationCode._id}
+      </p>
+
+      <p style="font-size: 14px; color: #64748b; line-height: 1.6;">
+        If you did not create an account on StoryWave, you can safely ignore this email.
+      </p>
+
+      <p style="margin-top: 32px; font-size: 14px; color: #94a3b8; text-align: right;">
+        — The StoryWave Team
+      </p>
+    </div>
+  </div>
+`,
   });
 
   return { user: user.omitPassword() };
