@@ -2,6 +2,7 @@ import { CONFIG } from "../model/config";
 
 export type ApiErrorResponse = {
   message: string;
+  errorCode?: string;
 };
 
 class ApiError extends Error {
@@ -15,41 +16,109 @@ class ApiError extends Error {
   }
 }
 
+// Флаги для единственного refresh-потока
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
+const doRefresh = async (): Promise<void> => {
+  // если уже идёт рефреш — дождаться его
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${CONFIG.API_BASE_URL}/auth/refresh`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        // пробрасываем ApiError с телом, чтобы вызывающий понял причину
+        const body = await res
+          .json()
+          .catch(() => ({ message: "Refresh failed" }));
+        throw new ApiError(res.status, body.message || "Refresh failed", body);
+      }
+
+      // удачный refresh — можем прочитать тело (если нужно)
+      await res.json().catch(() => undefined);
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+};
+
 export const apiInstance = async <T>(
   url: string,
   init?: RequestInit & { json?: unknown },
-) => {
+): Promise<T> => {
   let headers = init?.headers ?? {};
 
+  // если передали json — сериализуем
   if (init?.json) {
     headers = {
       "Content-Type": "application/json",
       ...headers,
     };
-
     init.body = JSON.stringify(init.json);
   }
 
-  const response = await fetch(`${CONFIG.API_BASE_URL}${url}`, {
-    ...init,
-    headers,
-  });
+  // по умолчанию включаем credentials, если не указанно
+  const credentials = init?.credentials ?? "include";
 
-  if (!response.ok) {
-    let errorBody: ApiErrorResponse | undefined;
+  const doFetch = () =>
+    fetch(`${CONFIG.API_BASE_URL}${url}`, {
+      ...init,
+      headers,
+      credentials,
+    });
 
-    try {
-      errorBody = await response.json();
-    } catch {
-      errorBody = { message: "Unknown error" };
-    }
+  // Выполняем запрос
+  let response = await doFetch();
 
-    const message =
-      errorBody?.message || `Request failed with status ${response.status}`;
-
-    throw new ApiError(response.status, message, errorBody);
+  // Если всё ок — возвращаем распарсенный json
+  if (response.ok) {
+    return response.json();
   }
 
-  const data = (await response.json()) as T;
-  return data;
+  // Попытаться распарсить тело ошибки
+  const errorBody: ApiErrorResponse = await response.json().catch(() => ({
+    message: "Unknown error",
+  }));
+
+  // Когда access протух — триггерим refresh (но не для самого refresh-эндоинта)
+  if (
+    response.status === 401 &&
+    errorBody?.errorCode === "invalidAccessToken" &&
+    !url.endsWith("/auth/refresh")
+  ) {
+    try {
+      // Выполняем единичный рефреш (параллельные запросы будут ждать)
+      await doRefresh();
+    } catch (refreshErr) {
+      // Refresh провалился — пробрасываем ошибку дальше
+      if (refreshErr instanceof ApiError) throw refreshErr;
+      throw new ApiError(500, "Refresh failed", { message: "Refresh failed" });
+    }
+
+    // Повторяем исходный запрос после успешного refresh
+    response = await doFetch();
+
+    if (response.ok) {
+      return response.json();
+    }
+
+    const retryErrBody: ApiErrorResponse = await response.json().catch(() => ({
+      message: "Unknown error on retry",
+    }));
+    throw new ApiError(response.status, retryErrBody.message, retryErrBody);
+  }
+
+  // В остальных случаях — обычная ошибка
+  throw new ApiError(response.status, errorBody.message, errorBody);
 };
