@@ -10,6 +10,7 @@ export const ROUTES = {
   EDITOR: "/editor",
   ARTICLES: "/articles",
   ARTICLE: "/articles/:articleId",
+  PROFILE: "/profile",
 } as const;
 
 export type PathParams = {

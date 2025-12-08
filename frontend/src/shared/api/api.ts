@@ -76,7 +76,12 @@ export const authApi = {
       credentials: "include",
     });
   },
-  refresh: () => {},
+  refresh: () => {
+    return apiInstance(`/auth/refresh`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
   verifyEmailCode: (code: string) => {
     return apiInstance<VerifyEmailApiResponse>(`/auth/email/verify/${code}`, {
       method: "GET",
