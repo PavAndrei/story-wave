@@ -6,6 +6,7 @@ export interface UserDocument extends mongoose.Document {
   email: string;
   password: string;
   verified: boolean;
+  avatarUrl: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(val: string): Promise<boolean>;
@@ -33,17 +34,14 @@ const userSchema = new mongoose.Schema<UserDocument>(
       required: true,
       default: false,
     },
+    avatarUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   { timestamps: true }
 );
-
-// userSchema.pre('save', async function (next) {
-//   if (!this.isModified('password')) {
-//     return next();
-//   }
-//   this.password = await hashValue(this.password);
-//   next();
-// });
 
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) {

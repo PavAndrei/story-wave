@@ -10,6 +10,9 @@ import { href, Link } from "react-router-dom";
 import { ROUTES } from "@/shared/model/routes";
 import { useSession } from "@/shared/model/session";
 import { useLogout } from "@/shared/api/use-logout";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/kit/avatar";
+import { useMyProfile } from "@/shared/model/user";
+import { User } from "lucide-react";
 
 const navigationMenuItems = [
   {
@@ -32,8 +35,8 @@ const navigationMenuItems = [
 
 export const AppHeader = () => {
   const { sessions, isLoading } = useSession();
-
   const { logout, isPending: isLogoutPending } = useLogout();
+  const { userData } = useMyProfile();
 
   return (
     <header className="bg-slate-200 py-5 border-b border-slate-700">
@@ -59,14 +62,31 @@ export const AppHeader = () => {
         {isLoading ? (
           <div className="min-w-[90px] h-10 rounded ml-auto mr-0" />
         ) : sessions ? (
-          <Button
-            onClick={() => logout()}
-            disabled={isLogoutPending}
-            aria-label="log out"
-            className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 ml-auto mr-0"
-          >
-            Log out
-          </Button>
+          <div className="flex items-center gap-2.5 mr-0 ml-auto">
+            <Button
+              aria-label="profile link"
+              asChild
+              className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2"
+            >
+              <Link to={href(ROUTES.PROFILE)}>
+                <Avatar className="size-6">
+                  <AvatarImage src={userData?.avatarUrl} />
+                  <AvatarFallback>
+                    <User className="text-cyan-700 size-5" />
+                  </AvatarFallback>
+                </Avatar>
+                {userData?.username}
+              </Link>
+            </Button>
+            <Button
+              onClick={() => logout()}
+              disabled={isLogoutPending}
+              aria-label="log out"
+              className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 ml-auto mr-0"
+            >
+              Log out
+            </Button>
+          </div>
         ) : (
           <div className="flex items-center gap-2.5 mr-0 ml-auto">
             <Link to={href(ROUTES.LOGIN)}>

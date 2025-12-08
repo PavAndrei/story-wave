@@ -104,5 +104,10 @@ export const sessionApi = {
 
 export const userApi = {
   baseKey: "user",
-  getProfile: () => {},
+  getMyProfile: () => {
+    return apiInstance(`/user/me`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
 };

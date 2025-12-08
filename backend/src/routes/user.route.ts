@@ -4,6 +4,6 @@ import { getUserHandler } from '../controllers/user.controller.js';
 
 const userRoutes = Router();
 
-userRoutes.get('/profile', getUserHandler);
+userRoutes.get('/me', getUserHandler);
 
 export default userRoutes;

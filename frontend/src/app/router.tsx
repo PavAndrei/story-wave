@@ -23,6 +23,23 @@ export const router = createBrowserRouter([
           {
             path: ROUTES.PROFILE,
             lazy: () => import("@/features/profile/profile.page"),
+            children: [
+              {
+                index: true,
+                lazy: () =>
+                  import("@/features/profile/pages/profile-overview.page"),
+              },
+              {
+                path: ROUTES.PROFILE_SETTINGS,
+                lazy: () =>
+                  import("@/features/profile/pages/profile-settings.page"),
+              },
+              {
+                path: ROUTES.PROFILE_SECURITY,
+                lazy: () =>
+                  import("@/features/profile/pages/profile-security.page"),
+              },
+            ],
           },
         ],
       },
