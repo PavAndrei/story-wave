@@ -7,6 +7,8 @@ export const ROUTES = {
   REGISTER: "/register",
   VERIFY_PENDING: "/verify-pending",
   VERIFY: "/verify-email/:code",
+  FORGOT_PASSWORD: "/password/forgot",
+  RESET_PASSWORD: "/password/reset",
   EDITOR: "/editor",
   ARTICLES: "/articles",
   ARTICLE: "/articles/:articleId",

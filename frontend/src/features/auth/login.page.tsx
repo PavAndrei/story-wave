@@ -13,6 +13,9 @@ const LoginPage = () => {
         <>
           <span>Don't have an account?</span>
           <Link to={href(ROUTES.REGISTER)}> Sign up</Link>
+          <br />
+          <span>Forot password?</span>
+          <Link to={href(ROUTES.FORGOT_PASSWORD)}> Click to reset</Link>
         </>
       }
     />

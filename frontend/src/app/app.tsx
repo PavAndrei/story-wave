@@ -9,7 +9,9 @@ export const App = () => {
     location.pathname === ROUTES.LOGIN ||
     location.pathname === ROUTES.REGISTER ||
     location.pathname === ROUTES.VERIFY_PENDING ||
-    location.pathname.startsWith(ROUTES.VERIFY.replace(":code", ""));
+    location.pathname.startsWith(ROUTES.VERIFY.replace(":code", "")) ||
+    location.pathname === ROUTES.FORGOT_PASSWORD ||
+    location.pathname === ROUTES.RESET_PASSWORD;
 
   return (
     <div className="min-h-screen flex flex-col text-slate-700 bg-slate-50 dark:text-slate-300">

@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/kit/card";
-import { useVerifyAlert } from "./model/use-verify-alert";
+import { useAlert } from "./model/use-alert";
 
 export const VerifyPendingPage = () => {
-  useVerifyAlert();
+  useAlert({
+    title: "Please verify your email",
+    text: "Check your inbox.",
+  });
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-200 text-slate-700 p-4">

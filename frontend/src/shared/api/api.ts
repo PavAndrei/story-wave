@@ -82,8 +82,18 @@ export const authApi = {
       credentials: "include",
     });
   },
-  forgotPassword: () => {},
-  resetPassword: () => {},
+  forgotPassword: (email: string) => {
+    return apiInstance(`/auth/password/forgot`, {
+      method: "POST",
+      json: { email },
+    });
+  },
+  resetPassword: (data: { password: string; verificationCode: string }) => {
+    return apiInstance(`/auth/password/reset`, {
+      method: "POST",
+      json: data,
+    });
+  },
 };
 
 export const sessionApi = {
