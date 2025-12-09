@@ -11,6 +11,7 @@ export const ROUTES = {
   ARTICLES: "/articles",
   ARTICLE: "/articles/:articleId",
   PROFILE: "/profile",
+  PROFILE_EDIT: "/profile/edit",
   PROFILE_SECURITY: "/profile/security",
   PROFILE_SETTINGS: "/profile/settings",
 } as const;
