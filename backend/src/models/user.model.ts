@@ -7,6 +7,7 @@ export interface UserDocument extends mongoose.Document {
   password: string;
   verified: boolean;
   avatarUrl: string;
+  bio: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(val: string): Promise<boolean>;
@@ -35,6 +36,11 @@ const userSchema = new mongoose.Schema<UserDocument>(
       default: false,
     },
     avatarUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    bio: {
       type: String,
       required: false,
       default: '',

@@ -14,8 +14,8 @@ const handleZodError = (res: Response, error: z.ZodError) => {
   }));
 
   return res.status(BAD_REQUEST).json({
-    message: error.message,
-    errors,
+    message: errors[0]?.message ?? 'Invalid input', // ← Читабельный текст
+    errors, // ← Но при желании фронт может получить все ошибки
   });
 };
 

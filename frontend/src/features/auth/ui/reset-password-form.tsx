@@ -38,6 +38,8 @@ export const ResetPasswordForm = () => {
     resetPassword({ password: data.password });
   });
 
+  console.log(errorMessage);
+
   return (
     <Form {...form}>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>

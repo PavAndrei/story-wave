@@ -2,6 +2,8 @@ import { CONFIG } from "../model/config";
 
 export type ApiErrorResponse = {
   message: string;
+  success?: boolean;
+  error?: string;
   errorCode?: string;
 };
 

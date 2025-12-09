@@ -1,12 +1,12 @@
 import { authApi, sessionApi, userApi } from "@/shared/api/api";
 import { queryClient } from "@/shared/api/query-client";
-import { ROUTES } from "@/shared/model/routes";
+import { ROUTES, type PathParams } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRef, useEffect } from "react";
 
 export const useVerifyEmail = () => {
-  const { code } = useParams<{ code: string }>();
+  const { code } = useParams<PathParams[typeof ROUTES.VERIFY]>();
   const navigate = useNavigate();
   const firstFetchRef = useRef(true);
 
