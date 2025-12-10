@@ -16,6 +16,7 @@ export const ROUTES = {
   PROFILE_EDIT: "/profile/edit",
   PROFILE_SECURITY: "/profile/security",
   PROFILE_SETTINGS: "/profile/settings",
+  PROFILE_CHANGE_PASSWORD: "/profile/change-password",
 } as const;
 
 export type PathParams = {

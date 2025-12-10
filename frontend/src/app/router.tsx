@@ -40,6 +40,11 @@ export const router = createBrowserRouter([
                 path: ROUTES.PROFILE_SECURITY,
                 lazy: () => import("@/features/profile/profile-security.page"),
               },
+              {
+                path: ROUTES.PROFILE_CHANGE_PASSWORD,
+                lazy: () =>
+                  import("@/features/profile/profile-change-password.page"),
+              },
             ],
           },
         ],
