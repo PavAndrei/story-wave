@@ -6,7 +6,7 @@ const ProfilePage = () => {
   return (
     <div className="max-w-[1440px] w-full px-2.5 mx-auto relative">
       <SidebarProvider>
-        <Sidebar className="w-1/4 absolute top-0 left-0 border-r border-slate-700">
+        <Sidebar className="w-1/4 h-full absolute top-0 left-0 border-x border-slate-700">
           <ProfileSidebar />
         </Sidebar>
         <Outlet />

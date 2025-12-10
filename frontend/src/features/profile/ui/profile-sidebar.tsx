@@ -14,7 +14,7 @@ export const ProfileSidebar = () => {
   const { userData } = useMyProfile();
 
   return (
-    <>
+    <aside className="flex flex-col gap-6 h-full bg-slate-200">
       <SidebarHeader className="bg-slate-200 border-b border-slate-700">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -45,6 +45,6 @@ export const ProfileSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="bg-slate-200">Log Out</SidebarFooter>
-    </>
+    </aside>
   );
 };

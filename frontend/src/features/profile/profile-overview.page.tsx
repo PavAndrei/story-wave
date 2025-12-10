@@ -1,6 +1,6 @@
 import { ROUTES } from "@/shared/model/routes";
 import { useMyProfile } from "@/shared/model/user";
-import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/kit/avatar";
+import { Avatar, AvatarImage } from "@/shared/ui/kit/avatar";
 import { Button } from "@/shared/ui/kit/button";
 import { CardDescription, CardTitle } from "@/shared/ui/kit/card";
 import { User } from "lucide-react";
@@ -20,11 +20,12 @@ const ProfileOverviewPage = () => {
       description="You can see how your profile looks like."
       header={
         <>
-          <Avatar className="w-24 h-24 rounded-full object-cover border-4 border-cyan-700 shadow-md">
-            <AvatarImage src={userData?.avatarUrl} />
-            <AvatarFallback>
+          <Avatar className="flex items-center justify-center w-24 h-24 rounded-full object-cover border-4 border-cyan-700 shadow-md">
+            {userData?.avatarUrl ? (
+              <AvatarImage src={userData?.avatarUrl} />
+            ) : (
               <User className="text-cyan-700 size-12" />
-            </AvatarFallback>
+            )}
           </Avatar>
 
           <div>
