@@ -16,11 +16,9 @@ import { useForm } from "react-hook-form";
 import { href, Link } from "react-router-dom";
 import z from "zod";
 
-import { useEffect, useState } from "react";
-import { useDropzone } from "react-dropzone";
 import { ProfileAvatarInput } from "./profile-avatar-input";
+import { useAvatarInput } from "../model/use-avatar-input";
 
-// ------------------ SCHEMA -------------------
 const EditProfileSchema = z.object({
   username: z.string().min(1, "Username is too short").max(255),
   email: z
@@ -38,81 +36,34 @@ const EditProfileSchema = z.object({
     .optional(),
 });
 
-type EditProfileFormValues = z.infer<typeof EditProfileSchema>;
+export type EditProfileFormValues = z.infer<typeof EditProfileSchema>;
 
-// ------------------ COMPONENT -------------------
 export const ProfileEditForm = () => {
   const { userData } = useMyProfile();
 
   const form = useForm<EditProfileFormValues>({
     resolver: zodResolver(EditProfileSchema),
     defaultValues: {
-      username: userData?.username || "",
-      email: userData?.email || "",
-      bio: userData?.bio || "",
+      username: userData?.username ?? "",
+      email: userData?.email ?? "",
+      bio: userData?.bio ?? "",
       avatar: null,
     },
   });
 
+  const avatar = useAvatarInput({
+    form,
+    initialAvatarUrl: userData?.avatarUrl,
+  });
+
   const handleSubmit = form.handleSubmit((data) => {
     console.log("FORM DATA:", data);
-    console.log("AVATAR FILE:", data.avatar);
   });
-
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: { "image/*": [] },
-    multiple: false,
-    maxSize: 1024 * 1024,
-    onDrop: (files: File[]) => {
-      const file = files[0];
-      if (file) {
-        form.clearErrors("avatar");
-        form.setValue("avatar", file, { shouldValidate: true });
-      }
-    },
-    onDropRejected: (rejections) => {
-      const error = rejections[0]?.errors[0];
-      if (!error) return;
-
-      if (error.code === "file-too-large") {
-        form.setError("avatar", {
-          type: "manual",
-          message: "File is too large (max 1MB)",
-        });
-      } else {
-        form.setError("avatar", {
-          type: "manual",
-          message: "Invalid file",
-        });
-      }
-    },
-  });
-
-  const avatarFile = form.watch("avatar");
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    userData?.avatarUrl || null,
-  );
-
-  const handleClearAvatar = () => {
-    form.setValue("avatar", null, { shouldValidate: true });
-    setAvatarPreview(null);
-    form.clearErrors("avatar");
-  };
 
   const handleResetForm = () => {
     form.reset();
-    setAvatarPreview(userData?.avatarUrl || null);
+    avatar.resetAvatar();
   };
-
-  useEffect(() => {
-    if (!avatarFile) {
-      setAvatarPreview(userData?.avatarUrl || null);
-      return;
-    }
-    const objectUrl = URL.createObjectURL(avatarFile);
-    setAvatarPreview(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [avatarFile, userData?.avatarUrl]);
 
   return (
     <Form {...form}>
@@ -121,21 +72,19 @@ export const ProfileEditForm = () => {
         onSubmit={handleSubmit}
         noValidate
       >
-        {/* ---------------- AVATAR UPLOAD ---------------- */}
         <FormField
           name="avatar"
           control={form.control}
           render={() => (
             <ProfileAvatarInput
-              getInputProps={getInputProps}
-              getRootProps={getRootProps}
-              avatarPreview={avatarPreview}
-              handleClearAvatar={handleClearAvatar}
+              getInputProps={avatar.getInputProps}
+              getRootProps={avatar.getRootProps}
+              avatarPreview={avatar.avatarPreview}
+              handleClearAvatar={avatar.clearAvatar}
             />
           )}
         />
 
-        {/* ---------------- USERNAME ---------------- */}
         <FormField
           control={form.control}
           name="username"
@@ -157,7 +106,6 @@ export const ProfileEditForm = () => {
           )}
         />
 
-        {/* ---------------- EMAIL ---------------- */}
         <FormField
           control={form.control}
           name="email"
@@ -179,7 +127,6 @@ export const ProfileEditForm = () => {
           )}
         />
 
-        {/* ---------------- BIO ---------------- */}
         <FormField
           control={form.control}
           name="bio"
@@ -227,7 +174,6 @@ export const ProfileEditForm = () => {
           }}
         />
 
-        {/* BUTTONS */}
         <div className="flex items-center gap-4 mx-auto">
           <Button
             type="submit"

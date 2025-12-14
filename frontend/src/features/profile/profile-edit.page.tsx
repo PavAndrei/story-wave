@@ -6,7 +6,6 @@ import { ProfileEditForm } from "./ui/profile-edit-form";
 
 export const ProfileEditPage = () => {
   const { userData, pending } = useMyProfile();
-  // const updateProfile = useUpdateProfile();
 
   if (pending) return <div>Loading...</div>;
   if (!userData) return <div>User not found</div>;
