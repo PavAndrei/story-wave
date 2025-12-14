@@ -1,7 +1,7 @@
 import { useDropzone } from "react-dropzone";
 import type { UseFormReturn } from "react-hook-form";
 import type { EditProfileFormValues } from "../ui/profile-edit-form";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type UseAvatarInputParams = {
   form: UseFormReturn<EditProfileFormValues>;
@@ -13,6 +13,7 @@ export const useAvatarInput = ({
   initialAvatarUrl,
 }: UseAvatarInputParams) => {
   const avatarFile = form.watch("avatar");
+  const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "image/*": [] },
@@ -22,6 +23,7 @@ export const useAvatarInput = ({
       const file = files[0];
       if (!file) return;
 
+      setIsAvatarRemoved(false);
       form.clearErrors("avatar");
       form.setValue("avatar", file, { shouldValidate: true });
     },
@@ -38,12 +40,12 @@ export const useAvatarInput = ({
       });
     },
   });
+
   const avatarPreview = useMemo(() => {
-    if (!avatarFile) {
-      return initialAvatarUrl ?? null;
-    }
-    return URL.createObjectURL(avatarFile);
-  }, [avatarFile, initialAvatarUrl]);
+    if (isAvatarRemoved) return null;
+    if (avatarFile) return URL.createObjectURL(avatarFile);
+    return initialAvatarUrl ?? null;
+  }, [avatarFile, initialAvatarUrl, isAvatarRemoved]);
 
   useEffect(() => {
     return () => {
@@ -54,11 +56,13 @@ export const useAvatarInput = ({
   }, [avatarFile, avatarPreview]);
 
   const clearAvatar = () => {
+    setIsAvatarRemoved(true);
     form.setValue("avatar", null, { shouldValidate: true });
     form.clearErrors("avatar");
   };
 
   const resetAvatar = () => {
+    setIsAvatarRemoved(false);
     form.setValue("avatar", null);
   };
 
@@ -68,5 +72,6 @@ export const useAvatarInput = ({
     getInputProps,
     clearAvatar,
     resetAvatar,
+    isAvatarRemoved,
   };
 };

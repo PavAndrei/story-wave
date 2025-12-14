@@ -44,6 +44,10 @@ export type GetMyProfileApiResponse = ApiResponse & {
   data?: User;
 };
 
+export type EditMyProfileApiResponse = ApiResponse & {
+  data?: User;
+};
+
 export const authApi = {
   baseKey: "auth",
   login: (data: { email: string; password: string }) => {
@@ -112,6 +116,13 @@ export const userApi = {
   getMyProfile: () => {
     return apiInstance<GetMyProfileApiResponse>(`/user/me`, {
       method: "GET",
+      credentials: "include",
+    });
+  },
+  editMyProfile: (data: { id: string; formData: FormData }) => {
+    return apiInstance<EditMyProfileApiResponse>(`/user/me/${data.id}`, {
+      method: "PATCH",
+      body: data.formData,
       credentials: "include",
     });
   },

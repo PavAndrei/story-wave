@@ -23,3 +23,7 @@ export const JWT_REFRESH_SECRET = getEnv('JWT_REFRESH_SECRET'); // refresh token
 
 export const SMTP_USER = getEnv('SMTP_USER'); // SMTP user for nodemailer
 export const SMTP_PASS = getEnv('SMTP_PASS'); // SMTP password for nodemailer
+
+export const CLOUDINARY_CLOUD_NAME = getEnv('CLOUDINARY_CLOUD_NAME'); // cloudinary cloud name
+export const CLOUDINARY_API_KEY = getEnv('CLOUDINARY_API_KEY'); // cloudinary api key
+export const CLOUDINARY_API_SECRET = getEnv('CLOUDINARY_API_SECRET'); // cloudinary api secret

@@ -21,6 +21,13 @@ export const changeUserData = async ({
   const user = await UserModel.findById(userId);
   appAssert(user, NOT_FOUND, 'User not found');
 
+  // const removeAvatar = req.body.removeAvatar === 'true';
+
+  // if (removeAvatar) {
+  //   user.avatarUrl = null;
+  //   // + удалить из Cloudinary (позже)
+  // }
+
   // Update the user
   const updatedUser = await UserModel.findByIdAndUpdate(
     userId,

@@ -18,6 +18,7 @@ import z from "zod";
 
 import { ProfileAvatarInput } from "./profile-avatar-input";
 import { useAvatarInput } from "../model/use-avatar-input";
+import { useEditProfile } from "../model/use-edit-profile";
 
 const EditProfileSchema = z.object({
   username: z.string().min(1, "Username is too short").max(255),
@@ -41,6 +42,8 @@ export type EditProfileFormValues = z.infer<typeof EditProfileSchema>;
 export const ProfileEditForm = () => {
   const { userData } = useMyProfile();
 
+  const { editProfile, isPending, errorMessage } = useEditProfile();
+
   const form = useForm<EditProfileFormValues>({
     resolver: zodResolver(EditProfileSchema),
     defaultValues: {
@@ -57,7 +60,28 @@ export const ProfileEditForm = () => {
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    console.log("FORM DATA:", data);
+    const formData = new FormData();
+
+    if (data.username !== userData?.username) {
+      formData.append("username", data.username);
+    }
+
+    if (data.bio !== userData?.bio) {
+      formData.append("bio", data.bio ?? "");
+    }
+
+    if (data.avatar) {
+      formData.append("avatar", data.avatar);
+    }
+
+    if (avatar.isAvatarRemoved) {
+      formData.append("removeAvatar", "true");
+    }
+
+    editProfile({
+      id: userData!._id,
+      formData,
+    });
   });
 
   const handleResetForm = () => {
@@ -176,6 +200,7 @@ export const ProfileEditForm = () => {
 
         <div className="flex items-center gap-4 mx-auto">
           <Button
+            disabled={isPending}
             type="submit"
             aria-label="Edit profile"
             className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95"
