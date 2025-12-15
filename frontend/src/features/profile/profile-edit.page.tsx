@@ -1,8 +1,7 @@
-import { Button } from "@/shared/ui/kit/button";
-import { CardDescription, CardTitle } from "@/shared/ui/kit/card";
 import { ProfileLayout } from "./ui/profile-layout";
 import { useMyProfile } from "@/shared/model/user";
 import { ProfileEditForm } from "./ui/profile-edit-form";
+import { ProfileDeleteSection } from "./ui/profile-delete-section";
 
 export const ProfileEditPage = () => {
   const { userData, pending } = useMyProfile();
@@ -16,18 +15,7 @@ export const ProfileEditPage = () => {
       description="Update your account information and personalize your profile."
       header={<></>}
       content={<ProfileEditForm />}
-      footerText={
-        <div className="pt-4 w-full text-center">
-          <CardTitle className="text-red-600">Danger Zone</CardTitle>
-          <CardDescription className="text-red-400 pb-3">
-            This action is irreversible.
-          </CardDescription>
-
-          <Button className="bg-red-600 hover:bg-red-500 text-white rounded-xl px-6 cursor-pointer">
-            Delete Account
-          </Button>
-        </div>
-      }
+      footerText={<ProfileDeleteSection />}
     />
   );
 };

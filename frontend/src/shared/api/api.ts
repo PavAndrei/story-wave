@@ -126,4 +126,10 @@ export const userApi = {
       credentials: "include",
     });
   },
+  deleteMyProfile: () => {
+    return apiInstance<ApiResponse>(`/user/me`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  },
 };

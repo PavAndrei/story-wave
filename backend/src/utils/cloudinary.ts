@@ -37,3 +37,19 @@ const storage = new CloudinaryStorage({
 });
 
 export { cloudinary, storage };
+
+export const deleteFromCloudinaryByUrl = async (url?: string) => {
+  if (!url) return;
+
+  const parts = url.split('/');
+  const filename = parts.at(-1);
+  if (!filename) return;
+
+  const publicId = filename.split('.')[0];
+
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error('Cloudinary delete error:', error);
+  }
+};

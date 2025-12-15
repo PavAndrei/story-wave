@@ -2,7 +2,9 @@ import mongoose from 'mongoose';
 import { NOT_FOUND } from '../constants/http.js';
 import UserModel from '../models/user.model.js';
 import appAssert from '../utils/appAssert.js';
-import { cloudinary } from '../utils/cloudinary.js';
+import { cloudinary, deleteFromCloudinaryByUrl } from '../utils/cloudinary.js';
+import SessionModel from '../models/session.model.js';
+import VerificationCodeModel from '../models/verificationCode.model.js';
 
 interface ChangeUserDataParams {
   request: {
@@ -49,4 +51,23 @@ export const changeUserData = async ({
 
   await user.save();
   return user;
+};
+
+export const deleteUserById = async (userId?: mongoose.Types.ObjectId) => {
+  const user = await UserModel.findById(userId);
+  appAssert(user, NOT_FOUND, 'User not found');
+
+  if (user.avatarUrl) {
+    await deleteFromCloudinaryByUrl(user.avatarUrl);
+  }
+
+  await SessionModel.deleteMany({ userId });
+
+  await VerificationCodeModel.deleteMany({ userId });
+
+  await UserModel.findByIdAndDelete(userId);
+
+  return {
+    deletedUserId: userId,
+  };
 };
