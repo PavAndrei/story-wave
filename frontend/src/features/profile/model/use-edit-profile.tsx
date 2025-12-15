@@ -3,10 +3,11 @@ import { queryClient } from "@/shared/api/query-client";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 type EditProfilePayload = {
   id: string;
-  formData: FormData;
+  payloadData: FormData;
 };
 
 export const useEditProfile = () => {
@@ -17,10 +18,18 @@ export const useEditProfile = () => {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [userApi.baseKey] });
+      toast.success("Your profile has been updated", {
+        duration: 5000,
+        classNames: { content: "text-slate-700", icon: "text-cyan-700" },
+      });
       navigate(ROUTES.PROFILE);
     },
 
     onError: (error) => {
+      toast.error(error.message ?? "Something went wrong...", {
+        duration: 5000,
+        classNames: { content: "text-destructive", icon: "text-destructive" },
+      });
       console.log(error.message);
     },
   });

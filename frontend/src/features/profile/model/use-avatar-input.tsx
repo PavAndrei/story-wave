@@ -1,7 +1,7 @@
 import { useDropzone } from "react-dropzone";
+import { useEffect, useMemo } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { EditProfileFormValues } from "../ui/profile-edit-form";
-import { useEffect, useMemo, useState } from "react";
 
 type UseAvatarInputParams = {
   form: UseFormReturn<EditProfileFormValues>;
@@ -12,20 +12,26 @@ export const useAvatarInput = ({
   form,
   initialAvatarUrl,
 }: UseAvatarInputParams) => {
+  /**
+   * Single source of truth — react-hook-form
+   */
   const avatarFile = form.watch("avatar");
-  const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
+  const removeAvatar = form.watch("removeAvatar");
 
+  /**
+   * Dropzone
+   */
   const { getRootProps, getInputProps } = useDropzone({
     accept: { "image/*": [] },
     multiple: false,
-    maxSize: 1024 * 1024,
+    maxSize: 5 * 1024 * 1024, // 5MB
     onDrop: (files) => {
       const file = files[0];
       if (!file) return;
 
-      setIsAvatarRemoved(false);
       form.clearErrors("avatar");
       form.setValue("avatar", file, { shouldValidate: true });
+      form.setValue("removeAvatar", false);
     },
     onDropRejected: (rejections) => {
       const error = rejections[0]?.errors[0];
@@ -35,35 +41,51 @@ export const useAvatarInput = ({
         type: "manual",
         message:
           error.code === "file-too-large"
-            ? "File is too large (max 1MB)"
-            : "Invalid file",
+            ? "File is too large (max 5MB)"
+            : "Invalid file type",
       });
     },
   });
 
   const avatarPreview = useMemo(() => {
-    if (isAvatarRemoved) return null;
-    if (avatarFile) return URL.createObjectURL(avatarFile);
-    return initialAvatarUrl ?? null;
-  }, [avatarFile, initialAvatarUrl, isAvatarRemoved]);
+    // User explicitly removed avatar
+    if (removeAvatar) return null;
 
+    // New file selected
+    if (avatarFile instanceof File) {
+      return URL.createObjectURL(avatarFile);
+    }
+
+    // Existing avatar from backend
+    return initialAvatarUrl ?? null;
+  }, [avatarFile, initialAvatarUrl, removeAvatar]);
+
+  /**
+   * Cleanup object URL
+   */
   useEffect(() => {
+    if (!(avatarFile instanceof File) || !avatarPreview) return;
+
     return () => {
-      if (avatarFile && avatarPreview) {
-        URL.revokeObjectURL(avatarPreview);
-      }
+      URL.revokeObjectURL(avatarPreview);
     };
   }, [avatarFile, avatarPreview]);
 
+  /**
+   * Clear avatar (click on X)
+   */
   const clearAvatar = () => {
-    setIsAvatarRemoved(true);
     form.setValue("avatar", null, { shouldValidate: true });
+    form.setValue("removeAvatar", true);
     form.clearErrors("avatar");
   };
 
+  /**
+   * Reset avatar (form reset)
+   */
   const resetAvatar = () => {
-    setIsAvatarRemoved(false);
     form.setValue("avatar", null);
+    form.setValue("removeAvatar", false);
   };
 
   return {
@@ -72,6 +94,5 @@ export const useAvatarInput = ({
     getInputProps,
     clearAvatar,
     resetAvatar,
-    isAvatarRemoved,
   };
 };

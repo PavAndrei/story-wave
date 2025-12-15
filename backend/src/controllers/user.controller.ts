@@ -14,15 +14,16 @@ export const getUserHandler = catchErrors(async (req, res) => {
 });
 
 export const editUserHandler = catchErrors(async (req, res) => {
-  // validation
-  const request = updateUserSchema.parse(req.body);
+  const request = updateUserSchema.parse({
+    ...req.body,
+  });
 
   const userId = req.userId;
 
-  // service
   const updatedUser = await changeUserData({
     request,
     avatarPath: req.file?.path,
+    avatarPublicId: req.file?.filename,
     userId,
   });
 

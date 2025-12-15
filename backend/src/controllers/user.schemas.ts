@@ -9,5 +9,7 @@ export const updateUserSchema = z
       .optional(),
 
     bio: z.string().max(255, 'Bio is too long').optional(),
+
+    removeAvatar: z.string().optional(),
   })
   .strict();

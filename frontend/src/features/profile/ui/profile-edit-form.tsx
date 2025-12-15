@@ -35,6 +35,7 @@ const EditProfileSchema = z.object({
       "Max file size is 5MB",
     )
     .optional(),
+  removeAvatar: z.boolean().optional(),
 });
 
 export type EditProfileFormValues = z.infer<typeof EditProfileSchema>;
@@ -42,7 +43,7 @@ export type EditProfileFormValues = z.infer<typeof EditProfileSchema>;
 export const ProfileEditForm = () => {
   const { userData } = useMyProfile();
 
-  const { editProfile, isPending, errorMessage } = useEditProfile();
+  const { editProfile, isPending } = useEditProfile();
 
   const form = useForm<EditProfileFormValues>({
     resolver: zodResolver(EditProfileSchema),
@@ -62,25 +63,20 @@ export const ProfileEditForm = () => {
   const handleSubmit = form.handleSubmit((data) => {
     const formData = new FormData();
 
-    if (data.username !== userData?.username) {
-      formData.append("username", data.username);
-    }
-
-    if (data.bio !== userData?.bio) {
-      formData.append("bio", data.bio ?? "");
-    }
+    if (data.username) formData.append("username", data.username);
+    if (data.bio) formData.append("bio", data.bio);
 
     if (data.avatar) {
       formData.append("avatar", data.avatar);
     }
 
-    if (avatar.isAvatarRemoved) {
+    if (data.removeAvatar) {
       formData.append("removeAvatar", "true");
     }
 
     editProfile({
       id: userData!._id,
-      formData,
+      payloadData: formData,
     });
   });
 

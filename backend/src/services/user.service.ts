@@ -2,11 +2,13 @@ import mongoose from 'mongoose';
 import { NOT_FOUND } from '../constants/http.js';
 import UserModel from '../models/user.model.js';
 import appAssert from '../utils/appAssert.js';
+import { cloudinary } from '../utils/cloudinary.js';
 
 interface ChangeUserDataParams {
   request: {
     username?: string;
     bio?: string;
+    removeAvatar?: string;
   };
   avatarPath?: string;
   userId?: mongoose.Types.ObjectId;
@@ -15,29 +17,36 @@ interface ChangeUserDataParams {
 export const changeUserData = async ({
   request,
   avatarPath,
+  avatarPublicId,
   userId,
-}: ChangeUserDataParams) => {
-  // Find the user
+}: ChangeUserDataParams & { avatarPublicId?: string }) => {
   const user = await UserModel.findById(userId);
   appAssert(user, NOT_FOUND, 'User not found');
 
-  // const removeAvatar = req.body.removeAvatar === 'true';
+  if (request.removeAvatar && user.avatarPublicId) {
+    await cloudinary.uploader.destroy(user.avatarPublicId);
 
-  // if (removeAvatar) {
-  //   user.avatarUrl = null;
-  //   // + удалить из Cloudinary (позже)
-  // }
+    user.avatarUrl = undefined;
+    user.avatarPublicId = undefined;
+  }
 
-  // Update the user
-  const updatedUser = await UserModel.findByIdAndUpdate(
-    userId,
-    {
-      username: request.username ? request.username : user.username,
-      bio: request.bio ? request.bio : user.bio,
-      avatarUrl: avatarPath ? avatarPath : user.avatarUrl,
-    },
-    { new: true }
-  );
-  appAssert(updatedUser, NOT_FOUND, 'Update failed');
-  return updatedUser;
+  if (avatarPath && avatarPublicId) {
+    if (user.avatarPublicId) {
+      await cloudinary.uploader.destroy(user.avatarPublicId);
+    }
+
+    user.avatarUrl = avatarPath;
+    user.avatarPublicId = avatarPublicId;
+  }
+
+  if (request.username) user.username = request.username;
+
+  if (!request.bio) {
+    user.bio = '';
+  } else {
+    user.bio = request.bio;
+  }
+
+  await user.save();
+  return user;
 };

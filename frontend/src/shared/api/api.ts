@@ -119,10 +119,10 @@ export const userApi = {
       credentials: "include",
     });
   },
-  editMyProfile: (data: { id: string; formData: FormData }) => {
+  editMyProfile: (data: { id: string; payloadData: FormData }) => {
     return apiInstance<EditMyProfileApiResponse>(`/user/me/${data.id}`, {
       method: "PATCH",
-      body: data.formData,
+      body: data.payloadData,
       credentials: "include",
     });
   },
