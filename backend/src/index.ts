@@ -4,15 +4,18 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import connectToDB from './config/db.js';
+import { OK } from './constants/http.js';
 import { APP_ORIGIN, NODE_ENV, PORT } from './constants/env.js';
+
 import errorHandler from './middleware/errorHandler.js';
 import { setRequestExtensions } from './middleware/requestExtension.js';
 import authenticate from './middleware/authentificate.js';
 
-import { OK } from './constants/http.js';
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import sessionRoutes from './routes/session.route.js';
+import postRoutes from './routes/post.route.js';
+import uploadRoutes from './routes/upload.route.js';
 
 dotenv.config();
 
@@ -35,6 +38,8 @@ app.get('/', (req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/user', setRequestExtensions, authenticate, userRoutes);
 app.use('/session', setRequestExtensions, authenticate, sessionRoutes);
+app.use('/post', setRequestExtensions, authenticate, postRoutes);
+app.use('/upload', setRequestExtensions, authenticate, uploadRoutes);
 
 app.use(errorHandler);
 

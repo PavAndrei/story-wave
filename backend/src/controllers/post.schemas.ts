@@ -1,0 +1,21 @@
+import { z } from 'zod';
+
+export const createPostSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }),
+  content: z.string().min(1, { message: 'Content is required' }),
+  categories: z.array(z.string()).optional().default([]),
+  coverImgUrl: z.string().optional().default(''),
+  imagesUrls: z.array(z.string()).optional().default([]),
+});
+
+export type CreatePostSchemaValues = z.infer<typeof createPostSchema>;
+
+export const editPostSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required' }).optional(),
+  content: z.string().min(1, { message: 'Content is required' }).optional(),
+  categories: z.array(z.string()).optional(),
+  coverImgUrl: z.string().optional(),
+  imagesUrls: z.array(z.string()).optional(),
+});
+
+export type EditPostSchemaValues = z.infer<typeof editPostSchema>;
