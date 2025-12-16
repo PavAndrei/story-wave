@@ -6,6 +6,7 @@ import { CardDescription, CardTitle } from "@/shared/ui/kit/card";
 import { User } from "lucide-react";
 import { Link, href } from "react-router-dom";
 import { ProfileLayout } from "./ui/profile-layout";
+import { formatDate } from "@/shared/model/date";
 
 const ProfileOverviewPage = () => {
   const { userData, pending } = useMyProfile();
@@ -32,6 +33,10 @@ const ProfileOverviewPage = () => {
             <CardTitle className="text-slate-700 text-xl font-semibold">
               {userData.username}
             </CardTitle>
+
+            <span className="text-slate-500 text-xs">
+              registered on {formatDate(userData.createdAt.toString())}
+            </span>
 
             <CardDescription className="text-slate-500">
               {userData.email}
