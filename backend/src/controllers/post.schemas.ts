@@ -41,3 +41,18 @@ export const getMyPublishedPostsSchema = z.object({
 export type GetMyPublishedPostsSchemaValues = z.infer<
   typeof getMyPublishedPostsSchema
 >;
+
+export const deletePostSchema = z.object({
+  id: z.string().min(1, 'Post id is required'),
+});
+
+export type DeletePostSchemaValues = z.infer<typeof deletePostSchema>;
+
+export const getAllPostsSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+  search: z.string().optional(),
+  category: z.string().optional(),
+});
+
+export type GetAllPostsSchemaValues = z.infer<typeof getAllPostsSchema>;

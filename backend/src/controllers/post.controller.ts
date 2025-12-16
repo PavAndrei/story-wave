@@ -3,7 +3,9 @@ import { CREATED, OK } from '../constants/http.js';
 import {
   archivePost,
   createPost,
+  deletePost,
   editPost,
+  getAllPosts,
   getMyDrafts,
   getMyPublishedPosts,
   getSinglePost,
@@ -12,7 +14,9 @@ import {
 import catchErrors from '../utils/catchErrors.js';
 import {
   createPostSchema,
+  deletePostSchema,
   editPostSchema,
+  getAllPostsSchema,
   getMyDraftsSchema,
   getMyPublishedPostsSchema,
   postIdSchema,
@@ -95,9 +99,16 @@ export const archivePostHandler = catchErrors(async (req, res) => {
 });
 
 export const deletePostHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const { id } = deletePostSchema.parse(req.params);
+
+  const authorId = new mongoose.Types.ObjectId(req.userId);
+
+  const post = await deletePost(id, authorId);
+
+  return res.status(OK).json({
     success: true,
     message: 'Post deleted successfully',
+    data: post,
   });
 });
 
@@ -130,8 +141,13 @@ export const getMyPostsHandler = catchErrors(async (req, res) => {
 });
 
 export const getAllPostsHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const { page, limit, search, category } = getAllPostsSchema.parse(req.query);
+
+  const result = await getAllPosts(page, limit, search, category);
+
+  return res.status(OK).json({
     success: true,
+    data: result,
     message: 'My published posts received successfully',
   });
 });

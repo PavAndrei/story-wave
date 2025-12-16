@@ -211,3 +211,65 @@ export const getMyPublishedPosts = async (
     },
   };
 };
+
+export const deletePost = async (
+  postId: string,
+  authorId: mongoose.Types.ObjectId
+) => {
+  const post = await PostModel.findById(postId);
+  appAssert(post, NOT_FOUND, 'Post not found');
+
+  appAssert(!post.isDeleted, NOT_FOUND, 'Post already deleted');
+
+  appAssert(
+    post.authorId.equals(authorId),
+    FORBIDDEN,
+    'You are allowed to delete only your own posts'
+  );
+
+  post.isDeleted = true;
+
+  await post.save();
+
+  return post;
+};
+
+export const getAllPosts = async (
+  page: number,
+  limit: number,
+  search?: string,
+  category?: string
+) => {
+  const skip = (page - 1) * limit;
+
+  const filter: Record<string, any> = {
+    status: 'published',
+    isDeleted: false,
+  };
+
+  if (search) {
+    filter.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { content: { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  if (category) {
+    filter.categories = category;
+  }
+
+  const [items, total] = await Promise.all([
+    PostModel.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
+    PostModel.countDocuments(filter),
+  ]);
+
+  return {
+    items,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  };
+};
