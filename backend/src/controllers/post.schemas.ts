@@ -19,3 +19,9 @@ export const editPostSchema = z.object({
 });
 
 export type EditPostSchemaValues = z.infer<typeof editPostSchema>;
+
+export const postIdSchema = z.object({
+  id: z.string().min(1, 'Post id is required'),
+});
+
+export type PostIdSchemaValues = z.infer<typeof postIdSchema>;

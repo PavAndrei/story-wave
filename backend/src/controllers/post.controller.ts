@@ -4,10 +4,15 @@ import {
   archivePost,
   createPost,
   editPost,
+  getSinglePost,
   publishPost,
 } from '../services/post.service.js';
 import catchErrors from '../utils/catchErrors.js';
-import { createPostSchema, editPostSchema } from './post.schemas.js';
+import {
+  createPostSchema,
+  editPostSchema,
+  postIdSchema,
+} from './post.schemas.js';
 
 export const createPostHandler = catchErrors(async (req, res) => {
   const request = createPostSchema.parse(req.body);
@@ -40,9 +45,18 @@ export const editPostHandler = catchErrors(async (req, res) => {
 });
 
 export const getSinglePostHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const { id } = postIdSchema.parse(req.params);
+
+  const viewerId = req.userId
+    ? new mongoose.Types.ObjectId(req.userId)
+    : undefined;
+
+  const post = await getSinglePost(id, viewerId);
+
+  return res.status(OK).json({
     success: true,
-    message: 'Post received successfully',
+    message: 'Post found',
+    data: post,
   });
 });
 

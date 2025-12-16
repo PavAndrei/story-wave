@@ -126,3 +126,25 @@ export const archivePost = async (
 
   return post;
 };
+
+export const getSinglePost = async (
+  postId: string,
+  viewerId?: mongoose.Types.ObjectId
+) => {
+  const post = await PostModel.findById(postId);
+  appAssert(post, NOT_FOUND, 'Post not found');
+
+  appAssert(!post.isDeleted, NOT_FOUND, 'Post not found');
+
+  if (post.status === 'published') {
+    return post;
+  }
+
+  appAssert(
+    viewerId && post.authorId.equals(viewerId),
+    FORBIDDEN,
+    'You are not allowed to view this post'
+  );
+
+  return post;
+};
