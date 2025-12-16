@@ -25,3 +25,10 @@ export const postIdSchema = z.object({
 });
 
 export type PostIdSchemaValues = z.infer<typeof postIdSchema>;
+
+export const getMyDraftsSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+export type GetMyDraftsSchemaValues = z.infer<typeof getMyDraftsSchema>;

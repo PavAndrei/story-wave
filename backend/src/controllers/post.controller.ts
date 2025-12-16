@@ -4,6 +4,7 @@ import {
   archivePost,
   createPost,
   editPost,
+  getMyDrafts,
   getSinglePost,
   publishPost,
 } from '../services/post.service.js';
@@ -11,6 +12,7 @@ import catchErrors from '../utils/catchErrors.js';
 import {
   createPostSchema,
   editPostSchema,
+  getMyDraftsSchema,
   postIdSchema,
 } from './post.schemas.js';
 
@@ -98,9 +100,16 @@ export const deletePostHandler = catchErrors(async (req, res) => {
 });
 
 export const getMyDraftsHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const { page, limit } = getMyDraftsSchema.parse(req.query);
+
+  const authorId = new mongoose.Types.ObjectId(req.userId);
+
+  const result = await getMyDrafts(authorId, page, limit);
+
+  return res.status(OK).json({
     success: true,
     message: 'My drafts received successfully',
+    data: result,
   });
 });
 
