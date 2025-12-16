@@ -4,7 +4,7 @@ import {
   CreatePostSchemaValues,
   EditPostSchemaValues,
 } from '../controllers/post.schemas.js';
-import { NOT_FOUND } from '../constants/http.js';
+import { BAD_REQUEST, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import appAssert from '../utils/appAssert.js';
 
 export const createPost = async (
@@ -44,7 +44,7 @@ export const editPost = async (
 
   appAssert(
     post.authorId.equals(authorId),
-    NOT_FOUND,
+    FORBIDDEN,
     'You are allowed to edit only your own posts'
   );
 
@@ -53,6 +53,74 @@ export const editPost = async (
   if (update.categories !== undefined) post.categories = update.categories;
   if (update.coverImgUrl !== undefined) post.coverImgUrl = update.coverImgUrl;
   if (update.imagesUrls !== undefined) post.imagesUrls = update.imagesUrls;
+
+  await post.save();
+
+  return post;
+};
+
+export const publishPost = async (
+  postId: string,
+  authorId: mongoose.Types.ObjectId
+) => {
+  const post = await PostModel.findById(postId);
+  appAssert(post, NOT_FOUND, 'Post not found');
+  appAssert(!post.isDeleted, NOT_FOUND, 'Post deleted');
+
+  appAssert(
+    post.authorId.equals(authorId),
+    FORBIDDEN,
+    'You are allowed to publish only your own posts'
+  );
+
+  appAssert(
+    post.status === 'draft',
+    BAD_REQUEST,
+    'Only draft posts can be published'
+  );
+
+  appAssert(
+    post.title.trim().length > 0,
+    BAD_REQUEST,
+    'Post title is required'
+  );
+
+  appAssert(
+    post.content.trim().length > 0,
+    BAD_REQUEST,
+    'Post content is required'
+  );
+
+  post.status = 'published';
+  post.publishedAt = new Date();
+
+  await post.save();
+
+  return post;
+};
+
+export const archivePost = async (
+  postId: string,
+  authorId: mongoose.Types.ObjectId
+) => {
+  const post = await PostModel.findById(postId);
+  appAssert(post, NOT_FOUND, 'Post not found');
+
+  appAssert(!post.isDeleted, NOT_FOUND, 'Post deleted');
+
+  appAssert(
+    post.authorId.equals(authorId),
+    FORBIDDEN,
+    'You are allowed to archive only your own posts'
+  );
+
+  appAssert(
+    post.status === 'published',
+    BAD_REQUEST,
+    'Only published posts can be archived'
+  );
+
+  post.status = 'archived';
 
   await post.save();
 

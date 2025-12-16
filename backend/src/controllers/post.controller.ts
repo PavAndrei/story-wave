@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import { CREATED, OK } from '../constants/http.js';
-import { createPost, editPost } from '../services/post.service.js';
+import {
+  archivePost,
+  createPost,
+  editPost,
+  publishPost,
+} from '../services/post.service.js';
 import catchErrors from '../utils/catchErrors.js';
 import { createPostSchema, editPostSchema } from './post.schemas.js';
 
@@ -42,16 +47,32 @@ export const getSinglePostHandler = catchErrors(async (req, res) => {
 });
 
 export const publishPostHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const authorId = req.userId;
+
+  const post = await publishPost(
+    req.params.id,
+    new mongoose.Types.ObjectId(authorId)
+  );
+
+  return res.status(OK).json({
     success: true,
     message: 'Post published successfully',
+    data: post,
   });
 });
 
 export const archivePostHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const authorId = req.userId;
+
+  const post = await archivePost(
+    req.params.id,
+    new mongoose.Types.ObjectId(authorId)
+  );
+
+  return res.status(OK).json({
     success: true,
     message: 'Post archived successfully',
+    data: post,
   });
 });
 
