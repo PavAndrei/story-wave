@@ -5,6 +5,7 @@ import {
   createPost,
   editPost,
   getMyDrafts,
+  getMyPublishedPosts,
   getSinglePost,
   publishPost,
 } from '../services/post.service.js';
@@ -13,6 +14,7 @@ import {
   createPostSchema,
   editPostSchema,
   getMyDraftsSchema,
+  getMyPublishedPostsSchema,
   postIdSchema,
 } from './post.schemas.js';
 
@@ -114,9 +116,16 @@ export const getMyDraftsHandler = catchErrors(async (req, res) => {
 });
 
 export const getMyPostsHandler = catchErrors(async (req, res) => {
-  return res.status(200).json({
+  const { page, limit } = getMyPublishedPostsSchema.parse(req.query);
+
+  const authorId = new mongoose.Types.ObjectId(req.userId);
+
+  const result = await getMyPublishedPosts(authorId, page, limit);
+
+  return res.status(OK).json({
     success: true,
     message: 'My published posts received successfully',
+    data: result,
   });
 });
 

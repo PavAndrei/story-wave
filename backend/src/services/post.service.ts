@@ -182,3 +182,32 @@ export const getMyDrafts = async (
     },
   };
 };
+
+export const getMyPublishedPosts = async (
+  authorId: mongoose.Types.ObjectId,
+  page: number,
+  limit: number
+) => {
+  const skip = (page - 1) * limit;
+
+  const filter = {
+    authorId,
+    status: 'published',
+    isDeleted: false,
+  };
+
+  const [items, total] = await Promise.all([
+    PostModel.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
+    PostModel.countDocuments(filter),
+  ]);
+
+  return {
+    items,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  };
+};

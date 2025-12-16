@@ -32,3 +32,12 @@ export const getMyDraftsSchema = z.object({
 });
 
 export type GetMyDraftsSchemaValues = z.infer<typeof getMyDraftsSchema>;
+
+export const getMyPublishedPostsSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+export type GetMyPublishedPostsSchemaValues = z.infer<
+  typeof getMyPublishedPostsSchema
+>;
