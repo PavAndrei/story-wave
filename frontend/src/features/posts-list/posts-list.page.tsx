@@ -9,9 +9,9 @@ const ArticleListPage = () => {
 
   return (
     <div>
-      <h1>Article List Page</h1>
+      <h1>Post List Page</h1>
 
-      <Link to={href(ROUTES.ARTICLE, { articleId: "1" })}>Article 1</Link>
+      <Link to={href(ROUTES.POST, { postId: "1" })}>Post 1</Link>
     </div>
   );
 };

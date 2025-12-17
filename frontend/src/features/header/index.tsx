@@ -24,12 +24,12 @@ const navigationMenuItems = [
     href: "/about",
   },
   {
-    label: "Articles",
-    href: "/articles",
+    label: "Blogs",
+    href: "/posts",
   },
   {
     label: "Editor",
-    href: "/editor",
+    href: "/create-post",
   },
 ];
 

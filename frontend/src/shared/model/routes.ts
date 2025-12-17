@@ -9,9 +9,9 @@ export const ROUTES = {
   VERIFY: "/verify-email/:code",
   FORGOT_PASSWORD: "/password/forgot",
   RESET_PASSWORD: "/password/reset",
-  EDITOR: "/editor",
-  ARTICLES: "/articles",
-  ARTICLE: "/articles/:articleId",
+  CREATE_POST: "/create-post",
+  POSTS: "/posts",
+  POST: "/posts/:postId",
   PROFILE: "/profile",
   PROFILE_EDIT: "/profile/edit",
   PROFILE_SECURITY: "/profile/security",
@@ -20,8 +20,8 @@ export const ROUTES = {
 } as const;
 
 export type PathParams = {
-  [ROUTES.ARTICLE]: {
-    articleId: string;
+  [ROUTES.POST]: {
+    postId: string;
   };
   [ROUTES.VERIFY]: {
     code: string;
