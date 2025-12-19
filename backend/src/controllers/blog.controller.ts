@@ -1,57 +1,9 @@
-// import mongoose from 'mongoose';
-// import { CREATED, OK } from '../constants/http.js';
-// import {
-//   archivePost,
-//   createPost,
-//   deletePost,
-//   editPost,
-//   getAllPosts,
-//   getMyDrafts,
-//   getMyPublishedPosts,
-//   getSinglePost,
-//   publishPost,
-//   createDraftPost,
-// } from '../services/post.service.js';
-// import catchErrors from '../utils/catchErrors.js';
-// import {
-//   createPostSchema,
-//   deletePostSchema,
-//   editPostSchema,
-//   getAllPostsSchema,
-//   getMyDraftsSchema,
-//   getMyPublishedPostsSchema,
-//   postIdSchema,
-// } from './post.schemas.js';
-
 import { BAD_REQUEST, OK } from '../constants/http.js';
 import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
-import { createBlog } from '../services/blog.service.js';
+import { saveBlogService } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
-
-// export const createDraftPostHandler = catchErrors(async (req, res) => {
-//   const authorId = req.userId;
-
-//   const post = await createDraftPost(new mongoose.Types.ObjectId(authorId));
-
-//   return res.status(CREATED).json({
-//     success: true,
-//     data: post,
-//   });
-// });
-
-// export const createPostHandler = catchErrors(async (req, res) => {
-//   const request = createPostSchema.parse(req.body);
-
-//   const result = await createPost(request, req.userId);
-
-//   return res.status(CREATED).json({
-//     success: true,
-//     message: 'Post created successfully',
-//     data: result,
-//   });
-// });
 
 // export const editPostHandler = catchErrors(async (req, res) => {
 //   const parsed = editPostSchema.parse(req.body);
@@ -171,36 +123,35 @@ import { draftSchema, publishSchema } from './blog.schemas.js';
 //   });
 // });
 
-export const createDraftBlog = catchErrors(async (req, res) => {
+export const saveBlog = catchErrors(async (req, res) => {
   const authorId = req.userId;
-  const status = req.body.status;
-  appAssert(
-    status !== 'draft' || status !== 'published',
-    BAD_REQUEST,
-    'Status is invalid'
-  );
+  const { status, postId } = req.body;
+
+  appAssert(status, BAD_REQUEST, 'Status is required');
 
   let data;
 
   if (status === 'draft') {
-    data = draftSchema.parse(req.body);
+    data = draftSchema.parse({
+      ...req.body,
+      coverImgUrl: req.body.coverImgUrl ?? undefined,
+    });
   }
 
   if (status === 'published') {
     data = publishSchema.parse(req.body);
   }
 
-  const newBlogDate = {
-    ...data,
-    status,
+  const blog = await saveBlogService({
+    postId,
     authorId: new mongoose.Types.ObjectId(authorId),
-  };
-
-  const blog = await createBlog(newBlogDate);
+    status,
+    data,
+  });
 
   return res.status(OK).json({
     success: true,
-    message: 'Blog created successfully',
-    blog: blog,
+    message: 'Blog saved successfully',
+    blog,
   });
 });

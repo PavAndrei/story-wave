@@ -9,15 +9,17 @@ import {
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
 import { Textarea } from "@/shared/ui/kit/textarea";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import Select from "react-select";
 import ReactMarkdown from "react-markdown";
 import { ImageUploader } from "@/features/uploads";
 import { useParams } from "react-router-dom";
+import { usePublishBlog } from "../model/use-publish-blog";
+import { useSaveDraft } from "@/shared/model/use-save-draft";
 
-const createPostSchema = z.object({
+/* ---------- schema ONLY for publish ---------- */
+const publishBlogSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Content is required" }),
   categories: z.array(z.string()),
@@ -35,7 +37,7 @@ const createPostSchema = z.object({
   ),
 });
 
-type CreatePostFormValues = z.infer<typeof createPostSchema>;
+type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
 
 const categoryOptions = [
   { label: "Tech", value: "tech" },
@@ -47,8 +49,7 @@ const categoryOptions = [
 export const CreatePostForm = () => {
   const { blogId } = useParams();
 
-  const form = useForm<CreatePostFormValues>({
-    resolver: zodResolver(createPostSchema),
+  const form = useForm<PublishBlogFormValues>({
     defaultValues: {
       title: "",
       content: "",
@@ -58,8 +59,15 @@ export const CreatePostForm = () => {
     },
   });
 
-  const handleSubmit = form.handleSubmit((data) => {
+  const publishBlog = usePublishBlog();
+  const saveDraft = useSaveDraft();
+
+  /* ---------- SAVE DRAFT (NO VALIDATION) ---------- */
+  const handleSaveDraft = () => {
+    const data = form.getValues();
+
     const payload = {
+      status: "draft",
       title: data.title,
       content: data.content,
       categories: data.categories,
@@ -67,16 +75,41 @@ export const CreatePostForm = () => {
       imagesUrls: data.images.map((img) => img.url),
     };
 
-    console.log(payload);
-  });
+    saveDraft.saveDraftFunction(payload);
+  };
+
+  /* ---------- PUBLISH (STRICT VALIDATION) ---------- */
+  const handlePublish = async () => {
+    const data = form.getValues();
+
+    const result = publishBlogSchema.safeParse(data);
+
+    if (!result.success) {
+      result.error.issues.forEach((err) => {
+        const field = err.path[0] as keyof PublishBlogFormValues;
+        form.setError(field, {
+          type: "manual",
+          message: err.message,
+        });
+      });
+      return;
+    }
+
+    const payload = {
+      status: "published",
+      title: data.title,
+      content: data.content,
+      categories: data.categories,
+      coverImgUrl: data.coverImage?.url ?? null,
+      imagesUrls: data.images.map((img) => img.url),
+    };
+
+    publishBlog.publishBlog(payload);
+  };
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={handleSubmit}
-        className="w-full flex flex-col gap-5"
-        noValidate
-      >
+      <form className="w-full flex flex-col gap-5" noValidate>
         {/* Title */}
         <FormField
           control={form.control}
@@ -123,7 +156,6 @@ export const CreatePostForm = () => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Content (Markdown)</FormLabel>
-
               <div className="grid grid-cols-2 gap-4">
                 <FormControl>
                   <Textarea
@@ -133,14 +165,12 @@ export const CreatePostForm = () => {
                     className="resize-none min-h-[300px]"
                   />
                 </FormControl>
-
                 <div className="border rounded-md p-3 prose max-w-none overflow-auto">
                   <ReactMarkdown>
                     {field.value || "Markdown preview"}
                   </ReactMarkdown>
                 </div>
               </div>
-
               <FormMessage />
             </FormItem>
           )}
@@ -185,7 +215,23 @@ export const CreatePostForm = () => {
           )}
         />
 
-        <Button type="submit">Create post</Button>
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            disabled={saveDraft.isPending}
+            onClick={handleSaveDraft}
+          >
+            Save draft
+          </Button>
+
+          <Button
+            type="button"
+            disabled={publishBlog.isPending}
+            onClick={handlePublish}
+          >
+            Publish
+          </Button>
+        </div>
       </form>
     </Form>
   );

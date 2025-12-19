@@ -20,7 +20,6 @@ export type User = {
 };
 
 export type Blog = {
-  _id: string;
   authorId: string;
   title: string;
   content: string;
@@ -29,6 +28,7 @@ export type Blog = {
   coverImgUrl: string;
   imagesUrls: string[];
   isDeleted: boolean;
+  _id: string;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
@@ -151,7 +151,7 @@ export const userApi = {
 };
 
 export type BlogParams = {
-  status: "draft" | "published";
+  status: string;
   data?: {
     title?: string;
     content?: string;

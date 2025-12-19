@@ -3,7 +3,7 @@ import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { href, useNavigate } from "react-router-dom";
 
-export const useCreateDraft = () => {
+export const useSaveDraft = () => {
   const navigate = useNavigate();
 
   const saveDraftMutation = useMutation({
@@ -24,7 +24,7 @@ export const useCreateDraft = () => {
     : null;
 
   return {
-    saveDraft: saveDraftMutation.mutate,
+    saveDraftFunction: saveDraftMutation.mutate,
     isPending: saveDraftMutation.isPending,
     errorMessage,
   };

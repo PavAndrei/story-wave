@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { createDraftBlog } from '../controllers/blog.controller.js';
+import { saveBlog } from '../controllers/blog.controller.js';
 
 const blogRoutes = Router();
 
-blogRoutes.post('/draft', createDraftBlog);
+blogRoutes.post('/draft', saveBlog);
 
 export default blogRoutes;

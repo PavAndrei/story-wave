@@ -1,10 +1,10 @@
 import { ROUTES } from "@/shared/model/routes";
 import { Button } from "@/shared/ui/kit/button";
 import { Link, href } from "react-router-dom";
-import { useCreateDraft } from "./use-create-draft";
+import { useSaveDraft } from "../../shared/model/use-save-draft";
 
 const BlogsListPage = () => {
-  const { saveDraft } = useCreateDraft();
+  const { saveDraftFunction: saveDraft } = useSaveDraft();
 
   return (
     <main className="max-w-[1440px] px-2.5 mx-auto flex items-center">

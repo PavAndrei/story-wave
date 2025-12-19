@@ -10,7 +10,9 @@
 // import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
 import mongoose from 'mongoose';
-import BlogModel, { BlogDocument } from '../models/blog.model.js';
+import BlogModel from '../models/blog.model.js';
+import appAssert from '../utils/appAssert.js';
+import { NOT_FOUND } from '../constants/http.js';
 
 // export const createDraftPost = async (authorId: mongoose.Types.ObjectId) => {
 //   const post = new PostModel({
@@ -295,26 +297,45 @@ import BlogModel, { BlogDocument } from '../models/blog.model.js';
 //     },
 //   };
 // };
-
-type CreateBlogProps = {
+type SaveBlogProps = {
+  postId?: string;
   authorId: mongoose.Types.ObjectId;
-  title?: string | undefined;
-  content?: string | undefined;
   status: 'draft' | 'published';
-  categories?: string[] | undefined;
-  coverImgUrl?: string | undefined;
-  imagesUrls?: string[] | undefined;
+  data?: {
+    title?: string;
+    content?: string;
+    categories?: string[];
+    coverImgUrl?: string;
+    imagesUrls?: string[];
+  };
 };
+export const saveBlogService = async ({
+  postId,
+  authorId,
+  status,
+  data,
+}: SaveBlogProps) => {
+  if (postId) {
+    const blog = await BlogModel.findOneAndUpdate(
+      { _id: postId, authorId },
+      {
+        ...data,
+        status,
+        ...(status === 'published' ? { publishedAt: new Date() } : {}),
+      },
+      { new: true }
+    );
 
-export const createBlog = async (blogData: CreateBlogProps) => {
+    appAssert(blog, NOT_FOUND, 'Post not found');
+
+    return blog;
+  }
+
   const blog = new BlogModel({
-    authorId: blogData.authorId,
-    title: blogData.title,
-    content: blogData.content,
-    status: blogData.status,
-    categories: blogData.categories,
-    coverImgUrl: blogData.coverImgUrl,
-    imagesUrls: blogData.imagesUrls,
+    authorId,
+    ...data,
+    status,
+    ...(status === 'published' ? { publishedAt: new Date() } : {}),
   });
 
   await blog.save();
