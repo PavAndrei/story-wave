@@ -38,6 +38,11 @@ export type Session = {
   createdAt: string;
 };
 
+export type ImageUrl = {
+  id: string;
+  url: string;
+};
+
 export type RegistrationApiResponse = ApiResponse & {
   data?: User;
 };
@@ -63,7 +68,7 @@ export type EditMyProfileApiResponse = ApiResponse & {
 };
 export type CreateDraftBlogApiResponse = ApiResponse & { blog: Blog };
 
-export type UploadApiResponse = ApiResponse & { data?: string[] };
+export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
 
 export const authApi = {
   baseKey: "auth",

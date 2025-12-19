@@ -15,13 +15,24 @@ import { z } from "zod";
 import Select from "react-select";
 import ReactMarkdown from "react-markdown";
 import { ImageUploader } from "@/features/uploads";
+import { useParams } from "react-router-dom";
 
 const createPostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
   content: z.string().min(1, { message: "Content is required" }),
   categories: z.array(z.string()),
-  coverImgUrl: z.string(),
-  imagesUrls: z.array(z.string()),
+  coverImage: z
+    .object({
+      id: z.string(),
+      url: z.string(),
+    })
+    .nullable(),
+  images: z.array(
+    z.object({
+      id: z.string(),
+      url: z.string(),
+    }),
+  ),
 });
 
 type CreatePostFormValues = z.infer<typeof createPostSchema>;
@@ -34,22 +45,30 @@ const categoryOptions = [
 ];
 
 export const CreatePostForm = () => {
+  const { blogId } = useParams();
+
   const form = useForm<CreatePostFormValues>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
       title: "",
       content: "",
       categories: [],
-      coverImgUrl: "",
-      imagesUrls: [],
+      coverImage: null,
+      images: [],
     },
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    console.log(data);
-  });
+    const payload = {
+      title: data.title,
+      content: data.content,
+      categories: data.categories,
+      coverImgUrl: data.coverImage?.url ?? null,
+      imagesUrls: data.images.map((img) => img.url),
+    };
 
-  // useCreateDraft();
+    console.log(payload);
+  });
 
   return (
     <Form {...form}>
@@ -64,15 +83,9 @@ export const CreatePostForm = () => {
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 font-medium text-base">
-                Title
-              </FormLabel>
+              <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input
-                  {...field}
-                  placeholder="The title of your story"
-                  className="border border-slate-700 placeholder:text-slate-400"
-                />
+                <Input {...field} placeholder="The title of your story" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,9 +98,7 @@ export const CreatePostForm = () => {
           name="categories"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 font-medium text-base">
-                Categories
-              </FormLabel>
+              <FormLabel>Categories</FormLabel>
               <FormControl>
                 <Select
                   isMulti
@@ -105,15 +116,13 @@ export const CreatePostForm = () => {
           )}
         />
 
-        {/* Content (Markdown) */}
+        {/* Content */}
         <FormField
           control={form.control}
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 font-medium text-base">
-                Content (Markdown)
-              </FormLabel>
+              <FormLabel>Content (Markdown)</FormLabel>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormControl>
@@ -121,11 +130,11 @@ export const CreatePostForm = () => {
                     {...field}
                     rows={14}
                     placeholder="Write your story in markdown..."
-                    className="border border-slate-700 placeholder:text-slate-400 resize-none min-h-[300px]"
+                    className="resize-none min-h-[300px]"
                   />
                 </FormControl>
 
-                <div className="border rounded-md p-3 text-sm prose prose-slate max-w-none overflow-auto">
+                <div className="border rounded-md p-3 prose max-w-none overflow-auto">
                   <ReactMarkdown>
                     {field.value || "Markdown preview"}
                   </ReactMarkdown>
@@ -137,31 +146,18 @@ export const CreatePostForm = () => {
           )}
         />
 
+        {/* Images */}
         <FormField
           control={form.control}
-          name="imagesUrls"
+          name="images"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Images</FormLabel>
               <FormControl>
-                <ImageUploader value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="coverImgUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cover image</FormLabel>
-              <FormControl>
                 <ImageUploader
-                  value={field.value ? [field.value] : []}
-                  onChange={(urls) => field.onChange(urls[0] ?? "")}
-                  max={1}
+                  blogId={blogId || ""}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               </FormControl>
               <FormMessage />
@@ -169,14 +165,27 @@ export const CreatePostForm = () => {
           )}
         />
 
-        <div>
-          <Button
-            type="submit"
-            className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 flex gap-2"
-          >
-            Create post
-          </Button>
-        </div>
+        {/* Cover */}
+        <FormField
+          control={form.control}
+          name="coverImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cover image</FormLabel>
+              <FormControl>
+                <ImageUploader
+                  blogId={blogId || ""}
+                  value={field.value ? [field.value] : []}
+                  max={1}
+                  onChange={(images) => field.onChange(images[0] ?? null)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit">Create post</Button>
       </form>
     </Form>
   );
