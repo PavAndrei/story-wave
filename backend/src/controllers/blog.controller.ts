@@ -23,10 +23,12 @@
 //   postIdSchema,
 // } from './post.schemas.js';
 
-import { OK } from '../constants/http.js';
+import { BAD_REQUEST, OK } from '../constants/http.js';
 import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
-import { createNewDraft } from '../services/blog.service.js';
+import { createBlog } from '../services/blog.service.js';
+import appAssert from '../utils/appAssert.js';
+import { draftSchema, publishSchema } from './blog.schemas.js';
 
 // export const createDraftPostHandler = catchErrors(async (req, res) => {
 //   const authorId = req.userId;
@@ -171,8 +173,30 @@ import { createNewDraft } from '../services/blog.service.js';
 
 export const createDraftBlog = catchErrors(async (req, res) => {
   const authorId = req.userId;
+  const status = req.body.status;
+  appAssert(
+    status !== 'draft' || status !== 'published',
+    BAD_REQUEST,
+    'Status is invalid'
+  );
 
-  const blog = await createNewDraft(new mongoose.Types.ObjectId(authorId));
+  let data;
+
+  if (status === 'draft') {
+    data = draftSchema.parse(req.body);
+  }
+
+  if (status === 'published') {
+    data = publishSchema.parse(req.body);
+  }
+
+  const newBlogDate = {
+    ...data,
+    status,
+    authorId: new mongoose.Types.ObjectId(authorId),
+  };
+
+  const blog = await createBlog(newBlogDate);
 
   return res.status(OK).json({
     success: true,

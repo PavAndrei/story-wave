@@ -14,7 +14,7 @@ const BlogsListPage = () => {
         <Button asChild type="button" className="max-w-fit cursor-pointer">
           <Link
             to={href(ROUTES.CREATE_BLOG, { blogId: "1" })}
-            onClick={() => saveDraft()}
+            onClick={() => saveDraft({ status: "draft" })}
           >
             Create new Blog
           </Link>

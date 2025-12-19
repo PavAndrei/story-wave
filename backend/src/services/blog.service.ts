@@ -9,8 +9,8 @@
 // import ImageModel from '../models/image.model.js';
 // import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
-import PostModel from '../models/blog.model.js';
 import mongoose from 'mongoose';
+import BlogModel, { BlogDocument } from '../models/blog.model.js';
 
 // export const createDraftPost = async (authorId: mongoose.Types.ObjectId) => {
 //   const post = new PostModel({
@@ -296,15 +296,25 @@ import mongoose from 'mongoose';
 //   };
 // };
 
-export const createNewDraft = async (authorId: mongoose.Types.ObjectId) => {
-  const blog = new PostModel({
-    authorId,
-    title: '',
-    content: '',
-    status: 'draft',
-    categories: [],
-    coverImgUrl: '',
-    imagesUrls: [],
+type CreateBlogProps = {
+  authorId: mongoose.Types.ObjectId;
+  title?: string | undefined;
+  content?: string | undefined;
+  status: 'draft' | 'published';
+  categories?: string[] | undefined;
+  coverImgUrl?: string | undefined;
+  imagesUrls?: string[] | undefined;
+};
+
+export const createBlog = async (blogData: CreateBlogProps) => {
+  const blog = new BlogModel({
+    authorId: blogData.authorId,
+    title: blogData.title,
+    content: blogData.content,
+    status: blogData.status,
+    categories: blogData.categories,
+    coverImgUrl: blogData.coverImgUrl,
+    imagesUrls: blogData.imagesUrls,
   });
 
   await blog.save();

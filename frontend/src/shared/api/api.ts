@@ -150,12 +150,24 @@ export const userApi = {
   },
 };
 
+export type BlogParams = {
+  status: "draft" | "published";
+  data?: {
+    title?: string;
+    content?: string;
+    categories?: string[];
+    coverImgUrl?: string;
+    images?: string[];
+  };
+};
+
 export const blogApi = {
   baseKey: "blog",
 
-  createDraft: () => {
+  createDraft: (data: BlogParams) => {
     return apiInstance<CreateDraftBlogApiResponse>("/blog/draft", {
       method: "POST",
+      json: data,
       credentials: "include",
     });
   },

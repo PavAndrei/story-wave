@@ -1,4 +1,4 @@
-import { blogApi } from "@/shared/api/api";
+import { blogApi, type BlogParams } from "@/shared/api/api";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { href, useNavigate } from "react-router-dom";
@@ -7,7 +7,7 @@ export const useCreateDraft = () => {
   const navigate = useNavigate();
 
   const saveDraftMutation = useMutation({
-    mutationFn: blogApi.createDraft,
+    mutationFn: (data: BlogParams) => blogApi.createDraft(data),
 
     onSuccess: (data) => {
       console.log("CREATE DRAFT SUCCESS:", data);
