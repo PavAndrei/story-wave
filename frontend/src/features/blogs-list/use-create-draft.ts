@@ -1,16 +1,17 @@
-import { postApi } from "@/shared/api/api";
+import { blogApi } from "@/shared/api/api";
+import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { href, useNavigate } from "react-router-dom";
 
 export const useCreateDraft = () => {
-  const [postId, setPostId] = useState("");
+  const navigate = useNavigate();
 
   const saveDraftMutation = useMutation({
-    mutationFn: postApi.createDraft,
+    mutationFn: blogApi.createDraft,
 
     onSuccess: (data) => {
       console.log("CREATE DRAFT SUCCESS:", data);
-      setPostId(data.data._id);
+      navigate(href(ROUTES.CREATE_BLOG, { blogId: data.blog._id }));
     },
 
     onError: (error) => {
@@ -21,17 +22,6 @@ export const useCreateDraft = () => {
   const errorMessage = saveDraftMutation.isError
     ? saveDraftMutation.error.message
     : null;
-
-  useEffect(() => {
-    const getPostId = async () => {
-      if (postId) return;
-
-      const post = await saveDraftMutation.mutate();
-      console.log(post._id);
-    };
-
-    getPostId();
-  }, []);
 
   return {
     saveDraft: saveDraftMutation.mutate,

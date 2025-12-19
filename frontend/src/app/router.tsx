@@ -17,8 +17,12 @@ export const router = createBrowserRouter([
         Component: ProtectedRoute,
         children: [
           {
-            path: ROUTES.CREATE_POST,
-            lazy: () => import("@/features/editor/create-post.page"),
+            path: ROUTES.CREATE_BLOG,
+            lazy: () => import("@/features/editor/create-blog.page"),
+          },
+          {
+            path: ROUTES.MY_BLOGS,
+            lazy: () => import("@/features/blogs-list/my-blogs-list.page"),
           },
           {
             path: ROUTES.PROFILE,
@@ -50,16 +54,16 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: ROUTES.POSTS,
-        lazy: () => import("@/features/posts-list/posts-list.page"),
+        path: ROUTES.BLOGS,
+        lazy: () => import("@/features/blogs-list/blogs-list.page"),
       },
       {
         path: ROUTES.ABOUT,
         lazy: () => import("@/features/about/about.page"),
       },
       {
-        path: ROUTES.POST,
-        lazy: () => import("@/features/post/post.page"),
+        path: ROUTES.BLOG,
+        lazy: () => import("@/features/blog/blog.page"),
       },
       {
         path: ROUTES.LOGIN,
@@ -87,7 +91,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTES.HOME,
-        loader: () => redirect(ROUTES.POSTS),
+        loader: () => redirect(ROUTES.BLOGS),
       },
     ],
   },

@@ -19,7 +19,7 @@ export type User = {
   __v: number;
 };
 
-export type Post = {
+export type Blog = {
   _id: string;
   authorId: string;
   title: string;
@@ -61,11 +61,9 @@ export type GetMyProfileApiResponse = ApiResponse & {
 export type EditMyProfileApiResponse = ApiResponse & {
   data?: User;
 };
-export type CreatePostApiResponse = ApiResponse & { data?: Post };
-export type EditPostApiResponse = ApiResponse & { data?: Post };
-export type GetSinglePostApiResponse = ApiResponse & { data?: Post };
+export type CreateDraftBlogApiResponse = ApiResponse & { blog: Blog };
+
 export type UploadApiResponse = ApiResponse & { data?: string[] };
-export type DeletePostApiResponse = ApiResponse & { data?: Post };
 
 export const authApi = {
   baseKey: "auth",
@@ -146,41 +144,13 @@ export const userApi = {
     });
   },
 };
-export const postApi = {
-  baseKey: "post",
 
-  createPost: (formData: FormData) => {
-    return apiInstance<CreatePostApiResponse>(`/post`, {
-      method: "POST",
-      body: formData,
-      credentials: "include",
-    });
-  },
+export const blogApi = {
+  baseKey: "blog",
+
   createDraft: () => {
-    return apiInstance<CreatePostApiResponse>(`/post/draft`, {
+    return apiInstance<CreateDraftBlogApiResponse>("/blog/draft", {
       method: "POST",
-      credentials: "include",
-    });
-  },
-
-  editPost: (id: string, formData: FormData) => {
-    return apiInstance<EditPostApiResponse>(`/post/${id}`, {
-      method: "PATCH",
-      body: formData,
-      credentials: "include",
-    });
-  },
-
-  getSinglePost: (id: string) => {
-    return apiInstance<GetSinglePostApiResponse>(`/post/${id}`, {
-      method: "GET",
-      credentials: "include",
-    });
-  },
-
-  deletePost: (id: string) => {
-    return apiInstance<DeletePostApiResponse>(`/post/${id}`, {
-      method: "DELETE",
       credentials: "include",
     });
   },

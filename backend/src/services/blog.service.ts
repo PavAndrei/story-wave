@@ -1,0 +1,312 @@
+// import PostModel from '../models/blog.model.js';
+// import mongoose from 'mongoose';
+// import {
+//   CreatePostSchemaValues,
+//   EditPostSchemaValues,
+// } from '../controllers/post.schemas.js';
+// import { BAD_REQUEST, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
+// import appAssert from '../utils/appAssert.js';
+// import ImageModel from '../models/image.model.js';
+// import { deleteFromCloudinary } from '../utils/cloudinary.js';
+
+import PostModel from '../models/blog.model.js';
+import mongoose from 'mongoose';
+
+// export const createDraftPost = async (authorId: mongoose.Types.ObjectId) => {
+//   const post = new PostModel({
+//     authorId,
+//     title: '',
+//     content: '',
+//     status: 'draft',
+//     categories: [],
+//     coverImgUrl: '',
+//     imagesUrls: [],
+//   });
+
+//   await post.save();
+//   return post;
+// };
+// export const createPost = async (
+//   req: CreatePostSchemaValues,
+//   authorId: mongoose.Types.ObjectId | undefined
+// ) => {
+//   if (!authorId) return null;
+
+//   const post = new PostModel({
+//     authorId,
+//     title: req.title,
+//     content: req.content,
+//     categories: req.categories ?? [],
+//     coverImgUrl: req.coverImgUrl ?? '',
+//     imagesUrls: req.imagesUrls ?? [],
+//     status: 'draft',
+//   });
+
+//   await post.save();
+//   return post;
+// };
+
+// export const editPost = async (
+//   postId: string,
+//   authorId: mongoose.Types.ObjectId,
+//   update: EditPostSchemaValues
+// ) => {
+//   const post = await PostModel.findById(postId);
+//   appAssert(post, NOT_FOUND, 'Post not found');
+
+//   const isPostDeleted = post.isDeleted;
+
+//   appAssert(!isPostDeleted, NOT_FOUND, 'Post deleted');
+
+//   appAssert(
+//     post.authorId.equals(authorId),
+//     FORBIDDEN,
+//     'You are allowed to edit only your own posts'
+//   );
+
+//   if (update.title !== undefined) post.title = update.title;
+//   if (update.content !== undefined) post.content = update.content;
+//   if (update.categories !== undefined) post.categories = update.categories;
+//   if (update.coverImgUrl !== undefined) post.coverImgUrl = update.coverImgUrl;
+//   if (update.imagesUrls !== undefined) post.imagesUrls = update.imagesUrls;
+
+//   await post.save();
+
+//   return post;
+// };
+
+// export const publishPost = async (
+//   postId: string,
+//   authorId: mongoose.Types.ObjectId
+// ) => {
+//   const post = await PostModel.findById(postId);
+//   appAssert(post, NOT_FOUND, 'Post not found');
+//   appAssert(!post.isDeleted, NOT_FOUND, 'Post deleted');
+
+//   appAssert(
+//     post.authorId.equals(authorId),
+//     FORBIDDEN,
+//     'You are allowed to publish only your own posts'
+//   );
+
+//   appAssert(
+//     post.status === 'draft',
+//     BAD_REQUEST,
+//     'Only draft posts can be published'
+//   );
+
+//   appAssert(
+//     post.title.trim().length > 0,
+//     BAD_REQUEST,
+//     'Post title is required'
+//   );
+
+//   appAssert(
+//     post.content.trim().length > 0,
+//     BAD_REQUEST,
+//     'Post content is required'
+//   );
+
+//   post.status = 'published';
+//   post.publishedAt = new Date();
+
+//   await post.save();
+
+//   return post;
+// };
+
+// export const archivePost = async (
+//   postId: string,
+//   authorId: mongoose.Types.ObjectId
+// ) => {
+//   const post = await PostModel.findById(postId);
+//   appAssert(post, NOT_FOUND, 'Post not found');
+
+//   appAssert(!post.isDeleted, NOT_FOUND, 'Post deleted');
+
+//   appAssert(
+//     post.authorId.equals(authorId),
+//     FORBIDDEN,
+//     'You are allowed to archive only your own posts'
+//   );
+
+//   appAssert(
+//     post.status === 'published',
+//     BAD_REQUEST,
+//     'Only published posts can be archived'
+//   );
+
+//   post.status = 'archived';
+
+//   await post.save();
+
+//   return post;
+// };
+
+// export const getSinglePost = async (
+//   postId: string,
+//   viewerId?: mongoose.Types.ObjectId
+// ) => {
+//   const post = await PostModel.findById(postId);
+//   appAssert(post, NOT_FOUND, 'Post not found');
+
+//   appAssert(!post.isDeleted, NOT_FOUND, 'Post not found');
+
+//   if (post.status === 'published') {
+//     return post;
+//   }
+
+//   appAssert(
+//     viewerId && post.authorId.equals(viewerId),
+//     FORBIDDEN,
+//     'You are not allowed to view this post'
+//   );
+
+//   return post;
+// };
+
+// export const getMyDrafts = async (
+//   authorId: mongoose.Types.ObjectId,
+//   page: number,
+//   limit: number
+// ) => {
+//   const skip = (page - 1) * limit;
+
+//   const [items, total] = await Promise.all([
+//     PostModel.find({
+//       authorId,
+//       status: 'draft',
+//       isDeleted: false,
+//     })
+//       .sort({ updatedAt: -1 })
+//       .skip(skip)
+//       .limit(limit),
+//     PostModel.countDocuments({
+//       authorId,
+//       status: 'draft',
+//       isDeleted: false,
+//     }),
+//   ]);
+
+//   return {
+//     items,
+//     pagination: {
+//       page,
+//       limit,
+//       total,
+//       pages: Math.ceil(total / limit),
+//     },
+//   };
+// };
+
+// export const getMyPublishedPosts = async (
+//   authorId: mongoose.Types.ObjectId,
+//   page: number,
+//   limit: number
+// ) => {
+//   const skip = (page - 1) * limit;
+
+//   const filter = {
+//     authorId,
+//     status: 'published',
+//     isDeleted: false,
+//   };
+
+//   const [items, total] = await Promise.all([
+//     PostModel.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
+//     PostModel.countDocuments(filter),
+//   ]);
+
+//   return {
+//     items,
+//     pagination: {
+//       page,
+//       limit,
+//       total,
+//       pages: Math.ceil(total / limit),
+//     },
+//   };
+// };
+
+// export const deletePost = async (
+//   postId: string,
+//   authorId: mongoose.Types.ObjectId
+// ) => {
+//   const post = await PostModel.findById(postId);
+//   appAssert(post, NOT_FOUND, 'Post not found');
+//   appAssert(!post.isDeleted, NOT_FOUND, 'Post already deleted');
+//   appAssert(
+//     post.authorId.equals(authorId),
+//     FORBIDDEN,
+//     'You are allowed to delete only your own posts'
+//   );
+
+//   post.isDeleted = true;
+
+//   const images = await ImageModel.find({ postId: post._id });
+
+//   // удаляем все изображения из Cloudinary
+//   for (const img of images) {
+//     await deleteFromCloudinary(img.publicId);
+//   }
+
+//   await ImageModel.deleteMany({ postId: post._id });
+//   await post.save();
+
+//   return post;
+// };
+
+// export const getAllPosts = async (
+//   page: number,
+//   limit: number,
+//   search?: string,
+//   category?: string
+// ) => {
+//   const skip = (page - 1) * limit;
+
+//   const filter: Record<string, any> = {
+//     status: 'published',
+//     isDeleted: false,
+//   };
+
+//   if (search) {
+//     filter.$or = [
+//       { title: { $regex: search, $options: 'i' } },
+//       { content: { $regex: search, $options: 'i' } },
+//     ];
+//   }
+
+//   if (category) {
+//     filter.categories = category;
+//   }
+
+//   const [items, total] = await Promise.all([
+//     PostModel.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
+//     PostModel.countDocuments(filter),
+//   ]);
+
+//   return {
+//     items,
+//     pagination: {
+//       page,
+//       limit,
+//       total,
+//       pages: Math.ceil(total / limit),
+//     },
+//   };
+// };
+
+export const createNewDraft = async (authorId: mongoose.Types.ObjectId) => {
+  const blog = new PostModel({
+    authorId,
+    title: '',
+    content: '',
+    status: 'draft',
+    categories: [],
+    coverImgUrl: '',
+    imagesUrls: [],
+  });
+
+  await blog.save();
+  return blog;
+};

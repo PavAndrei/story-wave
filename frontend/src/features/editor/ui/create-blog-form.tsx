@@ -15,7 +15,6 @@ import { z } from "zod";
 import Select from "react-select";
 import ReactMarkdown from "react-markdown";
 import { ImageUploader } from "@/features/uploads";
-import { useCreateDraft } from "../model/use-create-draft";
 
 const createPostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -50,7 +49,7 @@ export const CreatePostForm = () => {
     console.log(data);
   });
 
-  useCreateDraft();
+  // useCreateDraft();
 
   return (
     <Form {...form}>

@@ -25,11 +25,7 @@ const navigationMenuItems = [
   },
   {
     label: "Blogs",
-    href: "/posts",
-  },
-  {
-    label: "Editor",
-    href: "/create-post",
+    href: "/blogs",
   },
 ];
 

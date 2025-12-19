@@ -1,4 +1,4 @@
-import { CreatePostForm } from "./ui/create-post-form";
+import { CreatePostForm } from "./ui/create-blog-form";
 import { PostEditorLayout } from "./ui/post-editor-layout";
 
 const CreatePostPage = () => {

@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { OK, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import appAssert from '../utils/appAssert.js';
 import ImageModel from '../models/image.model.js';
-import PostModel from '../models/post.model.js';
+import PostModel from '../models/blog.model.js';
 import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
 export const uploadImagesHandler = async (req: Request, res: Response) => {

@@ -14,7 +14,7 @@ import authenticate from './middleware/authentificate.js';
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import sessionRoutes from './routes/session.route.js';
-import postRoutes from './routes/post.route.js';
+import blogRoutes from './routes/blog.route.js';
 import uploadRoutes from './routes/upload.route.js';
 
 dotenv.config();
@@ -38,7 +38,7 @@ app.get('/', (req, res, next) => {
 app.use('/auth', authRoutes);
 app.use('/user', setRequestExtensions, authenticate, userRoutes);
 app.use('/session', setRequestExtensions, authenticate, sessionRoutes);
-app.use('/post', setRequestExtensions, authenticate, postRoutes);
+app.use('/blog', setRequestExtensions, authenticate, blogRoutes);
 app.use('/upload', setRequestExtensions, authenticate, uploadRoutes);
 
 app.use(errorHandler);

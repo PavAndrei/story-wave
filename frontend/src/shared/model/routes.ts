@@ -9,9 +9,10 @@ export const ROUTES = {
   VERIFY: "/verify-email/:code",
   FORGOT_PASSWORD: "/password/forgot",
   RESET_PASSWORD: "/password/reset",
-  CREATE_POST: "/create-post",
-  POSTS: "/posts",
-  POST: "/posts/:postId",
+  CREATE_BLOG: "/create-blog/:blogId",
+  BLOGS: "/blogs",
+  BLOG: "/blog/:blogId",
+  MY_BLOGS: "/my-blogs",
   PROFILE: "/profile",
   PROFILE_EDIT: "/profile/edit",
   PROFILE_SECURITY: "/profile/security",
@@ -20,8 +21,11 @@ export const ROUTES = {
 } as const;
 
 export type PathParams = {
-  [ROUTES.POST]: {
-    postId: string;
+  [ROUTES.BLOG]: {
+    blogId: string;
+  };
+  [ROUTES.CREATE_BLOG]: {
+    blogId: string;
   };
   [ROUTES.VERIFY]: {
     code: string;
