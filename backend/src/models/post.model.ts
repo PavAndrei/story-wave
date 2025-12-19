@@ -31,11 +31,11 @@ const postSchema = new mongoose.Schema<PostDocument>(
     },
     title: {
       type: String,
-      required: true,
+      default: '',
     },
     content: {
       type: String,
-      required: true,
+      default: '',
     },
     status: {
       type: String,

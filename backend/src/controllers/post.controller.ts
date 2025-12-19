@@ -10,6 +10,7 @@ import {
   getMyPublishedPosts,
   getSinglePost,
   publishPost,
+  createDraftPost,
 } from '../services/post.service.js';
 import catchErrors from '../utils/catchErrors.js';
 import {
@@ -21,6 +22,17 @@ import {
   getMyPublishedPostsSchema,
   postIdSchema,
 } from './post.schemas.js';
+
+export const createDraftPostHandler = catchErrors(async (req, res) => {
+  const authorId = req.userId;
+
+  const post = await createDraftPost(new mongoose.Types.ObjectId(authorId));
+
+  return res.status(CREATED).json({
+    success: true,
+    data: post,
+  });
+});
 
 export const createPostHandler = catchErrors(async (req, res) => {
   const request = createPostSchema.parse(req.body);

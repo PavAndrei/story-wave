@@ -20,6 +20,7 @@ export type User = {
 };
 
 export type Post = {
+  _id: string;
   authorId: string;
   title: string;
   content: string;
@@ -28,12 +29,10 @@ export type Post = {
   coverImgUrl: string;
   imagesUrls: string[];
   isDeleted: boolean;
-  _id: string;
   createdAt: Date;
   updatedAt: Date;
-  __v: 0;
+  __v: number;
 };
-
 export type Session = {
   _id: string;
   createdAt: string;
@@ -62,21 +61,11 @@ export type GetMyProfileApiResponse = ApiResponse & {
 export type EditMyProfileApiResponse = ApiResponse & {
   data?: User;
 };
-
-export type CreatePostApiResponse = ApiResponse & {
-  data?: Post;
-};
-export type EditPostApiResponse = ApiResponse & {
-  data?: Post;
-};
-
-export type GetSinglePostApiResponse = ApiResponse & {
-  data?: Post;
-};
-
-export type UploadApiResponse = ApiResponse & {
-  data?: string[];
-};
+export type CreatePostApiResponse = ApiResponse & { data?: Post };
+export type EditPostApiResponse = ApiResponse & { data?: Post };
+export type GetSinglePostApiResponse = ApiResponse & { data?: Post };
+export type UploadApiResponse = ApiResponse & { data?: string[] };
+export type DeletePostApiResponse = ApiResponse & { data?: Post };
 
 export const authApi = {
   baseKey: "auth",
@@ -157,52 +146,60 @@ export const userApi = {
     });
   },
 };
-
 export const postApi = {
   baseKey: "post",
-  createPost: (data: FormData) => {
+
+  createPost: (formData: FormData) => {
     return apiInstance<CreatePostApiResponse>(`/post`, {
       method: "POST",
-      body: data,
+      body: formData,
       credentials: "include",
     });
   },
-  editPost: (data: { formData: FormData; id: string }) => {
-    return apiInstance<EditPostApiResponse>(`/post/${data.id}`, {
+  createDraft: () => {
+    return apiInstance<CreatePostApiResponse>(`/post/draft`, {
+      method: "POST",
+      credentials: "include",
+    });
+  },
+
+  editPost: (id: string, formData: FormData) => {
+    return apiInstance<EditPostApiResponse>(`/post/${id}`, {
       method: "PATCH",
-      body: data.formData,
+      body: formData,
       credentials: "include",
     });
   },
+
   getSinglePost: (id: string) => {
     return apiInstance<GetSinglePostApiResponse>(`/post/${id}`, {
       method: "GET",
       credentials: "include",
     });
   },
-};
 
-// export const uploadApi = {
-//   baseKey: "upload",
-//   uploadImages: (files: File[]) => {
-//     const formData = new FormData();
-//     files.forEach((file) => {
-//       formData.append("images", file);
-//     });
-//     return apiInstance<UploadApiResponse>(`/upload/images`, {
-//       method: "POST",
-//       body: formData,
-//       credentials: "include",
-//     });
-//   },
-// };
+  deletePost: (id: string) => {
+    return apiInstance<DeletePostApiResponse>(`/post/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  },
+};
 
 export const uploadApi = {
   baseKey: "upload",
-  uploadImages: (formData: FormData) => {
-    return apiInstance<UploadApiResponse>(`/upload/images`, {
+
+  uploadImages: (postId: string, formData: FormData) => {
+    return apiInstance<UploadApiResponse>(`/upload/images/${postId}`, {
       method: "POST",
       body: formData,
+      credentials: "include",
+    });
+  },
+
+  deleteImage: (imageId: string) => {
+    return apiInstance<ApiResponse>(`/upload/images/${imageId}`, {
+      method: "DELETE",
       credentials: "include",
     });
   },

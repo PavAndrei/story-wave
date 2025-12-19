@@ -36,7 +36,11 @@ const storage = new CloudinaryStorage({
   },
 });
 
-export { cloudinary, storage };
+const deleteFromCloudinary = async (publicId: string) => {
+  await cloudinary.uploader.destroy(publicId);
+};
+
+export { cloudinary, storage, deleteFromCloudinary };
 
 export const deleteFromCloudinaryByUrl = async (url?: string) => {
   if (!url) return;

@@ -15,6 +15,7 @@ import { z } from "zod";
 import Select from "react-select";
 import ReactMarkdown from "react-markdown";
 import { ImageUploader } from "@/features/uploads";
+import { useCreateDraft } from "../model/use-create-draft";
 
 const createPostSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),
@@ -49,6 +50,8 @@ export const CreatePostForm = () => {
     console.log(data);
   });
 
+  useCreateDraft();
+
   return (
     <Form {...form}>
       <form
@@ -72,38 +75,6 @@ export const CreatePostForm = () => {
                   className="border border-slate-700 placeholder:text-slate-400"
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Content (Markdown) */}
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-slate-700 font-medium text-base">
-                Content (Markdown)
-              </FormLabel>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    rows={14}
-                    placeholder="Write your story in markdown..."
-                    className="border border-slate-700 placeholder:text-slate-400"
-                  />
-                </FormControl>
-
-                <div className="border rounded-md p-3 text-sm prose prose-slate max-w-none overflow-auto">
-                  <ReactMarkdown>
-                    {field.value || "Markdown preview"}
-                  </ReactMarkdown>
-                </div>
-              </div>
-
               <FormMessage />
             </FormItem>
           )}
@@ -135,47 +106,75 @@ export const CreatePostForm = () => {
           )}
         />
 
-        {/* Cover image */}
-        {/* <FormField
+        {/* Content (Markdown) */}
+        <FormField
           control={form.control}
-          name="coverImgUrl"
+          name="content"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-slate-700 font-medium text-base">
-                Cover image
+                Content (Markdown)
               </FormLabel>
-              <FormControl>
-                <ImageUploader
-                  value={field.value ? [field.value] : []}
-                  onChange={(urls) => field.onChange(urls[0] ?? "")}
-                />
-              </FormControl>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    rows={14}
+                    placeholder="Write your story in markdown..."
+                    className="border border-slate-700 placeholder:text-slate-400 resize-none min-h-[300px]"
+                  />
+                </FormControl>
+
+                <div className="border rounded-md p-3 text-sm prose prose-slate max-w-none overflow-auto">
+                  <ReactMarkdown>
+                    {field.value || "Markdown preview"}
+                  </ReactMarkdown>
+                </div>
+              </div>
+
               <FormMessage />
             </FormItem>
           )}
-        /> */}
+        />
 
-        {/* Post images */}
-        {/* <FormField
+        <FormField
           control={form.control}
           name="imagesUrls"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-slate-700 font-medium text-base">
-                Images
-              </FormLabel>
+              <FormLabel>Images</FormLabel>
               <FormControl>
                 <ImageUploader value={field.value} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
-        /> */}
+        />
 
-        <ImageUploader />
+        <FormField
+          control={form.control}
+          name="coverImgUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cover image</FormLabel>
+              <FormControl>
+                <ImageUploader
+                  value={field.value ? [field.value] : []}
+                  onChange={(urls) => field.onChange(urls[0] ?? "")}
+                  max={1}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <div>
-          <Button type="submit" className="mt-4">
+          <Button
+            type="submit"
+            className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 flex gap-2"
+          >
             Create post
           </Button>
         </div>

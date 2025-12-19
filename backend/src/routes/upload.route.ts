@@ -1,14 +1,19 @@
 import { Router } from 'express';
 
-import { uploadPostImagesHandler } from '../controllers/upload.controller.js';
+import {
+  uploadImagesHandler,
+  deletePostImageHandler,
+} from '../controllers/upload.controller.js';
 import { upload } from '../middleware/uploadImages.js';
 
 const uploadRoutes = Router();
 
 uploadRoutes.post(
-  '/images',
+  '/images/:postId',
   upload.array('images', 10),
-  uploadPostImagesHandler
+  uploadImagesHandler
 );
+
+uploadRoutes.delete('/images/:id', deletePostImageHandler);
 
 export default uploadRoutes;

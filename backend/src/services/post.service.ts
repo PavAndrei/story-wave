@@ -6,17 +6,31 @@ import {
 } from '../controllers/post.schemas.js';
 import { BAD_REQUEST, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import appAssert from '../utils/appAssert.js';
+import ImageModel from '../models/image.model.js';
+import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
+export const createDraftPost = async (authorId: mongoose.Types.ObjectId) => {
+  const post = new PostModel({
+    authorId,
+    title: '',
+    content: '',
+    status: 'draft',
+    categories: [],
+    coverImgUrl: '',
+    imagesUrls: [],
+  });
+
+  await post.save();
+  return post;
+};
 export const createPost = async (
   req: CreatePostSchemaValues,
   authorId: mongoose.Types.ObjectId | undefined
 ) => {
-  if (!authorId) {
-    return null;
-  }
+  if (!authorId) return null;
 
-  const post = await new PostModel({
-    authorId: authorId,
+  const post = new PostModel({
+    authorId,
     title: req.title,
     content: req.content,
     categories: req.categories ?? [],
@@ -26,7 +40,6 @@ export const createPost = async (
   });
 
   await post.save();
-
   return post;
 };
 
@@ -218,9 +231,7 @@ export const deletePost = async (
 ) => {
   const post = await PostModel.findById(postId);
   appAssert(post, NOT_FOUND, 'Post not found');
-
   appAssert(!post.isDeleted, NOT_FOUND, 'Post already deleted');
-
   appAssert(
     post.authorId.equals(authorId),
     FORBIDDEN,
@@ -229,6 +240,14 @@ export const deletePost = async (
 
   post.isDeleted = true;
 
+  const images = await ImageModel.find({ postId: post._id });
+
+  // удаляем все изображения из Cloudinary
+  for (const img of images) {
+    await deleteFromCloudinary(img.publicId);
+  }
+
+  await ImageModel.deleteMany({ postId: post._id });
   await post.save();
 
   return post;
