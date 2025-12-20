@@ -21,10 +21,6 @@ export const router = createBrowserRouter([
             lazy: () => import("@/features/editor/create-blog.page"),
           },
           {
-            path: ROUTES.MY_BLOGS,
-            lazy: () => import("@/features/blogs-list/my-blogs-list.page"),
-          },
-          {
             path: ROUTES.PROFILE,
             lazy: () => import("@/features/profile/profile.page"),
             children: [
@@ -48,6 +44,10 @@ export const router = createBrowserRouter([
                 path: ROUTES.PROFILE_CHANGE_PASSWORD,
                 lazy: () =>
                   import("@/features/profile/profile-change-password.page"),
+              },
+              {
+                path: ROUTES.MY_BLOGS,
+                lazy: () => import("@/features/profile/my-blogs-list.page"),
               },
             ],
           },
