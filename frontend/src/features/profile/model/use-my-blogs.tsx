@@ -1,36 +1,15 @@
-import { blogApi, type Blog } from "@/shared/api/api";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { blogApi } from "@/shared/api/api";
+import { useQuery } from "@tanstack/react-query";
 
 export const useMyBlogs = () => {
-  const [myBlogs, setMyBlogs] = useState<Blog[]>([]);
-
-  const myBlogsMutation = useMutation({
-    mutationFn: blogApi.getMyBlogs,
-
-    onSuccess: (data) => {
-      console.log("CREATE DRAFT SUCCESS:", data);
-
-      if (data.blogs && data.blogs?.length > 0) setMyBlogs(data.blogs);
-    },
-
-    onError: (error) => {
-      console.error("CREATE DRAFT FAILED:", error.message);
-    },
+  const { data, isLoading, error } = useQuery({
+    queryFn: blogApi.getMyBlogs,
+    queryKey: [blogApi.baseKey, "my"],
   });
 
-  useEffect(() => {
-    myBlogsMutation.mutate();
-  }, []);
-
-  const errorMessage = myBlogsMutation.isError
-    ? myBlogsMutation.error.message
-    : null;
-
   return {
-    fetchMyBlogs: myBlogsMutation.mutate,
-    isPending: myBlogsMutation.isPending,
-    errorMessage,
-    myBlogs,
+    myBlogs: data?.blogs ?? null,
+    isLoading,
+    error: error instanceof Error ? error.message : String(error),
   };
 };
