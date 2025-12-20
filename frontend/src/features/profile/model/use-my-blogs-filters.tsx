@@ -1,7 +1,10 @@
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { useState } from "react";
 
 export const useMyBlogsFilters = () => {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 400);
+
   const [sort, setSort] = useState<"newest" | "oldest">("newest");
   const [categories, setCategories] = useState<string[]>([]);
   const [statuses, setStatuses] = useState<
@@ -11,14 +14,14 @@ export const useMyBlogsFilters = () => {
   const apiFilters = {
     status: statuses.length === 1 ? statuses[0] : undefined,
     sort,
-    search,
+    search: debouncedSearch, // ✅ ТОЛЬКО ТУТ debounce
     categories,
   };
 
   return {
     filters: apiFilters,
     ui: {
-      search,
+      search, // ✅ UI БЕЗ debounce
       sort,
       categories,
       statuses,
