@@ -11,12 +11,13 @@ import { Button } from "@/shared/ui/kit/button";
 import { Textarea } from "@/shared/ui/kit/textarea";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
-import Select from "react-select";
+import Multiselect from "react-select";
 import ReactMarkdown from "react-markdown";
 import { ImageUploader } from "@/features/uploads";
 import { useParams } from "react-router-dom";
 import { usePublishBlog } from "../model/use-publish-blog";
 import { useSaveDraft } from "@/shared/model/use-save-draft";
+import { categoryOptions } from "@/shared/model/categories";
 
 /* ---------- schema ONLY for publish ---------- */
 const publishBlogSchema = z.object({
@@ -38,13 +39,6 @@ const publishBlogSchema = z.object({
 });
 
 type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
-
-const categoryOptions = [
-  { label: "Tech", value: "tech" },
-  { label: "Life", value: "life" },
-  { label: "Sport", value: "sport" },
-  { label: "Business", value: "business" },
-];
 
 export const CreatePostForm = () => {
   const { blogId } = useParams();
@@ -133,7 +127,7 @@ export const CreatePostForm = () => {
             <FormItem>
               <FormLabel>Categories</FormLabel>
               <FormControl>
-                <Select
+                <Multiselect
                   isMulti
                   options={categoryOptions}
                   value={categoryOptions.filter((opt) =>

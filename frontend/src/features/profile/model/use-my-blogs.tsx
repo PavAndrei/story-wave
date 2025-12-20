@@ -1,14 +1,23 @@
 import { blogApi } from "@/shared/api/api";
 import { useQuery } from "@tanstack/react-query";
 
-export const useMyBlogs = () => {
+type UseMyBlogsParams = {
+  filters: {
+    status?: "draft" | "published" | "archived";
+    sort: "newest" | "oldest";
+    search: string;
+    categories: string[];
+  };
+};
+
+export const useMyBlogs = ({ filters }: UseMyBlogsParams) => {
   const { data, isLoading, error } = useQuery({
-    queryFn: blogApi.getMyBlogs,
-    queryKey: [blogApi.baseKey, "my"],
+    queryKey: [blogApi.baseKey, "my", filters],
+    queryFn: () => blogApi.getMyBlogs(filters),
   });
 
   return {
-    myBlogs: data?.blogs ?? null,
+    myBlogs: data?.blogs ?? [],
     isLoading,
     error: error instanceof Error ? error.message : String(error),
   };

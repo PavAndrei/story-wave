@@ -1,15 +1,12 @@
-import { useMyBlogs } from "../model/use-my-blogs";
+import type { Blog } from "@/shared/api/api";
 import { MyBlogItem } from "./my-blog-item";
 
-export const MyBlogsList = () => {
-  const { myBlogs } = useMyBlogs();
-  console.log(myBlogs);
-
+export const MyBlogsList = ({ myBlogs = [] }: { myBlogs?: Blog[] }) => {
   return (
     <section>
-      <ul>
+      <ul className="flex flex-col gap-4">
         {myBlogs &&
-          myBlogs.map((blog) => <MyBlogItem key={blog._id} {...blog} />)}
+          myBlogs.map((blog: Blog) => <MyBlogItem key={blog._id} {...blog} />)}
       </ul>
     </section>
   );

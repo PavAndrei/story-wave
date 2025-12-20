@@ -7,7 +7,13 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/shared/ui/kit/sidebar";
-import { FileUser, Settings, ShieldCheck, User } from "lucide-react";
+import {
+  FileUser,
+  ScrollText,
+  Settings,
+  ShieldCheck,
+  User,
+} from "lucide-react";
 import { href, Link } from "react-router-dom";
 
 export const ProfileSidebar = () => {
@@ -42,6 +48,10 @@ export const ProfileSidebar = () => {
         <SidebarGroup className="flex flex-row gap-2 font-medium text-slate-700 py-4">
           <Settings className="size-6" />
           <Link to={href(ROUTES.PROFILE_SETTINGS)}>Settings</Link>
+        </SidebarGroup>
+        <SidebarGroup className="flex flex-row gap-2 font-medium text-slate-700 py-4">
+          <ScrollText className="size-6" />
+          <Link to={href(ROUTES.MY_BLOGS)}>My Blogs</Link>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="bg-slate-200">Log Out</SidebarFooter>

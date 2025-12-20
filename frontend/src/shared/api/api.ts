@@ -1,4 +1,5 @@
 import { apiInstance } from "@/shared/api/api-instance";
+import { buildQueryString } from "../model/url-params";
 
 export type ApiResponse = {
   success?: boolean;
@@ -174,8 +175,10 @@ export const blogApi = {
     });
   },
 
-  getMyBlogs: () => {
-    return apiInstance<GetMyBlogsApiResponse>("/blog/my", {
+  getMyBlogs: (filters?: Record<string, string | string[]>) => {
+    const queryString = filters ? buildQueryString(filters) : "";
+
+    return apiInstance<GetMyBlogsApiResponse>(`/blog/my${queryString}`, {
       method: "GET",
       credentials: "include",
     });
