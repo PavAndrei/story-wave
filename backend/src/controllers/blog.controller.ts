@@ -42,21 +42,6 @@ import { draftSchema, publishSchema } from './blog.schemas.js';
 //   });
 // });
 
-// export const publishPostHandler = catchErrors(async (req, res) => {
-//   const authorId = req.userId;
-
-//   const post = await publishPost(
-//     req.params.id,
-//     new mongoose.Types.ObjectId(authorId)
-//   );
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'Post published successfully',
-//     data: post,
-//   });
-// });
-
 // export const archivePostHandler = catchErrors(async (req, res) => {
 //   const authorId = req.userId;
 
@@ -83,34 +68,6 @@ import { draftSchema, publishSchema } from './blog.schemas.js';
 //     success: true,
 //     message: 'Post deleted successfully',
 //     data: post,
-//   });
-// });
-
-// export const getMyDraftsHandler = catchErrors(async (req, res) => {
-//   const { page, limit } = getMyDraftsSchema.parse(req.query);
-
-//   const authorId = new mongoose.Types.ObjectId(req.userId);
-
-//   const result = await getMyDrafts(authorId, page, limit);
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'My drafts received successfully',
-//     data: result,
-//   });
-// });
-
-// export const getMyPostsHandler = catchErrors(async (req, res) => {
-//   const { page, limit } = getMyPublishedPostsSchema.parse(req.query);
-
-//   const authorId = new mongoose.Types.ObjectId(req.userId);
-
-//   const result = await getMyPublishedPosts(authorId, page, limit);
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'My published posts received successfully',
-//     data: result,
 //   });
 // });
 
@@ -162,8 +119,17 @@ export const saveBlogHandler = catchErrors(async (req, res) => {
 export const getMyBlogsHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
 
+  const { status, sort = 'newest', search, categories } = req.query;
+
   const blogs = await getMyBlogsService({
-    authorId,
+    authorId: new mongoose.Types.ObjectId(authorId),
+    filters: {
+      status: status as 'draft' | 'published' | 'archived',
+      sort: sort as 'newest' | 'oldest',
+      search: search as string | undefined,
+      categories:
+        typeof categories === 'string' ? categories.split(',') : undefined,
+    },
   });
 
   return res.status(OK).json({

@@ -1,52 +1,7 @@
-// import PostModel from '../models/blog.model.js';
-// import mongoose from 'mongoose';
-// import {
-//   CreatePostSchemaValues,
-//   EditPostSchemaValues,
-// } from '../controllers/post.schemas.js';
-// import { BAD_REQUEST, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
-// import appAssert from '../utils/appAssert.js';
-// import ImageModel from '../models/image.model.js';
-// import { deleteFromCloudinary } from '../utils/cloudinary.js';
-
 import mongoose from 'mongoose';
 import BlogModel from '../models/blog.model.js';
 import appAssert from '../utils/appAssert.js';
 import { NOT_FOUND } from '../constants/http.js';
-
-// export const createDraftPost = async (authorId: mongoose.Types.ObjectId) => {
-//   const post = new PostModel({
-//     authorId,
-//     title: '',
-//     content: '',
-//     status: 'draft',
-//     categories: [],
-//     coverImgUrl: '',
-//     imagesUrls: [],
-//   });
-
-//   await post.save();
-//   return post;
-// };
-// export const createPost = async (
-//   req: CreatePostSchemaValues,
-//   authorId: mongoose.Types.ObjectId | undefined
-// ) => {
-//   if (!authorId) return null;
-
-//   const post = new PostModel({
-//     authorId,
-//     title: req.title,
-//     content: req.content,
-//     categories: req.categories ?? [],
-//     coverImgUrl: req.coverImgUrl ?? '',
-//     imagesUrls: req.imagesUrls ?? [],
-//     status: 'draft',
-//   });
-
-//   await post.save();
-//   return post;
-// };
 
 // export const editPost = async (
 //   postId: string,
@@ -71,46 +26,6 @@ import { NOT_FOUND } from '../constants/http.js';
 //   if (update.categories !== undefined) post.categories = update.categories;
 //   if (update.coverImgUrl !== undefined) post.coverImgUrl = update.coverImgUrl;
 //   if (update.imagesUrls !== undefined) post.imagesUrls = update.imagesUrls;
-
-//   await post.save();
-
-//   return post;
-// };
-
-// export const publishPost = async (
-//   postId: string,
-//   authorId: mongoose.Types.ObjectId
-// ) => {
-//   const post = await PostModel.findById(postId);
-//   appAssert(post, NOT_FOUND, 'Post not found');
-//   appAssert(!post.isDeleted, NOT_FOUND, 'Post deleted');
-
-//   appAssert(
-//     post.authorId.equals(authorId),
-//     FORBIDDEN,
-//     'You are allowed to publish only your own posts'
-//   );
-
-//   appAssert(
-//     post.status === 'draft',
-//     BAD_REQUEST,
-//     'Only draft posts can be published'
-//   );
-
-//   appAssert(
-//     post.title.trim().length > 0,
-//     BAD_REQUEST,
-//     'Post title is required'
-//   );
-
-//   appAssert(
-//     post.content.trim().length > 0,
-//     BAD_REQUEST,
-//     'Post content is required'
-//   );
-
-//   post.status = 'published';
-//   post.publishedAt = new Date();
 
 //   await post.save();
 
@@ -165,69 +80,6 @@ import { NOT_FOUND } from '../constants/http.js';
 //   );
 
 //   return post;
-// };
-
-// export const getMyDrafts = async (
-//   authorId: mongoose.Types.ObjectId,
-//   page: number,
-//   limit: number
-// ) => {
-//   const skip = (page - 1) * limit;
-
-//   const [items, total] = await Promise.all([
-//     PostModel.find({
-//       authorId,
-//       status: 'draft',
-//       isDeleted: false,
-//     })
-//       .sort({ updatedAt: -1 })
-//       .skip(skip)
-//       .limit(limit),
-//     PostModel.countDocuments({
-//       authorId,
-//       status: 'draft',
-//       isDeleted: false,
-//     }),
-//   ]);
-
-//   return {
-//     items,
-//     pagination: {
-//       page,
-//       limit,
-//       total,
-//       pages: Math.ceil(total / limit),
-//     },
-//   };
-// };
-
-// export const getMyPublishedPosts = async (
-//   authorId: mongoose.Types.ObjectId,
-//   page: number,
-//   limit: number
-// ) => {
-//   const skip = (page - 1) * limit;
-
-//   const filter = {
-//     authorId,
-//     status: 'published',
-//     isDeleted: false,
-//   };
-
-//   const [items, total] = await Promise.all([
-//     PostModel.find(filter).sort({ publishedAt: -1 }).skip(skip).limit(limit),
-//     PostModel.countDocuments(filter),
-//   ]);
-
-//   return {
-//     items,
-//     pagination: {
-//       page,
-//       limit,
-//       total,
-//       pages: Math.ceil(total / limit),
-//     },
-//   };
 // };
 
 // export const deletePost = async (
@@ -342,16 +194,49 @@ export const saveBlogService = async ({
   return blog;
 };
 
+type GetMyBlogsFilters = {
+  status?: 'draft' | 'published' | 'archived';
+  sort?: 'newest' | 'oldest';
+  search?: string;
+  categories?: string[];
+};
+
+type GetMyBlogsServiceProps = {
+  authorId: mongoose.Types.ObjectId;
+  filters?: GetMyBlogsFilters;
+};
 export const getMyBlogsService = async ({
   authorId,
-}: {
-  authorId: mongoose.Types.ObjectId;
-}) => {
-  const blogs = await BlogModel.find({
-    authorId: new mongoose.Types.ObjectId(authorId),
-  })
-    .sort({ createdAt: -1 })
-    .select('title status createdAt publishedAt coverImgUrl categories')
+  filters = {},
+}: GetMyBlogsServiceProps) => {
+  const query: Record<string, any> = {
+    authorId,
+  };
+
+  if (filters.status) {
+    query.status = filters.status;
+  }
+
+  if (filters.search) {
+    query.title = {
+      $regex: filters.search,
+      $options: 'i',
+    };
+  }
+
+  if (filters.categories && filters.categories.length > 0) {
+    query.categories = {
+      $in: filters.categories,
+    };
+  }
+
+  const sortBy = filters.sort === 'oldest' ? 1 : -1;
+
+  const blogs = await BlogModel.find(query)
+    .sort({ createdAt: sortBy })
+    .select(
+      'title status createdAt updatedAt publishedAt coverImgUrl categories'
+    )
     .lean();
 
   return blogs;
