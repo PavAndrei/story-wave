@@ -13,6 +13,7 @@ export type User = {
   email: string;
   verified: boolean;
   avatarUrl?: string;
+  avatarPublicId?: string;
   bio?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -66,7 +67,8 @@ export type GetMyProfileApiResponse = ApiResponse & {
 export type EditMyProfileApiResponse = ApiResponse & {
   data?: User;
 };
-export type CreateDraftBlogApiResponse = ApiResponse & { blog: Blog };
+export type CreateBlogApiResponse = ApiResponse & { blog: Blog };
+export type GetMyBlogsApiResponse = ApiResponse & { blogs?: Blog[] };
 
 export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
 
@@ -164,10 +166,17 @@ export type BlogParams = {
 export const blogApi = {
   baseKey: "blog",
 
-  createDraft: (data: BlogParams) => {
-    return apiInstance<CreateDraftBlogApiResponse>("/blog/draft", {
+  createBlog: (data: BlogParams) => {
+    return apiInstance<CreateBlogApiResponse>("/blog", {
       method: "POST",
       json: data,
+      credentials: "include",
+    });
+  },
+
+  getMyBlogs: () => {
+    return apiInstance<GetMyBlogsApiResponse>("/blog/my", {
+      method: "GET",
       credentials: "include",
     });
   },

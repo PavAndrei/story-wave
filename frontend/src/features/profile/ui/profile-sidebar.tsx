@@ -1,3 +1,4 @@
+import { blogApi } from "@/shared/api/api";
 import { ROUTES } from "@/shared/model/routes";
 import { useMyProfile } from "@/shared/model/user";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/kit/avatar";
@@ -8,10 +9,25 @@ import {
   SidebarHeader,
 } from "@/shared/ui/kit/sidebar";
 import { FileUser, Settings, ShieldCheck, User } from "lucide-react";
+import { useEffect } from "react";
 import { href, Link } from "react-router-dom";
 
 export const ProfileSidebar = () => {
   const { userData } = useMyProfile();
+
+  useEffect(() => {
+    const getMine = async () => {
+      try {
+        const fetch = await blogApi.getMyBlogs();
+
+        console.log(fetch);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    getMine();
+  }, []);
 
   return (
     <aside className="flex flex-col gap-6 h-full bg-slate-200">

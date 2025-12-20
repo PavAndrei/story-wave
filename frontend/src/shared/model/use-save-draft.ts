@@ -7,7 +7,7 @@ export const useSaveDraft = () => {
   const navigate = useNavigate();
 
   const saveDraftMutation = useMutation({
-    mutationFn: (data: BlogParams) => blogApi.createDraft(data),
+    mutationFn: (data: BlogParams) => blogApi.createBlog(data),
 
     onSuccess: (data) => {
       console.log("CREATE DRAFT SUCCESS:", data);

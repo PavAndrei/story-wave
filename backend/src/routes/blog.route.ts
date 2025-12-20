@@ -1,8 +1,13 @@
 import { Router } from 'express';
-import { saveBlog } from '../controllers/blog.controller.js';
+import {
+  saveBlogHandler,
+  getMyBlogsHandler,
+} from '../controllers/blog.controller.js';
+import authenticate from '../middleware/authentificate.js';
 
 const blogRoutes = Router();
 
-blogRoutes.post('/draft', saveBlog);
+blogRoutes.post('/', saveBlogHandler);
+blogRoutes.get('/my', authenticate, getMyBlogsHandler);
 
 export default blogRoutes;

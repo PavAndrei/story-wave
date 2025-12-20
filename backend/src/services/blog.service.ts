@@ -341,3 +341,18 @@ export const saveBlogService = async ({
   await blog.save();
   return blog;
 };
+
+export const getMyBlogsService = async ({
+  authorId,
+}: {
+  authorId: mongoose.Types.ObjectId;
+}) => {
+  const blogs = await BlogModel.find({
+    authorId: new mongoose.Types.ObjectId(authorId),
+  })
+    .sort({ createdAt: -1 })
+    .select('title status createdAt publishedAt coverImgUrl categories')
+    .lean();
+
+  return blogs;
+};

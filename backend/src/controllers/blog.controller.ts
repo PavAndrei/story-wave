@@ -1,7 +1,10 @@
 import { BAD_REQUEST, OK } from '../constants/http.js';
 import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
-import { saveBlogService } from '../services/blog.service.js';
+import {
+  getMyBlogsService,
+  saveBlogService,
+} from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
 
@@ -123,7 +126,7 @@ import { draftSchema, publishSchema } from './blog.schemas.js';
 //   });
 // });
 
-export const saveBlog = catchErrors(async (req, res) => {
+export const saveBlogHandler = catchErrors(async (req, res) => {
   const authorId = req.userId;
   const { status, postId } = req.body;
 
@@ -153,5 +156,19 @@ export const saveBlog = catchErrors(async (req, res) => {
     success: true,
     message: 'Blog saved successfully',
     blog,
+  });
+});
+
+export const getMyBlogsHandler = catchErrors(async (req, res) => {
+  const authorId = req.userId!;
+
+  const blogs = await getMyBlogsService({
+    authorId,
+  });
+
+  return res.status(OK).json({
+    success: true,
+    message: 'Blogs received successfully',
+    blogs,
   });
 });
