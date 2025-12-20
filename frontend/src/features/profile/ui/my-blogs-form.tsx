@@ -62,9 +62,11 @@ export const MyBlogsForm = ({ ui, handlers }: MyBlogsFormProps) => {
 
         {/* Statuses */}
         <ToggleGroup
-          type="multiple"
-          value={ui.statuses}
-          onValueChange={handlers.handleStatusesChange}
+          type="single"
+          value={ui.statuses[0]}
+          onValueChange={(value) =>
+            handlers.handleStatusesChange(value ? [value] : [])
+          }
         >
           <ToggleGroupItem value="draft">
             <NotebookPen /> Drafts

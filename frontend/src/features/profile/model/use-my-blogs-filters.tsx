@@ -1,37 +1,83 @@
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { BlogsFilters } from "../my-blogs-list.page";
+import { useSearchParams } from "react-router-dom";
+
+export const filtersToSearchParams = (filters: BlogsFilters) => {
+  const params = new URLSearchParams();
+
+  if (filters.status) params.set("status", filters.status);
+  if (filters.sort !== "newest") params.set("sort", filters.sort);
+  if (filters.search.trim()) params.set("search", filters.search.trim());
+
+  if (filters.categories.length) {
+    params.set("categories", filters.categories.join(","));
+  }
+
+  return params;
+};
+
+export const searchParamsToFilters = (
+  params: URLSearchParams,
+): BlogsFilters => {
+  return {
+    status: (params.get("status") as BlogsFilters["status"]) ?? undefined,
+    sort: (params.get("sort") as "newest" | "oldest") ?? "newest",
+    search: params.get("search") ?? "",
+    categories: params.get("categories")?.split(",") ?? [],
+  };
+};
 
 export const useMyBlogsFilters = () => {
-  const [search, setSearch] = useState("");
-  const debouncedSearch = useDebounce(search, 400);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const [sort, setSort] = useState<"newest" | "oldest">("newest");
-  const [categories, setCategories] = useState<string[]>([]);
-  const [statuses, setStatuses] = useState<
-    Array<"draft" | "published" | "archived">
-  >([]);
+  // 🔹 1. Инициализация ОДИН РАЗ
+  const [filters, setFilters] = useState<BlogsFilters>(() =>
+    searchParamsToFilters(searchParams),
+  );
 
-  const apiFilters = {
-    status: statuses.length === 1 ? statuses[0] : undefined,
-    sort,
-    search: debouncedSearch, // ✅ ТОЛЬКО ТУТ debounce
-    categories,
+  // 🔹 2. Синхронизация state → URL
+  useEffect(() => {
+    const params = filtersToSearchParams(filters);
+    setSearchParams(params, { replace: true });
+  }, [filters, setSearchParams]);
+
+  const debouncedSearch = useDebounce(filters.search, 400);
+
+  const debouncedFilters = {
+    ...filters,
+    search: debouncedSearch,
   };
-
+  // 🔹 3. Handlers
   return {
-    filters: apiFilters,
+    filters,
+    apiFilters: debouncedFilters,
+
     ui: {
-      search, // ✅ UI БЕЗ debounce
-      sort,
-      categories,
-      statuses,
+      search: filters.search,
+      sort: filters.sort,
+      categories: filters.categories,
+      statuses: filters.status ? [filters.status] : [],
     },
+
     handlers: {
-      handleSearchChange: setSearch,
-      handleSortChange: setSort,
-      handleCategoriesChange: setCategories,
-      handleStatusesChange: (values: string[]) =>
-        setStatuses(values as Array<"draft" | "published" | "archived">),
+      handleSearchChange: (search: string) =>
+        setFilters((f) => ({ ...f, search })),
+
+      handleSortChange: (sort: "newest" | "oldest") =>
+        setFilters((f) => ({ ...f, sort })),
+
+      handleCategoriesChange: (categories: string[]) =>
+        setFilters((f) => ({ ...f, categories })),
+
+      handleStatusesChange: (statuses: string[]) =>
+        setFilters((f) => ({
+          ...f,
+          status:
+            statuses.length === 1
+              ? (statuses[0] as BlogsFilters["status"])
+              : undefined,
+        })),
     },
   };
 };

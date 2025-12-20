@@ -13,7 +13,7 @@ export type BlogsFilters = {
 
 const MyBlogsListPage = () => {
   const filtersState = useMyBlogsFilters();
-  const { myBlogs } = useMyBlogs({ filters: filtersState.filters });
+  const { myBlogs } = useMyBlogs({ filters: filtersState.apiFilters });
 
   return (
     <ProfileLayout
