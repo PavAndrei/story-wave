@@ -8,16 +8,15 @@ import {
 } from "@/shared/ui/kit/form";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
-import { Textarea } from "@/shared/ui/kit/textarea";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import Multiselect from "react-select";
-import ReactMarkdown from "react-markdown";
 import { ImageUploader } from "@/features/uploads";
 import { useParams } from "react-router-dom";
 import { usePublishBlog } from "../model/use-publish-blog";
 import { useSaveDraft } from "@/shared/model/use-save-draft";
 import { categoryOptions } from "@/shared/model/categories";
+import { MarkdownEditor } from "@/features/markdown";
 
 /* ---------- schema ONLY for publish ---------- */
 const publishBlogSchema = z.object({
@@ -149,22 +148,10 @@ export const CreatePostForm = () => {
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Content (Markdown)</FormLabel>
-              <div className="grid grid-cols-2 gap-4">
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    rows={14}
-                    placeholder="Write your story in markdown..."
-                    className="resize-none min-h-[300px]"
-                  />
-                </FormControl>
-                <div className="border rounded-md p-3 prose max-w-none overflow-auto">
-                  <ReactMarkdown>
-                    {field.value || "Markdown preview"}
-                  </ReactMarkdown>
-                </div>
-              </div>
+              <FormLabel>Content</FormLabel>
+              <FormControl>
+                <MarkdownEditor value={field.value} onChange={field.onChange} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

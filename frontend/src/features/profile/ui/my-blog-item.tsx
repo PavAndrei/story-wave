@@ -1,8 +1,10 @@
 import type { Blog } from "@/shared/api/api";
 import { formatDate } from "@/shared/model/date";
+import { ROUTES } from "@/shared/model/routes";
 import { Button } from "@/shared/ui/kit/button";
 import { Card, CardHeader, CardFooter } from "@/shared/ui/kit/card";
 import { Image } from "lucide-react";
+import { href, Link } from "react-router-dom";
 
 export const MyBlogItem = (blog: Blog) => {
   return (
@@ -49,8 +51,11 @@ export const MyBlogItem = (blog: Blog) => {
                 <Button className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-1 px-3 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2">
                   Archive
                 </Button>
-                <Button className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-1 px-3 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2">
-                  View
+                <Button
+                  asChild
+                  className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-1 px-3 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2"
+                >
+                  <Link to={href(ROUTES.BLOG, { blogId: blog._id })}>View</Link>
                 </Button>
               </div>
             )}
