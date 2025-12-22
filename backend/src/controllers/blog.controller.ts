@@ -7,6 +7,7 @@ import {
 } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
+import BlogModel from '../models/blog.model.js';
 
 // export const editPostHandler = catchErrors(async (req, res) => {
 //   const parsed = editPostSchema.parse(req.body);
@@ -152,5 +153,16 @@ export const getMyBlogsHandler = catchErrors(async (req, res) => {
     message: 'Blogs received successfully',
     blogs: result.blogs,
     pagination: result.pagination,
+  });
+});
+
+export const getOneBlogHandler = catchErrors(async (req, res) => {
+  const { id } = req.params;
+  const blog = await BlogModel.findById(id);
+  appAssert(blog, BAD_REQUEST, 'Blog not found');
+  return res.status(OK).json({
+    success: true,
+    message: 'Blog found',
+    blog,
   });
 });
