@@ -35,6 +35,26 @@ export type Blog = {
   updatedAt: Date;
   __v: number;
 };
+
+export type BlogsFilters = {
+  status: "draft" | "published" | "archived" | undefined;
+  sort: "newest" | "oldest";
+  search: string;
+  categories: string[];
+
+  page?: number;
+  limit?: number;
+};
+
+export type BlogsPagination = {
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
 export type Session = {
   _id: string;
   createdAt: string;
@@ -69,7 +89,15 @@ export type EditMyProfileApiResponse = ApiResponse & {
   data?: User;
 };
 export type CreateBlogApiResponse = ApiResponse & { blog: Blog };
-export type GetMyBlogsApiResponse = ApiResponse & { blogs?: Blog[] };
+export type GetMyBlogsApiResponse = ApiResponse & {
+  blogs?: Blog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
 
 export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
 
@@ -175,10 +203,20 @@ export const blogApi = {
     });
   },
 
-  getMyBlogs: (filters?: Record<string, string | string[]>) => {
-    const queryString = filters ? buildQueryString(filters) : "";
+  getMyBlogs: (filters: BlogsFilters) => {
+    const query = buildQueryString({
+      page: String(filters.page),
+      limit: String(filters.limit),
+      status: filters.status,
+      sort: filters.sort,
+      search: filters.search,
+      categories:
+        filters.categories.length > 0
+          ? filters.categories.join(",")
+          : undefined,
+    });
 
-    return apiInstance<GetMyBlogsApiResponse>(`/blog/my${queryString}`, {
+    return apiInstance<GetMyBlogsApiResponse>(`/blog/my${query}`, {
       method: "GET",
       credentials: "include",
     });

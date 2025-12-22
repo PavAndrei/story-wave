@@ -194,20 +194,23 @@ export const saveBlogService = async ({
   return blog;
 };
 
-type GetMyBlogsFilters = {
-  status?: 'draft' | 'published' | 'archived';
-  sort?: 'newest' | 'oldest';
-  search?: string;
-  categories?: string[];
-};
-
 type GetMyBlogsServiceProps = {
   authorId: mongoose.Types.ObjectId;
-  filters?: GetMyBlogsFilters;
+  filters?: {
+    status?: 'draft' | 'published' | 'archived';
+    sort?: 'newest' | 'oldest';
+    search?: string;
+    categories?: string[];
+  };
+  pagination: {
+    page: number;
+    limit: number;
+  };
 };
 export const getMyBlogsService = async ({
   authorId,
   filters = {},
+  pagination,
 }: GetMyBlogsServiceProps) => {
   const query: Record<string, any> = {
     authorId,
@@ -230,14 +233,33 @@ export const getMyBlogsService = async ({
     };
   }
 
-  const sortBy = filters.sort === 'oldest' ? 1 : -1;
+  const sortDirection = filters.sort === 'oldest' ? 1 : -1;
 
-  const blogs = await BlogModel.find(query)
-    .sort({ createdAt: sortBy })
-    .select(
-      'title status createdAt updatedAt publishedAt coverImgUrl categories'
-    )
-    .lean();
+  const skip = (pagination.page - 1) * pagination.limit;
 
-  return blogs;
+  // 🔹 Параллельные запросы (важно)
+  const [blogs, total] = await Promise.all([
+    BlogModel.find(query)
+      .sort({ createdAt: sortDirection })
+      .skip(skip)
+      .limit(pagination.limit)
+      .select(
+        'title status createdAt updatedAt publishedAt coverImgUrl categories'
+      )
+      .lean(),
+
+    BlogModel.countDocuments(query),
+  ]);
+
+  const totalPages = Math.ceil(total / pagination.limit);
+
+  return {
+    blogs,
+    pagination: {
+      page: pagination.page,
+      limit: pagination.limit,
+      total,
+      totalPages,
+    },
+  };
 };

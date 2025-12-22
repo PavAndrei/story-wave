@@ -115,26 +115,42 @@ export const saveBlogHandler = catchErrors(async (req, res) => {
     blog,
   });
 });
-
 export const getMyBlogsHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
 
-  const { status, sort = 'newest', search, categories } = req.query;
+  const {
+    status,
+    sort = 'newest',
+    search,
+    categories,
+    page = '1',
+    limit = '10',
+  } = req.query;
 
-  const blogs = await getMyBlogsService({
+  const pageNumber = Math.max(Number(page) || 1, 1);
+  const limitNumber = Math.min(Math.max(Number(limit) || 10, 1), 50);
+
+  const result = await getMyBlogsService({
     authorId: new mongoose.Types.ObjectId(authorId),
     filters: {
-      status: status as 'draft' | 'published' | 'archived',
+      status: status as 'draft' | 'published' | 'archived' | undefined,
       sort: sort as 'newest' | 'oldest',
       search: search as string | undefined,
       categories:
-        typeof categories === 'string' ? categories.split(',') : undefined,
+        typeof categories === 'string'
+          ? categories.split(',').filter(Boolean)
+          : undefined,
+    },
+    pagination: {
+      page: pageNumber,
+      limit: limitNumber,
     },
   });
 
   return res.status(OK).json({
     success: true,
     message: 'Blogs received successfully',
-    blogs,
+    blogs: result.blogs,
+    pagination: result.pagination,
   });
 });
