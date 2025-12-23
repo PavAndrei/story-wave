@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 import BlogModel from '../models/blog.model.js';
 import appAssert from '../utils/appAssert.js';
-import { NOT_FOUND } from '../constants/http.js';
+import { FORBIDDEN, NOT_FOUND } from '../constants/http.js';
+import imageModel from '../models/image.model.js';
+import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
 type SaveBlogProps = {
   blogId?: string;
@@ -12,39 +14,82 @@ type SaveBlogProps = {
     content?: string;
     categories?: string[];
     coverImgUrl?: string;
-    imagesUrls?: string[];
+    // imagesUrls?: string[];
   };
 };
+
+const extractImageUrlsFromContent = (content?: string): string[] => {
+  if (!content) return [];
+
+  const regex = /!\[[^\]]*\]\((.*?)\)/g;
+  const urls: string[] = [];
+
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    urls.push(match[1]);
+  }
+
+  return urls;
+};
+
 export const saveBlogService = async ({
   blogId,
   authorId,
   status,
   data,
 }: SaveBlogProps) => {
+  let blog;
+
+  /* ================= CREATE OR LOAD ================= */
+
   if (blogId) {
-    const blog = await BlogModel.findOneAndUpdate(
-      { _id: blogId, authorId },
-      {
-        ...data,
-        status,
-        ...(status === 'published' ? { publishedAt: new Date() } : {}),
-      },
-      { new: true }
-    );
-
-    appAssert(blog, NOT_FOUND, 'Post not found');
-
-    return blog;
+    blog = await BlogModel.findById(blogId);
+    appAssert(blog, NOT_FOUND, 'Blog not found');
+    appAssert(blog.authorId.equals(authorId), FORBIDDEN, 'Not your blog');
+  } else {
+    blog = new BlogModel({
+      authorId,
+      status: 'draft',
+    });
   }
 
-  const blog = new BlogModel({
-    authorId,
-    ...data,
-    status,
-    ...(status === 'published' ? { publishedAt: new Date() } : {}),
-  });
+  /* ================= UPDATE FIELDS ================= */
+
+  if (data?.title !== undefined) blog.title = data.title;
+  if (data?.content !== undefined) blog.content = data.content;
+  if (data?.categories !== undefined) blog.categories = data.categories;
+  if (data?.coverImgUrl !== undefined) blog.coverImgUrl = data.coverImgUrl;
+
+  blog.status = status;
+
+  if (status === 'published' && !blog.publishedAt) {
+    blog.publishedAt = new Date();
+  }
+
+  /* ================= IMAGE SYNC ================= */
+
+  const contentImageUrls = extractImageUrlsFromContent(blog.content);
+  const usedUrls = new Set<string>(contentImageUrls);
+
+  if (blog.coverImgUrl) {
+    usedUrls.add(blog.coverImgUrl);
+  }
+
+  const allImages = await imageModel.find({ blogId: blog._id });
+
+  const unusedImages = allImages.filter((img) => !usedUrls.has(img.url));
+
+  for (const img of unusedImages) {
+    await deleteFromCloudinary(img.publicId);
+    await img.deleteOne();
+  }
+
+  blog.imagesUrls = Array.from(usedUrls);
+
+  /* ================= SAVE ================= */
 
   await blog.save();
+
   return blog;
 };
 

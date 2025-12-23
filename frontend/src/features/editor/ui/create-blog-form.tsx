@@ -60,16 +60,14 @@ export const CreatePostForm = () => {
   const handleSaveDraft = () => {
     const data = form.getValues();
 
-    const payload = {
+    saveDraft.saveDraftFunction({
+      blogId,
       status: "draft",
       title: data.title,
       content: data.content,
       categories: data.categories,
       coverImgUrl: data.coverImage?.url ?? null,
-      imagesUrls: data.images.map((img) => img.url),
-    };
-
-    saveDraft.saveDraftFunction(payload);
+    });
   };
 
   /* ---------- PUBLISH (STRICT VALIDATION) ---------- */
@@ -89,16 +87,14 @@ export const CreatePostForm = () => {
       return;
     }
 
-    const payload = {
+    publishBlog.publishBlog({
+      blogId,
       status: "published",
       title: data.title,
       content: data.content,
       categories: data.categories,
       coverImgUrl: data.coverImage?.url ?? null,
-      imagesUrls: data.images.map((img) => img.url),
-    };
-
-    publishBlog.publishBlog(payload);
+    });
   };
 
   return (

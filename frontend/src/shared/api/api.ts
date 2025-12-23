@@ -182,20 +182,18 @@ export const userApi = {
 };
 
 export type BlogParams = {
-  status: string;
-  data?: {
-    title?: string;
-    content?: string;
-    categories?: string[];
-    coverImgUrl?: string;
-    images?: string[];
-  };
+  blogId?: string;
+  status: "draft" | "published";
+  title?: string;
+  content?: string;
+  categories?: string[];
+  coverImgUrl?: string | null;
 };
 
 export const blogApi = {
   baseKey: "blog",
 
-  createBlog: (data: BlogParams) => {
+  saveBlog: (data: BlogParams) => {
     return apiInstance<CreateBlogApiResponse>("/blog", {
       method: "POST",
       json: data,

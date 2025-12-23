@@ -10,7 +10,7 @@ import { draftSchema, publishSchema } from './blog.schemas.js';
 import BlogModel from '../models/blog.model.js';
 
 export const saveBlogHandler = catchErrors(async (req, res) => {
-  const authorId = req.userId;
+  const authorId = req.userId!;
   const { status, blogId } = req.body;
 
   appAssert(status, BAD_REQUEST, 'Status is required');
@@ -37,10 +37,13 @@ export const saveBlogHandler = catchErrors(async (req, res) => {
 
   return res.status(OK).json({
     success: true,
-    message: 'Blog saved successfully',
-    blog,
+    blog: {
+      _id: blog._id,
+      status: blog.status,
+    },
   });
 });
+
 export const getMyBlogsHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
 
