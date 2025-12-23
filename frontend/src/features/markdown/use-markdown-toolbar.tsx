@@ -124,6 +124,32 @@ export const useMarkdownToolbar = (
 
     const { textarea, selectionStart, selectionEnd, value } = ctx;
 
+    if (selectionStart === selectionEnd) {
+      const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
+      const lineEnd =
+        value.indexOf("\n", selectionStart) === -1
+          ? value.length
+          : value.indexOf("\n", selectionStart);
+
+      const line = value.slice(lineStart, lineEnd);
+
+      if (!line.trim()) {
+        const insert = type === "ul" ? "- " : "1. ";
+
+        const next = value.slice(0, lineStart) + insert + value.slice(lineEnd);
+
+        apply(next);
+
+        restoreSelection(
+          textarea,
+          lineStart + insert.length,
+          lineStart + insert.length,
+        );
+
+        return;
+      }
+    }
+
     const ulRegex = /^-\s+/;
     const olRegex = /^\d+\.\s+/;
 

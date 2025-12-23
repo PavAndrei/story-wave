@@ -36,6 +36,109 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
 
     onChange(next.join("\n"));
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Backspace") {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+
+      const { selectionStart, value } = textarea;
+
+      const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
+      const line = value.slice(lineStart, selectionStart);
+
+      const patterns = [/^- $/, /^- \[[ x]\] $/i, /^\d+\. $/];
+
+      if (patterns.some((r) => r.test(line))) {
+        e.preventDefault();
+
+        const next = value.slice(0, lineStart) + value.slice(selectionStart);
+
+        onChange(next);
+      }
+    }
+
+    if (e.key !== "Enter") return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { selectionStart, value } = textarea;
+
+    const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
+    const lineEnd =
+      value.indexOf("\n", selectionStart) === -1
+        ? value.length
+        : value.indexOf("\n", selectionStart);
+
+    const line = value.slice(lineStart, lineEnd);
+
+    // TASK LIST
+    if (/^- \[[ x]\]\s*/i.test(line)) {
+      e.preventDefault();
+
+      if (!line.replace(/^-\s+\[[ x]\]\s*/, "").trim()) {
+        // пустой task → выйти
+        const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
+
+        onChange(next);
+        return;
+      }
+
+      const insert = "\n- [ ] ";
+      const next =
+        value.slice(0, selectionStart) + insert + value.slice(selectionStart);
+
+      onChange(next);
+
+      requestAnimationFrame(() => {
+        textarea.setSelectionRange(
+          selectionStart + insert.length,
+          selectionStart + insert.length,
+        );
+      });
+
+      return;
+    }
+
+    // UL
+    if (/^- /.test(line)) {
+      e.preventDefault();
+
+      if (!line.replace(/^- /, "").trim()) {
+        const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
+
+        onChange(next);
+        return;
+      }
+
+      const insert = "\n- ";
+      onChange(
+        value.slice(0, selectionStart) + insert + value.slice(selectionStart),
+      );
+      return;
+    }
+
+    // OL
+    if (/^\d+\.\s+/.test(line)) {
+      e.preventDefault();
+
+      if (!line.replace(/^\d+\.\s+/, "").trim()) {
+        const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
+
+        onChange(next);
+        return;
+      }
+
+      const current = Number(line.match(/^(\d+)\./)?.[1] ?? 1);
+      const insert = `\n${current + 1}. `;
+
+      onChange(
+        value.slice(0, selectionStart) + insert + value.slice(selectionStart),
+      );
+    }
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <MarkdownToolbar toolbar={toolbar} />
@@ -45,6 +148,7 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           rows={14}
           className="resize-none min-h-[300px]"
         />
