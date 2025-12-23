@@ -4,10 +4,19 @@ import { Textarea } from "@/shared/ui/kit/textarea";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { MarkdownToolbar } from "./markdown-toolbar";
 import { useMarkdownToolbar } from "./use-markdown-toolbar";
+import { ImageUploader } from "../uploads";
+
+export type UploadedImage = {
+  id: string; // image _id из Mongo
+  url: string; // cloudinary url
+};
 
 type Props = {
   value: string;
   onChange: (value: string) => void;
+  images: UploadedImage[];
+  onImagesChange: (images: UploadedImage[]) => void;
+  blogId: string;
 };
 
 const renumberOrderedList = (value: string, cursor: number) => {
@@ -57,7 +66,13 @@ const renumberOrderedList = (value: string, cursor: number) => {
   return lines.join("\n");
 };
 
-export const MarkdownEditor = ({ value, onChange }: Props) => {
+export const MarkdownEditor = ({
+  value,
+  onChange,
+  blogId,
+  images,
+  onImagesChange,
+}: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const toolbar = useMarkdownToolbar(textareaRef, value, onChange);
@@ -111,7 +126,6 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
       return;
     }
 
-    /* ================= ENTER ================= */
     /* ================= ENTER ================= */
 
     if (e.key !== "Enter") return;
@@ -179,9 +193,37 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
     }
   };
 
+  const insertMarkdown = (snippet: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { selectionStart, selectionEnd } = textarea;
+
+    const next =
+      value.slice(0, selectionStart) + snippet + value.slice(selectionEnd);
+
+    onChange(next);
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd =
+        selectionStart + snippet.length;
+    });
+  };
+
   return (
     <div className="flex flex-col gap-3">
-      <MarkdownToolbar toolbar={toolbar} />
+      <div>
+        <MarkdownToolbar toolbar={toolbar} />
+
+        <ImageUploader
+          variant="editor"
+          blogId={blogId}
+          images={images}
+          onImagesChange={onImagesChange}
+          insertMarkdown={insertMarkdown}
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-4">
         <Textarea

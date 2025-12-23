@@ -9,84 +9,9 @@ import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
 import BlogModel from '../models/blog.model.js';
 
-// export const editPostHandler = catchErrors(async (req, res) => {
-//   const parsed = editPostSchema.parse(req.body);
-
-//   const authorId = req.userId;
-
-//   const updatedPost = await editPost(
-//     req.params.id,
-//     new mongoose.Types.ObjectId(authorId),
-//     parsed
-//   );
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'Post edited successfully',
-//     data: updatedPost,
-//   });
-// });
-
-// export const getSinglePostHandler = catchErrors(async (req, res) => {
-//   const { id } = postIdSchema.parse(req.params);
-
-//   const viewerId = req.userId
-//     ? new mongoose.Types.ObjectId(req.userId)
-//     : undefined;
-
-//   const post = await getSinglePost(id, viewerId);
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'Post found',
-//     data: post,
-//   });
-// });
-
-// export const archivePostHandler = catchErrors(async (req, res) => {
-//   const authorId = req.userId;
-
-//   const post = await archivePost(
-//     req.params.id,
-//     new mongoose.Types.ObjectId(authorId)
-//   );
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'Post archived successfully',
-//     data: post,
-//   });
-// });
-
-// export const deletePostHandler = catchErrors(async (req, res) => {
-//   const { id } = deletePostSchema.parse(req.params);
-
-//   const authorId = new mongoose.Types.ObjectId(req.userId);
-
-//   const post = await deletePost(id, authorId);
-
-//   return res.status(OK).json({
-//     success: true,
-//     message: 'Post deleted successfully',
-//     data: post,
-//   });
-// });
-
-// export const getAllPostsHandler = catchErrors(async (req, res) => {
-//   const { page, limit, search, category } = getAllPostsSchema.parse(req.query);
-
-//   const result = await getAllPosts(page, limit, search, category);
-
-//   return res.status(OK).json({
-//     success: true,
-//     data: result,
-//     message: 'My published posts received successfully',
-//   });
-// });
-
 export const saveBlogHandler = catchErrors(async (req, res) => {
   const authorId = req.userId;
-  const { status, postId } = req.body;
+  const { status, blogId } = req.body;
 
   appAssert(status, BAD_REQUEST, 'Status is required');
 
@@ -104,7 +29,7 @@ export const saveBlogHandler = catchErrors(async (req, res) => {
   }
 
   const blog = await saveBlogService({
-    postId,
+    blogId,
     authorId: new mongoose.Types.ObjectId(authorId),
     status,
     data,

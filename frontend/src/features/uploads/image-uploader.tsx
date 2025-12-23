@@ -1,41 +1,60 @@
 import { Button } from "@/shared/ui/kit/button";
-import { Copy, Trash2 } from "lucide-react";
+import { Upload } from "lucide-react";
 import { useImageUploader } from "./use-image-uploader";
-import { useImageActions } from "./use-image-actions";
 
 export type UploadedImage = {
-  id: string;
-  url: string;
+  id: string; // image _id из Mongo
+  url: string; // cloudinary url
 };
 
-type ImageUploaderProps = {
-  value: UploadedImage[];
-  onChange: (images: UploadedImage[]) => void;
-  max?: number;
+export type EditorUploaderProps = {
   blogId: string;
+
+  /**
+   * Вставить markdown в редактор
+   * Пример: ![](https://...)
+   */
+  insertMarkdown: (markdown: string) => void;
+
+  /**
+   * Синхронизация изображений с формой
+   * (для imagesUrls)
+   */
+  onImagesChange: (images: UploadedImage[]) => void;
+
+  /**
+   * Текущий список изображений (из RHF)
+   */
+  images: UploadedImage[];
+
+  max?: number;
 };
 
 export const ImageUploader = ({
-  value,
-  onChange,
-  max = 10,
   blogId,
-}: ImageUploaderProps) => {
-  const { inputRef, isPending, selectFiles } = useImageUploader({
-    value,
-    onChange,
-    blogId,
-    max,
-  });
+  insertMarkdown,
+  images,
+  onImagesChange,
+  max = 10,
+}: EditorUploaderProps) => {
+  const canAddMore = images.length < max;
 
-  const { canAddMore, deleteImage, copyToClipboard } = useImageActions({
-    value,
-    onChange,
-    max,
+  const { inputRef, isPending, selectFiles } = useImageUploader({
+    blogId,
+    mode: "multiple",
+    onUploaded: (uploaded) => {
+      // 1. вставляем markdown
+      uploaded.forEach((img) => {
+        insertMarkdown(`\n\n![](${img.url})\n\n`);
+      });
+
+      // 2. синхронизируем RHF
+      onImagesChange([...images, ...uploaded]);
+    },
   });
 
   return (
-    <div className="flex flex-col gap-3">
+    <>
       <input
         ref={inputRef}
         type="file"
@@ -47,47 +66,63 @@ export const ImageUploader = ({
 
       <Button
         type="button"
+        size="sm"
+        variant="ghost"
+        disabled={!canAddMore || isPending}
         onClick={() => inputRef.current?.click()}
-        disabled={!canAddMore}
-        className="max-w-fit bg-slate-100 text-slate-700 hover:bg-slate-700 hover:text-slate-100 disabled:opacity-50"
       >
-        Choose images
+        <Upload size={16} />
       </Button>
+    </>
+  );
+};
 
-      <div className="flex flex-wrap gap-3">
-        {value.map((image) => (
-          <div key={image.id} className="flex flex-col gap-1 max-w-[200px]">
-            <div className="relative">
-              <img
-                src={image.url}
-                className="w-[200px] h-32 object-cover border rounded-md"
-              />
+type CoverImageUploaderProps = {
+  blogId: string;
+  value: UploadedImage | null;
+  onChange: (image: UploadedImage) => void;
+};
 
-              <button
-                type="button"
-                onClick={() => deleteImage(image)}
-                className="absolute top-2 right-2 bg-red-700 rounded-full w-8 h-8 flex items-center justify-center text-white"
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
+export const CoverImageUploader = ({
+  blogId,
+  value,
+  onChange,
+}: CoverImageUploaderProps) => {
+  const { inputRef, isPending, selectFiles } = useImageUploader({
+    blogId,
+    mode: "single",
+    onUploaded: ([image]) => {
+      onChange(image);
+    },
+  });
 
-            <button
-              type="button"
-              onClick={() => copyToClipboard(image.url)}
-              className="text-xs text-slate-700 flex items-center gap-1 hover:text-slate-400 break-all"
-            >
-              {image.url}
-              <Copy size={12} />
-            </button>
-          </div>
-        ))}
-      </div>
+  return (
+    <div className="flex flex-col gap-3">
+      {value && (
+        <img
+          src={value.url}
+          alt="Cover"
+          className="w-full max-h-64 object-cover rounded-md"
+        />
+      )}
 
-      <p className="text-sm text-slate-600">
-        {value.length}/{max} images
-        {isPending && " · uploading..."}
-      </p>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        hidden
+        onChange={(e) => selectFiles(e.target.files)}
+      />
+
+      <Button
+        type="button"
+        variant="outline"
+        disabled={isPending}
+        onClick={() => inputRef.current?.click()}
+      >
+        <Upload size={16} className="mr-2" />
+        {value ? "Change cover image" : "Upload cover image"}
+      </Button>
     </div>
   );
 };

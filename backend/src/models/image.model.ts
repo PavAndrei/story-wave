@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export interface ImageDocument extends mongoose.Document {
-  postId: mongoose.Types.ObjectId;
+  blogId: mongoose.Types.ObjectId;
   url: string;
   publicId: string;
   createdAt: Date;
@@ -9,7 +9,7 @@ export interface ImageDocument extends mongoose.Document {
 
 const imageSchema = new mongoose.Schema<ImageDocument>(
   {
-    postId: {
+    blogId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Post',
       required: true,

@@ -9,7 +9,7 @@ import { upload } from '../middleware/uploadImages.js';
 const uploadRoutes = Router();
 
 uploadRoutes.post(
-  '/images/:postId',
+  '/images/:blogId',
   upload.array('images', 10),
   uploadImagesHandler
 );

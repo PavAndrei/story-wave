@@ -226,8 +226,8 @@ export const blogApi = {
 export const uploadApi = {
   baseKey: "upload",
 
-  uploadImages: (postId: string, formData: FormData) => {
-    return apiInstance<UploadApiResponse>(`/upload/images/${postId}`, {
+  uploadImages: (blogId: string, formData: FormData) => {
+    return apiInstance<UploadApiResponse>(`/upload/images/${blogId}`, {
       method: "POST",
       body: formData,
       credentials: "include",

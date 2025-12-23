@@ -11,12 +11,13 @@ import { Button } from "@/shared/ui/kit/button";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import Multiselect from "react-select";
-import { ImageUploader } from "@/features/uploads";
+// import { ImageUploader } from "@/features/uploads";
 import { useParams } from "react-router-dom";
 import { usePublishBlog } from "../model/use-publish-blog";
 import { useSaveDraft } from "@/shared/model/use-save-draft";
 import { categoryOptions } from "@/shared/model/categories";
 import { MarkdownEditor } from "@/features/markdown";
+import { CoverImageUploader } from "@/features/uploads/image-uploader";
 
 /* ---------- schema ONLY for publish ---------- */
 const publishBlogSchema = z.object({
@@ -150,52 +151,18 @@ export const CreatePostForm = () => {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <MarkdownEditor value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Images */}
-        <FormField
-          control={form.control}
-          name="images"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Images</FormLabel>
-              <FormControl>
-                <ImageUploader
-                  blogId={blogId || ""}
+                <MarkdownEditor
                   value={field.value}
                   onChange={field.onChange}
+                  blogId={blogId!}
+                  images={form.watch("images")}
+                  onImagesChange={(imgs) => form.setValue("images", imgs)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-
-        {/* Cover */}
-        <FormField
-          control={form.control}
-          name="coverImage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cover image</FormLabel>
-              <FormControl>
-                <ImageUploader
-                  blogId={blogId || ""}
-                  value={field.value ? [field.value] : []}
-                  max={1}
-                  onChange={(images) => field.onChange(images[0] ?? null)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <div className="flex gap-3">
           <Button
             type="button"
@@ -204,6 +171,24 @@ export const CreatePostForm = () => {
           >
             Save draft
           </Button>
+
+          <FormField
+            control={form.control}
+            name="coverImage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Cover image</FormLabel>
+                <FormControl>
+                  <CoverImageUploader
+                    blogId={blogId!}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button
             type="button"

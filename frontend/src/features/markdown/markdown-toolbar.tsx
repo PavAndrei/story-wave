@@ -7,6 +7,7 @@ import {
 } from "@/shared/ui/kit/popover";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
+import { ImageUploader } from "../uploads";
 
 type Props = {
   toolbar: ReturnType<typeof useMarkdownToolbar>;

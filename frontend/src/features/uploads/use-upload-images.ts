@@ -7,7 +7,7 @@ export type UploadedImage = {
   url: string;
 };
 
-export const useUploadImages = (files: File[], postId: string) => {
+export const useUploadImages = (files: File[], blogId: string) => {
   const [images, setImages] = useState<UploadedImage[]>([]);
 
   const formData = useMemo(() => {
@@ -17,7 +17,7 @@ export const useUploadImages = (files: File[], postId: string) => {
   }, [files]);
 
   const uploadMutation = useMutation({
-    mutationFn: (data: FormData) => uploadApi.uploadImages(postId, data),
+    mutationFn: (data: FormData) => uploadApi.uploadImages(blogId, data),
 
     onSuccess: (response) => {
       if (response.data) {
@@ -31,9 +31,9 @@ export const useUploadImages = (files: File[], postId: string) => {
   });
 
   useEffect(() => {
-    if (!files.length || !postId) return;
+    if (!files.length || !blogId) return;
     uploadMutation.mutate(formData);
-  }, [files, postId, formData]);
+  }, [files, blogId, formData]);
 
   return {
     images, // ← { id, url }[]

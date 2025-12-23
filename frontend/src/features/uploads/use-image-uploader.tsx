@@ -1,42 +1,38 @@
 import { useEffect, useRef, useState } from "react";
-import { useUploadImages } from "./use-upload-images";
+import { useUploadImages } from "@/features/uploads/use-upload-images";
 import type { UploadedImage } from "./image-uploader";
 
 type Params = {
-  value: UploadedImage[];
-  onChange: (images: UploadedImage[]) => void;
   blogId: string;
-  max: number;
+  mode: "single" | "multiple";
+  onUploaded: (images: UploadedImage[]) => void;
 };
 
-export const useImageUploader = ({ value, onChange, blogId, max }: Params) => {
-  const [files, setFiles] = useState<File[]>([]);
+export const useImageUploader = ({ blogId, mode, onUploaded }: Params) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const { images, isPending } = useUploadImages(files, blogId);
 
-  /* ---------- select files ---------- */
   const selectFiles = (filesList: FileList | null) => {
     if (!filesList) return;
 
-    const selected = Array.from(filesList).slice(0, max - value.length);
-    setFiles(selected);
+    const selected = mode === "single" ? [filesList[0]] : Array.from(filesList);
 
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
+    setFiles(selected.filter(Boolean) as File[]);
+    inputRef.current!.value = "";
   };
 
-  /* ---------- sync uploaded images ---------- */
   useEffect(() => {
-    const syncImages = () => {
-      onChange([...value, ...images]);
+    if (!images.length) return;
+
+    const getFiles = () => {
+      onUploaded(images);
       setFiles([]);
     };
 
-    if (!images.length) return;
-    syncImages();
-  }, [images]); // ← оставляем как ты просил
+    getFiles();
+  }, [images]);
 
   return {
     inputRef,

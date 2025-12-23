@@ -7,18 +7,18 @@ import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
 export const uploadImagesHandler = async (req: Request, res: Response) => {
   const files = req.files as Express.Multer.File[];
-  const { postId } = req.params;
+  const { blogId } = req.params;
 
   if (!files || files.length === 0) {
     return res.status(400).json({ message: 'No files uploaded' });
   }
 
-  const post = await BlogModel.findById(postId);
-  if (!post) {
-    return res.status(404).json({ message: 'Post not found' });
+  const blog = await BlogModel.findById(blogId);
+  if (!blog) {
+    return res.status(404).json({ message: 'Blog not found' });
   }
 
-  if (post.status !== 'draft') {
+  if (blog.status !== 'draft') {
     return res
       .status(400)
       .json({ message: 'Images can be uploaded only to draft posts' });
@@ -26,14 +26,14 @@ export const uploadImagesHandler = async (req: Request, res: Response) => {
 
   const images = await ImageModel.insertMany(
     files.map((file) => ({
-      postId: post._id,
+      blogId: blog._id,
       url: file.path,
       publicId: file.filename,
     }))
   );
 
-  post.imagesUrls.push(...images.map((img) => img.url));
-  await post.save();
+  blog.imagesUrls.push(...images.map((img) => img.url));
+  await blog.save();
 
   return res.status(200).json({
     success: true,
@@ -50,7 +50,7 @@ export const deletePostImageHandler = async (req: Request, res: Response) => {
   const image = await ImageModel.findById(id);
   appAssert(image, NOT_FOUND, 'Image not found');
 
-  const blog = await BlogModel.findById(image.postId);
+  const blog = await BlogModel.findById(image.blogId);
   appAssert(blog, NOT_FOUND, 'Post not found');
 
   appAssert(blog.authorId.equals(req.userId), FORBIDDEN, 'Not your blog');
