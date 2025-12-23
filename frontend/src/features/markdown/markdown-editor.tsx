@@ -10,6 +10,53 @@ type Props = {
   onChange: (value: string) => void;
 };
 
+const renumberOrderedList = (value: string, cursor: number) => {
+  const lines = value.split("\n");
+
+  // определить индекс строки курсора
+  let lineIndex = 0;
+  let acc = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    acc += lines[i].length + 1;
+    if (acc > cursor) {
+      lineIndex = i;
+      break;
+    }
+  }
+
+  const isOl = (line: string) => /^\d+\.\s+/.test(line);
+
+  // если текущая строка не OL — ищем ближайший OL выше
+  let probe = lineIndex;
+  while (probe >= 0 && !isOl(lines[probe])) {
+    probe--;
+  }
+
+  if (probe < 0) return value;
+
+  // найти начало списка
+  let start = probe;
+  while (start > 0 && isOl(lines[start - 1])) {
+    start--;
+  }
+
+  // найти конец списка
+  let end = probe;
+  while (end < lines.length - 1 && isOl(lines[end + 1])) {
+    end++;
+  }
+
+  // перенумерация
+  let counter = 1;
+  for (let i = start; i <= end; i++) {
+    lines[i] = lines[i].replace(/^\d+\.\s+/, `${counter}. `);
+    counter++;
+  }
+
+  return lines.join("\n");
+};
+
 export const MarkdownEditor = ({ value, onChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -17,20 +64,17 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
 
   const toggleTaskAtIndex = (index: number) => {
     const lines = value.split("\n");
-
     let current = -1;
 
     const next = lines.map((line) => {
       if (/^- \[[ x]\]/.test(line)) {
         current++;
-
         if (current === index) {
           return line.includes("[x]")
             ? line.replace("[x]", "[ ]")
             : line.replace("[ ]", "[x]");
         }
       }
-
       return line;
     });
 
@@ -38,28 +82,6 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Backspace") {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-
-      const { selectionStart, value } = textarea;
-
-      const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
-      const line = value.slice(lineStart, selectionStart);
-
-      const patterns = [/^- $/, /^- \[[ x]\] $/i, /^\d+\. $/];
-
-      if (patterns.some((r) => r.test(line))) {
-        e.preventDefault();
-
-        const next = value.slice(0, lineStart) + value.slice(selectionStart);
-
-        onChange(next);
-      }
-    }
-
-    if (e.key !== "Enter") return;
-
     const textarea = textareaRef.current;
     if (!textarea) return;
 
@@ -73,15 +95,34 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
 
     const line = value.slice(lineStart, lineEnd);
 
+    /* ================= BACKSPACE ================= */
+
+    if (e.key === "Backspace") {
+      const patterns = [/^- $/, /^- \[[ x]\] $/i, /^\d+\. $/];
+
+      if (patterns.some((r) => r.test(line))) {
+        e.preventDefault();
+
+        const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
+        const nextCursor = lineStart;
+
+        onChange(renumberOrderedList(next, nextCursor));
+      }
+      return;
+    }
+
+    /* ================= ENTER ================= */
+    /* ================= ENTER ================= */
+
+    if (e.key !== "Enter") return;
+
     // TASK LIST
     if (/^- \[[ x]\]\s*/i.test(line)) {
       e.preventDefault();
 
       if (!line.replace(/^-\s+\[[ x]\]\s*/, "").trim()) {
-        // пустой task → выйти
         const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
-
-        onChange(next);
+        onChange(renumberOrderedList(next, lineStart));
         return;
       }
 
@@ -107,7 +148,6 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
 
       if (!line.replace(/^- /, "").trim()) {
         const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
-
         onChange(next);
         return;
       }
@@ -125,17 +165,17 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
 
       if (!line.replace(/^\d+\.\s+/, "").trim()) {
         const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
-
-        onChange(next);
+        onChange(renumberOrderedList(next, lineStart));
         return;
       }
 
       const current = Number(line.match(/^(\d+)\./)?.[1] ?? 1);
       const insert = `\n${current + 1}. `;
+      const next =
+        value.slice(0, selectionStart) + insert + value.slice(selectionStart);
 
-      onChange(
-        value.slice(0, selectionStart) + insert + value.slice(selectionStart),
-      );
+      onChange(next);
+      return;
     }
   };
 
