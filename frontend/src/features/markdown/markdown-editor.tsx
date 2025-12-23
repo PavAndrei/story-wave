@@ -14,6 +14,28 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const toolbar = useMarkdownToolbar(textareaRef, value, onChange);
+
+  const toggleTaskAtIndex = (index: number) => {
+    const lines = value.split("\n");
+
+    let current = -1;
+
+    const next = lines.map((line) => {
+      if (/^- \[[ x]\]/.test(line)) {
+        current++;
+
+        if (current === index) {
+          return line.includes("[x]")
+            ? line.replace("[x]", "[ ]")
+            : line.replace("[ ]", "[x]");
+        }
+      }
+
+      return line;
+    });
+
+    onChange(next.join("\n"));
+  };
   return (
     <div className="flex flex-col gap-3">
       <MarkdownToolbar toolbar={toolbar} />
@@ -28,7 +50,7 @@ export const MarkdownEditor = ({ value, onChange }: Props) => {
         />
 
         <div className="border rounded-md p-3 overflow-auto">
-          <MarkdownRenderer content={value} />
+          <MarkdownRenderer content={value} onToggleTask={toggleTaskAtIndex} />
         </div>
       </div>
     </div>

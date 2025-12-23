@@ -171,6 +171,92 @@ export const useMarkdownToolbar = (
     );
   };
 
+  const toggleTaskList = () => {
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    const { textarea, selectionStart, selectionEnd, value } = ctx;
+
+    // CASE: пустая строка + нет выделения
+    if (selectionStart === selectionEnd) {
+      const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
+      const lineEnd =
+        value.indexOf("\n", selectionStart) === -1
+          ? value.length
+          : value.indexOf("\n", selectionStart);
+
+      const line = value.slice(lineStart, lineEnd);
+
+      if (!line.trim()) {
+        const insert = "- [ ] check-me";
+
+        const next = value.slice(0, lineStart) + insert + value.slice(lineEnd);
+
+        apply(next);
+
+        restoreSelection(
+          textarea,
+          lineStart + insert.length,
+          lineStart + insert.length,
+        );
+
+        return;
+      }
+    }
+
+    const taskUnchecked = /^-\s+\[ \]\s+/;
+    // const taskChecked = /^-\s+\[x\]\s+/i;
+    const taskAny = /^-\s+\[[ x]\]\s+/i;
+
+    // границы блока
+    const blockStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
+    const endLineBreak = value.indexOf("\n", selectionEnd);
+    const blockEnd = endLineBreak === -1 ? value.length : endLineBreak;
+
+    const block = value.slice(blockStart, blockEnd);
+    const lines = block.split("\n");
+
+    const isTaskList = lines.every((l) => !l.trim() || taskAny.test(l));
+
+    let transformed: string[];
+
+    if (isTaskList) {
+      // если все unchecked → делаем checked
+      const allUnchecked = lines.every(
+        (l) => !l.trim() || taskUnchecked.test(l),
+      );
+
+      if (allUnchecked) {
+        transformed = lines.map((l) => l.replace(taskUnchecked, "- [x] "));
+      } else {
+        // иначе снимаем task-разметку
+        transformed = lines.map((l) => l.replace(taskAny, ""));
+      }
+    } else {
+      // превращаем в task list
+      transformed = lines.map((l) => {
+        if (!l.trim()) return l;
+
+        const content = l.replace(/^-\s+/, "").replace(/^\d+\.\s+/, "");
+
+        return `- [ ] ${content}`;
+      });
+    }
+
+    const next =
+      value.slice(0, blockStart) +
+      transformed.join("\n") +
+      value.slice(blockEnd);
+
+    apply(next);
+
+    restoreSelection(
+      textarea,
+      blockStart,
+      blockStart + transformed.join("\n").length,
+    );
+  };
+
   /* ================= active state ================= */
 
   const getActiveState = () => {
@@ -180,6 +266,8 @@ export const useMarkdownToolbar = (
     const pos = textarea.selectionStart;
     const { text } = getCurrentLine(value, pos);
 
+    const taskAny = /^-\s+\[[ x]\]\s+/i;
+    const taskChecked = /^-\s+\[x\]\s+/i;
     return {
       bold: /\*\*.+\*\*/.test(text),
       italic: /_.+_/.test(text),
@@ -192,6 +280,9 @@ export const useMarkdownToolbar = (
 
       ul: /^-\s+/.test(text),
       ol: /^\d+\.\s+/.test(text),
+
+      task: taskAny.test(text),
+      taskChecked: taskChecked.test(text),
     };
   };
 
@@ -210,6 +301,8 @@ export const useMarkdownToolbar = (
 
       ul: () => toggleList("ul"),
       ol: () => toggleList("ol"),
+
+      task: () => toggleTaskList(),
     },
 
     state: getActiveState(),

@@ -101,6 +101,17 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
       >
         1.
       </button>
+
+      <button
+        type="button"
+        className={btn(state.task)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.task();
+        }}
+      >
+        ☑
+      </button>
     </div>
   );
 };

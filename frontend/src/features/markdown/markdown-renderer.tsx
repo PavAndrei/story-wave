@@ -4,9 +4,15 @@ import remarkGfm from "remark-gfm";
 
 type MarkdownRendererProps = {
   content: string;
+  onToggleTask: (lineIndex: number) => void;
 };
 
-export const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
+export const MarkdownRenderer = ({
+  content,
+  onToggleTask,
+}: MarkdownRendererProps) => {
+  let taskIndex = -1;
+
   return (
     <div className="markdown prose max-w-none">
       <ReactMarkdown
@@ -75,6 +81,17 @@ export const MarkdownRenderer = ({ content }: MarkdownRendererProps) => {
           td: ({ children }) => (
             <td className="border px-3 py-2">{children}</td>
           ),
+          input: ({ checked }) => {
+            taskIndex++;
+
+            return (
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => onToggleTask(taskIndex)}
+              />
+            );
+          },
         }}
       >
         {content || " "}
