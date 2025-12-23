@@ -13,8 +13,7 @@ type Props = {
 export const MarkdownEditor = ({ value, onChange }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const toolbar = useMarkdownToolbar(textareaRef, onChange);
-
+  const toolbar = useMarkdownToolbar(textareaRef, value, onChange);
   return (
     <div className="flex flex-col gap-3">
       <MarkdownToolbar toolbar={toolbar} />

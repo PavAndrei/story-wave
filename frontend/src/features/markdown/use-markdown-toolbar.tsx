@@ -7,6 +7,7 @@ type ListType = "ul" | "ol";
 
 export const useMarkdownToolbar = (
   textareaRef: RefObject<HTMLTextAreaElement>,
+  value: string,
   apply: ApplyFn,
 ) => {
   /* ================= helpers ================= */
@@ -121,37 +122,63 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, value } = ctx;
-    const { start, end, text } = getCurrentLine(value, selectionStart);
+    const { textarea, selectionStart, selectionEnd, value } = ctx;
 
     const ulRegex = /^-\s+/;
     const olRegex = /^\d+\.\s+/;
 
-    const isUl = ulRegex.test(text);
-    const isOl = olRegex.test(text);
+    // 1. Определяем границы блока
+    const blockStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
 
-    let nextLine = text.replace(ulRegex, "").replace(olRegex, "");
+    const endLineBreak = value.indexOf("\n", selectionEnd);
+    const blockEnd = endLineBreak === -1 ? value.length : endLineBreak;
+
+    const block = value.slice(blockStart, blockEnd);
+    const lines = block.split("\n");
+
+    const isUl = lines.every((l) => !l.trim() || ulRegex.test(l));
+    const isOl = lines.every((l) => !l.trim() || olRegex.test(l));
+
+    // 2. Определяем трансформацию
+    let transformed: string[];
 
     if ((type === "ul" && isUl) || (type === "ol" && isOl)) {
       // toggle OFF
+      transformed = lines.map((l) =>
+        l.replace(ulRegex, "").replace(olRegex, ""),
+      );
     } else {
-      nextLine = type === "ul" ? `- ${nextLine}` : `1. ${nextLine}`;
+      // replace / apply
+      transformed = lines.map((l, i) => {
+        if (!l.trim()) return l;
+
+        const content = l.replace(ulRegex, "").replace(olRegex, "");
+        return type === "ul" ? `- ${content}` : `${i + 1}. ${content}`;
+      });
     }
 
-    const next = value.slice(0, start) + nextLine + value.slice(end);
+    const next =
+      value.slice(0, blockStart) +
+      transformed.join("\n") +
+      value.slice(blockEnd);
 
     apply(next);
-    restoreSelection(textarea, start, start + nextLine.length);
+
+    restoreSelection(
+      textarea,
+      blockStart,
+      blockStart + transformed.join("\n").length,
+    );
   };
 
   /* ================= active state ================= */
 
   const getActiveState = () => {
-    const ctx = getCtx();
-    if (!ctx) return {};
+    const textarea = textareaRef.current;
+    if (!textarea) return {};
 
-    const { selectionStart, value } = ctx;
-    const { text } = getCurrentLine(value, selectionStart);
+    const pos = textarea.selectionStart;
+    const { text } = getCurrentLine(value, pos);
 
     return {
       bold: /\*\*.+\*\*/.test(text),
@@ -159,11 +186,11 @@ export const useMarkdownToolbar = (
       strike: /~~.+~~/.test(text),
       code: /`.+`/.test(text),
 
-      h1: text.startsWith("# "),
-      h2: text.startsWith("## "),
-      h3: text.startsWith("### "),
+      h1: /^#\s+/.test(text),
+      h2: /^##\s+/.test(text),
+      h3: /^###\s+/.test(text),
 
-      ul: text.startsWith("- "),
+      ul: /^-\s+/.test(text),
       ol: /^\d+\.\s+/.test(text),
     };
   };

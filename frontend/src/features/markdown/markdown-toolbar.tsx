@@ -14,42 +14,91 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
 
   return (
     <div className="flex gap-1 p-2 border rounded">
-      <button type="button" className={btn(state.bold)} onClick={actions.bold}>
+      <button
+        type="button"
+        className={btn(state.bold)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.bold();
+        }}
+      >
         B
       </button>
+
       <button
         type="button"
         className={btn(state.italic)}
-        onClick={actions.italic}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.italic();
+        }}
       >
         I
       </button>
       <button
         type="button"
         className={btn(state.strike)}
-        onClick={actions.strike}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.strike();
+        }}
       >
         S
       </button>
 
       <span>|</span>
 
-      <button type="button" className={btn(state.h1)} onClick={actions.h1}>
+      <button
+        type="button"
+        className={btn(state.h1)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.h1();
+        }}
+      >
         H1
       </button>
-      <button type="button" className={btn(state.h2)} onClick={actions.h2}>
+      <button
+        type="button"
+        className={btn(state.h2)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.h2();
+        }}
+      >
         H2
       </button>
-      <button type="button" className={btn(state.h3)} onClick={actions.h3}>
+      <button
+        type="button"
+        className={btn(state.h3)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.h3();
+        }}
+      >
         H3
       </button>
 
       <span>|</span>
 
-      <button type="button" className={btn(state.ul)} onClick={actions.ul}>
+      <button
+        type="button"
+        className={btn(state.ul)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.ul();
+        }}
+      >
         •
       </button>
-      <button type="button" className={btn(state.ol)} onClick={actions.ol}>
+      <button
+        type="button"
+        className={btn(state.ol)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.ol();
+        }}
+      >
         1.
       </button>
     </div>
