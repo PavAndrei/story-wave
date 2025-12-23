@@ -1,16 +1,50 @@
+import { useState } from "react";
 import type { useMarkdownToolbar } from "./use-markdown-toolbar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/ui/kit/popover";
+import { Input } from "@/shared/ui/kit/input";
+import { Button } from "@/shared/ui/kit/button";
 
 type Props = {
   toolbar: ReturnType<typeof useMarkdownToolbar>;
 };
 
 export const MarkdownToolbar = ({ toolbar }: Props) => {
-  if (!toolbar) return;
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkText, setLinkText] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+
+  const [imageOpen, setImageOpen] = useState(false);
+  const [imageAlt, setImageAlt] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+
+  if (!toolbar) return null;
 
   const { actions, state } = toolbar;
 
   const btn = (active?: boolean) =>
     `px-2 py-1 rounded ${active ? "bg-primary text-white" : "bg-muted"}`;
+
+  /* ================= LINK ================= */
+
+  const openLinkPopover = () => {
+    const sel = actions.getSelectionText();
+    setLinkText(sel || "link");
+    setLinkUrl("");
+    setLinkOpen(true);
+  };
+
+  /* ================= IMAGE ================= */
+
+  const openImagePopover = () => {
+    const sel = actions.getSelectionText();
+    setImageAlt(sel || "alt text");
+    setImageUrl("");
+    setImageOpen(true);
+  };
 
   return (
     <div className="flex gap-1 p-2 border rounded">
@@ -35,6 +69,7 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
       >
         I
       </button>
+
       <button
         type="button"
         className={btn(state.strike)}
@@ -58,6 +93,7 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
       >
         H1
       </button>
+
       <button
         type="button"
         className={btn(state.h2)}
@@ -68,6 +104,7 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
       >
         H2
       </button>
+
       <button
         type="button"
         className={btn(state.h3)}
@@ -91,6 +128,7 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
       >
         •
       </button>
+
       <button
         type="button"
         className={btn(state.ol)}
@@ -112,6 +150,120 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
       >
         ☑
       </button>
+
+      <button
+        type="button"
+        className={btn(state.code)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.code();
+        }}
+      >
+        {"</>"}
+      </button>
+
+      <button
+        type="button"
+        className={btn()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.quote();
+        }}
+      >
+        ❝
+      </button>
+
+      {/* ================= LINK POPOVER ================= */}
+
+      <Popover open={linkOpen} onOpenChange={setLinkOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={btn()}
+            onClick={(e) => {
+              e.preventDefault();
+              openLinkPopover();
+            }}
+          >
+            🔗
+          </button>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-72 space-y-3">
+          <Input
+            placeholder="Text"
+            value={linkText}
+            onChange={(e) => setLinkText(e.target.value)}
+          />
+
+          <Input
+            placeholder="URL"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+          />
+
+          <Button
+            size="sm"
+            className="w-full"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              actions.insertLink(
+                linkText || "link",
+                linkUrl || "https://www.example.com",
+              );
+              setLinkOpen(false);
+            }}
+          >
+            Insert link
+          </Button>
+        </PopoverContent>
+      </Popover>
+
+      {/* ================= IMAGE POPOVER ================= */}
+
+      <Popover open={imageOpen} onOpenChange={setImageOpen}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={btn()}
+            onClick={(e) => {
+              e.preventDefault();
+              openImagePopover();
+            }}
+          >
+            🖼
+          </button>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-72 space-y-3">
+          <Input
+            placeholder="Alt text"
+            value={imageAlt}
+            onChange={(e) => setImageAlt(e.target.value)}
+          />
+
+          <Input
+            placeholder="Image URL"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+          />
+
+          <Button
+            size="sm"
+            className="w-full"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              actions.insertImage(
+                imageAlt || "alt text",
+                imageUrl || "https://picsum.photos/400",
+              );
+              setImageOpen(false);
+            }}
+          >
+            Insert image
+          </Button>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

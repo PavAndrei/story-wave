@@ -45,6 +45,7 @@ export const useMarkdownToolbar = (
   const toggleInline = (
     wrapperStart: string,
     wrapperEnd: string = wrapperStart,
+    placeholder = "text",
   ) => {
     const ctx = getCtx();
     if (!ctx) return;
@@ -54,7 +55,19 @@ export const useMarkdownToolbar = (
     const from = selectionStart;
     const to = selectionEnd;
 
-    if (from === to) return;
+    if (from === to) {
+      const insert = `${wrapperStart}${placeholder}${wrapperEnd}`;
+      const next = value.slice(0, from) + insert + value.slice(from);
+
+      apply(next);
+
+      restoreSelection(
+        textarea,
+        from + wrapperStart.length,
+        from + wrapperStart.length + placeholder.length,
+      );
+      return;
+    }
 
     const selected = value.slice(from, to);
     const before = value.slice(0, from);
@@ -86,6 +99,29 @@ export const useMarkdownToolbar = (
       from + wrapperStart.length,
       to + wrapperStart.length,
     );
+  };
+
+  const toggleQuote = () => {
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    const { textarea, selectionStart, value } = ctx;
+    const { start, end, text } = getCurrentLine(value, selectionStart);
+
+    if (!text.trim()) {
+      const insert = "> quote text";
+      const next = value.slice(0, start) + insert + value.slice(end);
+
+      apply(next);
+      restoreSelection(textarea, start + 2, start + insert.length);
+      return;
+    }
+
+    const isQuote = /^>\s+/.test(text);
+    const nextLine = isQuote ? text.replace(/^>\s+/, "") : `> ${text}`;
+
+    const next = value.slice(0, start) + nextLine + value.slice(end);
+    apply(next);
   };
 
   /* ================= headings ================= */
@@ -312,14 +348,61 @@ export const useMarkdownToolbar = (
     };
   };
 
+  const insertLink = (text: string, url: string) => {
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    const { textarea, selectionStart, selectionEnd, value } = ctx;
+
+    const insert =
+      selectionStart !== selectionEnd
+        ? `[${text}](${url})`
+        : `[${text}](${url})`;
+
+    const start = selectionStart;
+    const end = selectionEnd;
+
+    const next = value.slice(0, start) + insert + value.slice(end);
+
+    apply(next);
+
+    const cursor = start + insert.length;
+    restoreSelection(textarea, cursor, cursor);
+  };
+
+  const insertImage = (alt: string, url: string) => {
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    const { textarea, selectionStart, value } = ctx;
+
+    const insert = `![${alt}](${url})`;
+
+    const next =
+      value.slice(0, selectionStart) + insert + value.slice(selectionStart);
+
+    apply(next);
+
+    const cursor = selectionStart + insert.length;
+    restoreSelection(textarea, cursor, cursor);
+  };
+
+  const getSelectionText = () => {
+    const ctx = getCtx();
+    if (!ctx) return "";
+    return ctx.value.slice(ctx.selectionStart, ctx.selectionEnd);
+  };
+
   /* ================= public api ================= */
 
   return {
     actions: {
-      bold: () => toggleInline("**"),
-      italic: () => toggleInline("_"),
-      strike: () => toggleInline("~~"),
-      code: () => toggleInline("`"),
+      bold: () => toggleInline("**", "**", "strong text"),
+      italic: () => toggleInline("_", "_", "italic text"),
+      strike: () => toggleInline("~~", "~~", "striked text"),
+      code: () => toggleInline("`", "`", "code"),
+
+      quote: () => toggleQuote(),
 
       h1: () => toggleHeading(1),
       h2: () => toggleHeading(2),
@@ -329,6 +412,11 @@ export const useMarkdownToolbar = (
       ol: () => toggleList("ol"),
 
       task: () => toggleTaskList(),
+
+      insertLink,
+      insertImage,
+
+      getSelectionText,
     },
 
     state: getActiveState(),
