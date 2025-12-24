@@ -1,9 +1,6 @@
 import type { Request, Response } from 'express';
-import { OK, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
-import appAssert from '../utils/appAssert.js';
 import ImageModel from '../models/image.model.js';
 import BlogModel from '../models/blog.model.js';
-import { deleteFromCloudinary } from '../utils/cloudinary.js';
 
 export const uploadImagesHandler = async (req: Request, res: Response) => {
   const files = req.files as Express.Multer.File[];
@@ -42,29 +39,4 @@ export const uploadImagesHandler = async (req: Request, res: Response) => {
       url: img.url,
     })),
   });
-};
-
-export const deletePostImageHandler = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  const image = await ImageModel.findById(id);
-  appAssert(image, NOT_FOUND, 'Image not found');
-
-  const blog = await BlogModel.findById(image.blogId);
-  appAssert(blog, NOT_FOUND, 'Post not found');
-
-  appAssert(blog.authorId.equals(req.userId), FORBIDDEN, 'Not your blog');
-
-  // 1. Удаляем из Cloudinary
-  await deleteFromCloudinary(image.publicId);
-
-  // 2. Удаляем из БД images
-  await image.deleteOne();
-
-  // 3. Удаляем ссылку из blog
-  blog.imagesUrls = blog.imagesUrls.filter((url) => url !== image.url);
-
-  await blog.save();
-
-  return res.status(200).json({ success: true });
 };
