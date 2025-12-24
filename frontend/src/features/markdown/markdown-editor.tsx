@@ -5,6 +5,9 @@ import { MarkdownRenderer } from "./markdown-renderer";
 import { MarkdownToolbar } from "./markdown-toolbar";
 import { useMarkdownToolbar } from "./use-markdown-toolbar";
 import { ImageUploader } from "../uploads";
+import { useMarkdownStats } from "./use-markdown-stats";
+import { usePreviewStats } from "./use-preview-stats";
+import { StatsBar } from "./stats-bar";
 
 export type UploadedImage = {
   id: string; // image _id из Mongo
@@ -74,6 +77,10 @@ export const MarkdownEditor = ({
   onImagesChange,
 }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  const markdownStats = useMarkdownStats(value, textareaRef);
+  const previewStats = usePreviewStats(previewRef, value);
 
   const toolbar = useMarkdownToolbar(textareaRef, value, onChange);
 
@@ -235,9 +242,10 @@ export const MarkdownEditor = ({
           className="resize-none min-h-[300px]"
         />
 
-        <div className="border rounded-md p-3 overflow-auto">
+        <div className="border rounded-md p-3 overflow-auto" ref={previewRef}>
           <MarkdownRenderer content={value} onToggleTask={toggleTaskAtIndex} />
         </div>
+        <StatsBar markdown={markdownStats} preview={previewStats} />
       </div>
     </div>
   );
