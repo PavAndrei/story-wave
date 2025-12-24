@@ -1,9 +1,43 @@
-// features/markdown/model/use-markdown-toolbar.ts
+// features/markdown/use-markdown-toolbar.ts
 
 import type { RefObject } from "react";
 
 type ApplyFn = (next: string) => void;
 type ListType = "ul" | "ol";
+
+const MERMAID_TEMPLATE = `\`\`\`mermaid
+graph TD
+  A[Start] --> B[End]
+\`\`\`
+`;
+
+const isInsideFencedBlock = (
+  value: string,
+  pos: number,
+): { inside: boolean; language?: string } => {
+  const before = value.slice(0, pos);
+  const after = value.slice(pos);
+
+  const openIndex = before.lastIndexOf("```");
+  if (openIndex === -1) return { inside: false };
+
+  const closeIndex = after.indexOf("```");
+  if (closeIndex === -1) return { inside: false };
+
+  const nextOpen = after.indexOf("```", closeIndex + 3);
+  if (nextOpen !== -1) return { inside: false };
+
+  const lineEnd = value.indexOf("\n", openIndex);
+  const fenceLine =
+    lineEnd === -1
+      ? value.slice(openIndex + 3)
+      : value.slice(openIndex + 3, lineEnd);
+
+  return {
+    inside: true,
+    language: fenceLine.trim() || undefined,
+  };
+};
 
 export const useMarkdownToolbar = (
   textareaRef: RefObject<HTMLTextAreaElement>,
@@ -328,13 +362,28 @@ export const useMarkdownToolbar = (
     const pos = textarea.selectionStart;
     const { text } = getCurrentLine(value, pos);
 
+    const fenced = isInsideFencedBlock(value, pos);
+
+    const { start } = getCurrentLine(value, pos);
+    const cursorInLine = pos - start;
+
+    const isInlineCode =
+      !fenced.inside &&
+      (() => {
+        const open = text.lastIndexOf("`", cursorInLine - 1);
+        const close = text.indexOf("`", cursorInLine);
+        return open !== -1 && close !== -1;
+      })();
+
     const taskAny = /^-\s+\[[ x]\]\s+/i;
     const taskChecked = /^-\s+\[x\]\s+/i;
     return {
-      bold: /\*\*.+\*\*/.test(text),
-      italic: /_.+_/.test(text),
-      strike: /~~.+~~/.test(text),
-      code: /`.+`/.test(text),
+      bold: !fenced.inside && /\*\*.+\*\*/.test(text),
+      italic: !fenced.inside && /_.+_/.test(text),
+      strike: !fenced.inside && /~~.+~~/.test(text),
+
+      quote: /^>\s+/.test(text),
+      code: isInlineCode,
 
       h1: /^#\s+/.test(text),
       h2: /^##\s+/.test(text),
@@ -370,20 +419,31 @@ export const useMarkdownToolbar = (
     restoreSelection(textarea, cursor, cursor);
   };
 
-  const insertImage = (alt: string, url: string) => {
+  const insertTable = (rows: number, cols: number) => {
     const ctx = getCtx();
     if (!ctx) return;
 
     const { textarea, selectionStart, value } = ctx;
 
-    const insert = `![${alt}](${url})`;
+    const header = `| ${Array(cols).fill("Header").join(" | ")} |`;
+    const divider = `| ${Array(cols).fill("---").join(" | ")} |`;
+
+    const body = Array.from(
+      { length: rows },
+      () => `| ${Array(cols).fill("Cell").join(" | ")} |`,
+    );
+
+    const table = [header, divider, ...body].join("\n");
 
     const next =
-      value.slice(0, selectionStart) + insert + value.slice(selectionStart);
+      value.slice(0, selectionStart) +
+      table +
+      "\n\n" +
+      value.slice(selectionStart);
 
     apply(next);
 
-    const cursor = selectionStart + insert.length;
+    const cursor = selectionStart + header.length + divider.length + 2;
     restoreSelection(textarea, cursor, cursor);
   };
 
@@ -391,6 +451,23 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return "";
     return ctx.value.slice(ctx.selectionStart, ctx.selectionEnd);
+  };
+
+  const insertDiagram = () => {
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    const { textarea, selectionStart, value } = ctx;
+
+    const next =
+      value.slice(0, selectionStart) +
+      MERMAID_TEMPLATE +
+      value.slice(selectionStart);
+
+    apply(next);
+
+    const cursor = selectionStart + MERMAID_TEMPLATE.length;
+    restoreSelection(textarea, cursor, cursor);
   };
 
   /* ================= public api ================= */
@@ -414,7 +491,8 @@ export const useMarkdownToolbar = (
       task: () => toggleTaskList(),
 
       insertLink,
-      insertImage,
+      insertTable,
+      insertDiagram,
 
       getSelectionText,
     },

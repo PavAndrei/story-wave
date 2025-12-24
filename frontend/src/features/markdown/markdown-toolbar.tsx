@@ -1,3 +1,5 @@
+// features/markdown/markdown-toolbar.tsx
+
 import { useState } from "react";
 import type { useMarkdownToolbar } from "./use-markdown-toolbar";
 import {
@@ -7,7 +9,6 @@ import {
 } from "@/shared/ui/kit/popover";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
-import { ImageUploader } from "../uploads";
 
 type Props = {
   toolbar: ReturnType<typeof useMarkdownToolbar>;
@@ -18,9 +19,9 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
   const [linkText, setLinkText] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
 
-  const [imageOpen, setImageOpen] = useState(false);
-  const [imageAlt, setImageAlt] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [tableOpen, setTableOpen] = useState(false);
+  const [tableRows, setTableRows] = useState(2);
+  const [tableCols, setTableCols] = useState(2);
 
   if (!toolbar) return null;
 
@@ -36,15 +37,6 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
     setLinkText(sel || "link");
     setLinkUrl("");
     setLinkOpen(true);
-  };
-
-  /* ================= IMAGE ================= */
-
-  const openImagePopover = () => {
-    const sel = actions.getSelectionText();
-    setImageAlt(sel || "alt text");
-    setImageUrl("");
-    setImageOpen(true);
   };
 
   return (
@@ -165,13 +157,24 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
 
       <button
         type="button"
-        className={btn()}
+        className={btn(state.quote)}
         onMouseDown={(e) => {
           e.preventDefault();
           actions.quote();
         }}
       >
         ❝
+      </button>
+
+      <button
+        type="button"
+        className={btn()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          actions.insertDiagram();
+        }}
+      >
+        📈
       </button>
 
       {/* ================= LINK POPOVER ================= */}
@@ -220,33 +223,37 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
         </PopoverContent>
       </Popover>
 
-      {/* ================= IMAGE POPOVER ================= */}
-
-      <Popover open={imageOpen} onOpenChange={setImageOpen}>
+      <Popover open={tableOpen} onOpenChange={setTableOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
             className={btn()}
             onClick={(e) => {
               e.preventDefault();
-              openImagePopover();
+              setTableOpen(true);
             }}
           >
-            🖼
+            📊
           </button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-72 space-y-3">
+        <PopoverContent className="w-64 space-y-3">
           <Input
-            placeholder="Alt text"
-            value={imageAlt}
-            onChange={(e) => setImageAlt(e.target.value)}
+            type="number"
+            min={1}
+            max={20}
+            placeholder="Rows"
+            value={tableRows}
+            onChange={(e) => setTableRows(Number(e.target.value))}
           />
 
           <Input
-            placeholder="Image URL"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
+            type="number"
+            min={1}
+            max={10}
+            placeholder="Columns"
+            value={tableCols}
+            onChange={(e) => setTableCols(Number(e.target.value))}
           />
 
           <Button
@@ -254,14 +261,11 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
             className="w-full"
             onMouseDown={(e) => {
               e.preventDefault();
-              actions.insertImage(
-                imageAlt || "alt text",
-                imageUrl || "https://picsum.photos/400",
-              );
-              setImageOpen(false);
+              actions.insertTable(tableRows, tableCols);
+              setTableOpen(false);
             }}
           >
-            Insert image
+            Insert table
           </Button>
         </PopoverContent>
       </Popover>

@@ -1,4 +1,4 @@
-// features/markdown/ui/markdown-editor.tsx
+// features/markdown/markdown-editor.tsx
 import { useRef } from "react";
 import { Textarea } from "@/shared/ui/kit/textarea";
 import { MarkdownRenderer } from "./markdown-renderer";

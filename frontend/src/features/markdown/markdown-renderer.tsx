@@ -1,6 +1,7 @@
-// features/markdown/ui/markdown-renderer.tsx
+// features/markdown/markdown-renderer.tsx
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { MermaidDiagram } from "./mermaid-diagram";
 
 type MarkdownRendererProps = {
   content: string;
@@ -53,16 +54,27 @@ export const MarkdownRenderer = ({
               className="rounded-md my-4 max-w-full"
             />
           ),
-          code: ({ inline, children }) =>
-            inline ? (
-              <code className="bg-muted px-1 py-0.5 rounded text-sm">
-                {children}
-              </code>
-            ) : (
+          code: ({ inline, className, children }) => {
+            const language = className?.replace("language-", "");
+
+            if (!inline && language === "mermaid") {
+              return <MermaidDiagram code={String(children).trim()} />;
+            }
+
+            if (inline) {
+              return (
+                <code className="bg-muted px-1 py-0.5 rounded text-sm">
+                  {children}
+                </code>
+              );
+            }
+
+            return (
               <pre className="bg-muted p-3 rounded-md overflow-x-auto my-4">
                 <code>{children}</code>
               </pre>
-            ),
+            );
+          },
           blockquote: ({ children }) => (
             <blockquote className="border-l-4 border-muted pl-4 italic my-4">
               {children}

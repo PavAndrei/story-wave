@@ -14,7 +14,6 @@ type SaveBlogProps = {
     content?: string;
     categories?: string[];
     coverImgUrl?: string;
-    // imagesUrls?: string[];
   };
 };
 
