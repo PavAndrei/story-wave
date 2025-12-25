@@ -8,7 +8,7 @@ import {
 } from "@/shared/ui/kit/form";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { z } from "zod";
 import Multiselect from "react-select";
 // import { ImageUploader } from "@/features/uploads";
@@ -18,6 +18,8 @@ import { useSaveDraft } from "@/shared/model/use-save-draft";
 import { categoryOptions } from "@/shared/model/categories";
 import { MarkdownEditor } from "@/features/markdown";
 import { CoverImageUploader } from "@/features/uploads/image-uploader";
+import { useDraftAutosave } from "@/shared/model/use-draft-autosave";
+import { useState } from "react";
 
 /* ---------- schema ONLY for publish ---------- */
 const publishBlogSchema = z.object({
@@ -55,6 +57,19 @@ export const CreateBlogForm = () => {
 
   const publishBlog = usePublishBlog();
   const saveDraft = useSaveDraft();
+
+  const content = useWatch({
+    control: form.control,
+    name: "content",
+  });
+
+  const autoSave = useDraftAutosave({
+    blogId,
+    title: form.watch("title"),
+    content,
+    categories: form.watch("categories"),
+    coverImgUrl: form.watch("coverImage")?.url ?? undefined,
+  });
 
   /* ---------- SAVE DRAFT (NO VALIDATION) ---------- */
   const handleSaveDraft = () => {
@@ -160,6 +175,15 @@ export const CreateBlogForm = () => {
             </FormItem>
           )}
         />
+
+        <span className="text-xs text-muted">
+          {autoSave.status === "saving" && "Saving…"}
+          {autoSave.status === "saved" && autoSave.lastSavedAt && (
+            <>Saved at {autoSave.lastSavedAt.toLocaleTimeString()}</>
+          )}
+          {autoSave.status === "error" && "Autosave failed"}
+        </span>
+
         <div className="flex gap-3">
           <Button
             type="button"

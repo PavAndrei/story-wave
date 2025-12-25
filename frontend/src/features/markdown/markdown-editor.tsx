@@ -1,5 +1,5 @@
 // features/markdown/markdown-editor.tsx
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Textarea } from "@/shared/ui/kit/textarea";
 import { MarkdownRenderer } from "./markdown-renderer";
 import { MarkdownToolbar } from "./markdown-toolbar";
@@ -13,6 +13,7 @@ import { exportMarkdown, importMarkdownFile } from "./import-export";
 import { exportHtml } from "./export-html";
 import { exportPdf } from "./export-pdf";
 import { getExportFilename } from "./filename";
+import { renumberOrderedList } from "./renumber-ordered-list";
 
 export type UploadedImage = {
   id: string; // image _id из Mongo
@@ -24,53 +25,8 @@ type Props = {
   onImagesChange: (images: UploadedImage[]) => void;
   blogId: string;
   title?: string;
-};
-
-const renumberOrderedList = (value: string, cursor: number) => {
-  const lines = value.split("\n");
-
-  // определить индекс строки курсора
-  let lineIndex = 0;
-  let acc = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    acc += lines[i].length + 1;
-    if (acc > cursor) {
-      lineIndex = i;
-      break;
-    }
-  }
-
-  const isOl = (line: string) => /^\d+\.\s+/.test(line);
-
-  // если текущая строка не OL — ищем ближайший OL выше
-  let probe = lineIndex;
-  while (probe >= 0 && !isOl(lines[probe])) {
-    probe--;
-  }
-
-  if (probe < 0) return value;
-
-  // найти начало списка
-  let start = probe;
-  while (start > 0 && isOl(lines[start - 1])) {
-    start--;
-  }
-
-  // найти конец списка
-  let end = probe;
-  while (end < lines.length - 1 && isOl(lines[end + 1])) {
-    end++;
-  }
-
-  // перенумерация
-  let counter = 1;
-  for (let i = start; i <= end; i++) {
-    lines[i] = lines[i].replace(/^\d+\.\s+/, `${counter}. `);
-    counter++;
-  }
-
-  return lines.join("\n");
+  value: string;
+  onChange: (value: string) => void;
 };
 
 export const MarkdownEditor = ({
@@ -78,13 +34,31 @@ export const MarkdownEditor = ({
   images,
   onImagesChange,
   title,
+  value,
+  onChange,
 }: Props) => {
-  const history = useEditorHistory("");
-  const value = history.value;
-  const onChange = history.setValue;
+  // refs
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
+  // history
+  const history = useEditorHistory(value);
+
+  useEffect(() => {
+    if (history.value !== value) {
+      history.markAction();
+    }
+  }, [value]);
+
+  const applyChange = (next: string, mark = false) => {
+    if (mark) history.markAction();
+    history.setValue(next);
+    onChange(next);
+  };
+
+  // imports & exports
   const filename = getExportFilename(history.value || "", {
-    title, // если есть
+    title: title?.trim() || "",
     fallbackId: blogId,
   });
   const handleExport = () => {
@@ -102,9 +76,7 @@ export const MarkdownEditor = ({
 
       try {
         const content = await importMarkdownFile(file);
-
-        history.markAction();
-        history.setValue(content);
+        applyChange(content, true);
       } catch (err) {
         alert((err as Error).message);
       }
@@ -115,26 +87,20 @@ export const MarkdownEditor = ({
 
   const handleExportHtml = () => {
     if (!previewRef.current) return;
-
     exportHtml(previewRef.current.innerHTML, `${filename}.html`);
   };
 
   const handleExportPdf = () => {
     if (!previewRef.current) return;
-
-    exportPdf(previewRef.current.innerHTML, filename);
+    exportPdf(previewRef.current.innerHTML);
   };
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   const markdownStats = useMarkdownStats(value, textareaRef);
   const previewStats = usePreviewStats(previewRef, value);
 
-  const toolbar = useMarkdownToolbar(textareaRef, value, (next) => {
-    history.markAction();
-    history.setValue(next);
-  });
+  const toolbar = useMarkdownToolbar(textareaRef, value, (next) =>
+    applyChange(next, true),
+  );
 
   const toggleTaskAtIndex = (index: number) => {
     const lines = value.split("\n");
@@ -177,18 +143,19 @@ export const MarkdownEditor = ({
     if (isMod && e.key === "z" && !e.shiftKey) {
       e.preventDefault();
       history.undo();
+
+      requestAnimationFrame(() => {
+        onChange(history.value);
+      });
     }
 
-    // Redo (Cmd/Ctrl + Shift + Z)
-    if (isMod && e.key === "z" && e.shiftKey) {
+    if (isMod && e.key === "z" && !e.shiftKey) {
       e.preventDefault();
-      history.redo();
-    }
+      history.undo();
 
-    // Redo (Ctrl + Y) — Windows only
-    if (e.ctrlKey && e.key === "y") {
-      e.preventDefault();
-      history.redo();
+      requestAnimationFrame(() => {
+        onChange(history.value);
+      });
     }
 
     /* ================= BACKSPACE ================= */
@@ -202,7 +169,7 @@ export const MarkdownEditor = ({
         const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
         const nextCursor = lineStart;
 
-        onChange(renumberOrderedList(next, nextCursor));
+        applyChange(renumberOrderedList(next, nextCursor), true);
       }
       return;
     }
@@ -225,7 +192,7 @@ export const MarkdownEditor = ({
       const next =
         value.slice(0, selectionStart) + insert + value.slice(selectionStart);
 
-      onChange(next);
+      applyChange(next, true);
 
       requestAnimationFrame(() => {
         textarea.setSelectionRange(
@@ -283,7 +250,7 @@ export const MarkdownEditor = ({
     const next =
       value.slice(0, selectionStart) + snippet + value.slice(selectionEnd);
 
-    onChange(next);
+    applyChange(next, true);
 
     requestAnimationFrame(() => {
       textarea.focus();
@@ -297,8 +264,14 @@ export const MarkdownEditor = ({
       <div>
         <MarkdownToolbar
           toolbar={toolbar}
-          onUndo={history.undo}
-          onRedo={history.redo}
+          onUndo={() => {
+            history.undo();
+            requestAnimationFrame(() => onChange(history.value));
+          }}
+          onRedo={() => {
+            history.redo();
+            requestAnimationFrame(() => onChange(history.value));
+          }}
           canUndo={history.canUndo}
           canRedo={history.canRedo}
           onImport={handleImport}
@@ -320,7 +293,7 @@ export const MarkdownEditor = ({
         <Textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => applyChange(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={14}
           className="resize-none min-h-[300px]"
