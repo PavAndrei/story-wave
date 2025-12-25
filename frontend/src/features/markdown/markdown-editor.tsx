@@ -8,6 +8,7 @@ import { ImageUploader } from "../uploads";
 import { useMarkdownStats } from "./use-markdown-stats";
 import { usePreviewStats } from "./use-preview-stats";
 import { StatsBar } from "./stats-bar";
+import { useEditorHistory } from "./use-editor-history";
 
 export type UploadedImage = {
   id: string; // image _id из Mongo
@@ -15,8 +16,6 @@ export type UploadedImage = {
 };
 
 type Props = {
-  value: string;
-  onChange: (value: string) => void;
   images: UploadedImage[];
   onImagesChange: (images: UploadedImage[]) => void;
   blogId: string;
@@ -69,20 +68,21 @@ const renumberOrderedList = (value: string, cursor: number) => {
   return lines.join("\n");
 };
 
-export const MarkdownEditor = ({
-  value,
-  onChange,
-  blogId,
-  images,
-  onImagesChange,
-}: Props) => {
+export const MarkdownEditor = ({ blogId, images, onImagesChange }: Props) => {
+  const history = useEditorHistory("");
+  const value = history.value;
+  const onChange = history.setValue;
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const markdownStats = useMarkdownStats(value, textareaRef);
   const previewStats = usePreviewStats(previewRef, value);
 
-  const toolbar = useMarkdownToolbar(textareaRef, value, onChange);
+  const toolbar = useMarkdownToolbar(textareaRef, value, (next) => {
+    history.markAction();
+    history.setValue(next);
+  });
 
   const toggleTaskAtIndex = (index: number) => {
     const lines = value.split("\n");
@@ -116,6 +116,28 @@ export const MarkdownEditor = ({
         : value.indexOf("\n", selectionStart);
 
     const line = value.slice(lineStart, lineEnd);
+
+    /* ================= UNDO / REDO ================= */
+
+    const isMod = e.ctrlKey || e.metaKey;
+
+    // Undo
+    if (isMod && e.key === "z" && !e.shiftKey) {
+      e.preventDefault();
+      history.undo();
+    }
+
+    // Redo (Cmd/Ctrl + Shift + Z)
+    if (isMod && e.key === "z" && e.shiftKey) {
+      e.preventDefault();
+      history.redo();
+    }
+
+    // Redo (Ctrl + Y) — Windows only
+    if (e.ctrlKey && e.key === "y") {
+      e.preventDefault();
+      history.redo();
+    }
 
     /* ================= BACKSPACE ================= */
 
@@ -221,7 +243,13 @@ export const MarkdownEditor = ({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <MarkdownToolbar toolbar={toolbar} />
+        <MarkdownToolbar
+          toolbar={toolbar}
+          onUndo={history.undo}
+          onRedo={history.redo}
+          canUndo={history.canUndo}
+          canRedo={history.canRedo}
+        />
 
         <ImageUploader
           variant="editor"

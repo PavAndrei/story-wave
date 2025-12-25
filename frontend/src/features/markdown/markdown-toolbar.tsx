@@ -12,9 +12,19 @@ import { Button } from "@/shared/ui/kit/button";
 
 type Props = {
   toolbar: ReturnType<typeof useMarkdownToolbar>;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 };
 
-export const MarkdownToolbar = ({ toolbar }: Props) => {
+export const MarkdownToolbar = ({
+  toolbar,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+}: Props) => {
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkText, setLinkText] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
@@ -41,6 +51,34 @@ export const MarkdownToolbar = ({ toolbar }: Props) => {
 
   return (
     <div className="flex gap-1 p-2 border rounded">
+      <button
+        type="button"
+        className={btn(canUndo)}
+        disabled={!canUndo}
+        title="Undo (Ctrl/Cmd + Z)"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          onUndo();
+        }}
+      >
+        ↶
+      </button>
+
+      <button
+        type="button"
+        className={btn(canRedo)}
+        disabled={!canRedo}
+        title="Redo (Ctrl/Cmd + Shift + Z)"
+        onMouseDown={(e) => {
+          e.preventDefault();
+          onRedo();
+        }}
+      >
+        ↷
+      </button>
+
+      <span>|</span>
+
       <button
         type="button"
         className={btn(state.bold)}
