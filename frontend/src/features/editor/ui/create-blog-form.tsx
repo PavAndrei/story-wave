@@ -40,7 +40,7 @@ const publishBlogSchema = z.object({
 
 type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
 
-export const CreatePostForm = () => {
+export const CreateBlogForm = () => {
   const { blogId } = useParams();
 
   const form = useForm<PublishBlogFormValues>({
@@ -148,6 +148,7 @@ export const CreatePostForm = () => {
               <FormLabel>Content</FormLabel>
               <FormControl>
                 <MarkdownEditor
+                  title={form.watch("title")}
                   value={field.value}
                   onChange={field.onChange}
                   blogId={blogId!}

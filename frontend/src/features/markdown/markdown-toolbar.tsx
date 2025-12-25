@@ -16,6 +16,10 @@ type Props = {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onImport: () => void;
+  onExport: () => void;
+  handleExportHtml: () => void;
+  handleExportPdf: () => void;
 };
 
 export const MarkdownToolbar = ({
@@ -24,6 +28,10 @@ export const MarkdownToolbar = ({
   onRedo,
   canUndo,
   canRedo,
+  onImport,
+  onExport,
+  handleExportHtml,
+  handleExportPdf,
 }: Props) => {
   const [linkOpen, setLinkOpen] = useState(false);
   const [linkText, setLinkText] = useState("");
@@ -78,6 +86,52 @@ export const MarkdownToolbar = ({
       </button>
 
       <span>|</span>
+
+      <button
+        type="button"
+        className={btn()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          onImport();
+        }}
+      >
+        📥
+      </button>
+
+      <button
+        type="button"
+        className={btn()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          onExport();
+        }}
+      >
+        📤
+      </button>
+
+      <span>|</span>
+
+      <button
+        type="button"
+        className={btn()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          handleExportHtml();
+        }}
+      >
+        🌐 HTML
+      </button>
+
+      <button
+        type="button"
+        className={btn()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          handleExportPdf();
+        }}
+      >
+        📄 PDF
+      </button>
 
       <button
         type="button"

@@ -1,4 +1,4 @@
-import { CreatePostForm } from "./ui/create-blog-form";
+import { CreateBlogForm } from "./ui/create-blog-form";
 import { PostEditorLayout } from "./ui/post-editor-layout";
 
 const CreatePostPage = () => {
@@ -6,7 +6,7 @@ const CreatePostPage = () => {
     <PostEditorLayout
       title={"Create Post"}
       description={"Write your story and share it with the world"}
-      content={<CreatePostForm />}
+      content={<CreateBlogForm />}
       footer={<></>}
     />
   );

@@ -9,6 +9,10 @@ import { useMarkdownStats } from "./use-markdown-stats";
 import { usePreviewStats } from "./use-preview-stats";
 import { StatsBar } from "./stats-bar";
 import { useEditorHistory } from "./use-editor-history";
+import { exportMarkdown, importMarkdownFile } from "./import-export";
+import { exportHtml } from "./export-html";
+import { exportPdf } from "./export-pdf";
+import { getExportFilename } from "./filename";
 
 export type UploadedImage = {
   id: string; // image _id из Mongo
@@ -19,6 +23,7 @@ type Props = {
   images: UploadedImage[];
   onImagesChange: (images: UploadedImage[]) => void;
   blogId: string;
+  title?: string;
 };
 
 const renumberOrderedList = (value: string, cursor: number) => {
@@ -68,10 +73,57 @@ const renumberOrderedList = (value: string, cursor: number) => {
   return lines.join("\n");
 };
 
-export const MarkdownEditor = ({ blogId, images, onImagesChange }: Props) => {
+export const MarkdownEditor = ({
+  blogId,
+  images,
+  onImagesChange,
+  title,
+}: Props) => {
   const history = useEditorHistory("");
   const value = history.value;
   const onChange = history.setValue;
+
+  const filename = getExportFilename(history.value || "", {
+    title, // если есть
+    fallbackId: blogId,
+  });
+  const handleExport = () => {
+    exportMarkdown(history.value, `${filename}.md`);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".md";
+
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      try {
+        const content = await importMarkdownFile(file);
+
+        history.markAction();
+        history.setValue(content);
+      } catch (err) {
+        alert((err as Error).message);
+      }
+    };
+
+    input.click();
+  };
+
+  const handleExportHtml = () => {
+    if (!previewRef.current) return;
+
+    exportHtml(previewRef.current.innerHTML, `${filename}.html`);
+  };
+
+  const handleExportPdf = () => {
+    if (!previewRef.current) return;
+
+    exportPdf(previewRef.current.innerHTML, filename);
+  };
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -249,6 +301,10 @@ export const MarkdownEditor = ({ blogId, images, onImagesChange }: Props) => {
           onRedo={history.redo}
           canUndo={history.canUndo}
           canRedo={history.canRedo}
+          onImport={handleImport}
+          onExport={handleExport}
+          handleExportHtml={handleExportHtml}
+          handleExportPdf={handleExportPdf}
         />
 
         <ImageUploader
