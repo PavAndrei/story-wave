@@ -1,9 +1,22 @@
 import { useCallback, useRef, useState } from "react";
 
+type HistoryEntry = {
+  value: string;
+  selection: {
+    start: number;
+    end: number;
+  };
+};
+
+type Selection = {
+  start: number;
+  end: number;
+};
+
 type HistoryState = {
-  past: string[];
-  present: string;
-  future: string[];
+  past: HistoryEntry[];
+  present: HistoryEntry;
+  future: HistoryEntry[];
 };
 
 const MAX_HISTORY = 50;
@@ -12,7 +25,10 @@ const TYPING_MERGE_DELAY = 800; // ms
 export const useEditorHistory = (initialValue: string) => {
   const [history, setHistory] = useState<HistoryState>({
     past: [],
-    present: initialValue,
+    present: {
+      value: initialValue,
+      selection: { start: 0, end: 0 },
+    },
     future: [],
   });
 
@@ -28,12 +44,20 @@ export const useEditorHistory = (initialValue: string) => {
 
   /* ================= set value ================= */
 
-  const setValue = useCallback((nextValue: string) => {
+  const setValue = useCallback((nextValue: string, selection?: Selection) => {
     setHistory((current) => {
       const now = Date.now();
       const isTyping =
         !forceNewStepRef.current &&
         now - lastTypingTimeRef.current < TYPING_MERGE_DELAY;
+
+      const nextSelection = selection ??
+        current.present.selection ?? { start: 0, end: 0 };
+
+      const nextEntry: HistoryEntry = {
+        value: nextValue,
+        selection: nextSelection,
+      };
 
       const past = isTyping
         ? current.past
@@ -44,7 +68,7 @@ export const useEditorHistory = (initialValue: string) => {
 
       return {
         past,
-        present: nextValue,
+        present: nextEntry,
         future: [], // любое новое изменение сбрасывает redo
       };
     });
@@ -89,12 +113,15 @@ export const useEditorHistory = (initialValue: string) => {
   };
 
   return {
-    value: history.present,
+    value: history.present.value,
+    selection: history.present.selection,
+
     setValue,
     undo,
     redo,
+    markAction,
+
     canUndo: history.past.length > 0,
     canRedo: history.future.length > 0,
-    markAction,
   };
 };

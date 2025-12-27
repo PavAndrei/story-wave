@@ -1,6 +1,7 @@
 // features/markdown/markdown-renderer.tsx
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
 import { MermaidDiagram } from "./mermaid-diagram";
 
 type MarkdownRendererProps = {
@@ -17,7 +18,7 @@ export const MarkdownRenderer = ({
   return (
     <div className="markdown prose max-w-none">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
+        remarkPlugins={[remarkGfm, remarkBreaks]}
         skipHtml
         components={{
           h1: ({ children }) => (

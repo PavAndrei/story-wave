@@ -41,18 +41,24 @@ export const MarkdownEditor = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  // selection
+  const getSelection = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return undefined;
+
+    return {
+      start: textarea.selectionStart,
+      end: textarea.selectionEnd,
+    };
+  };
+
   // history
   const history = useEditorHistory(value);
 
-  useEffect(() => {
-    if (history.value !== value) {
-      history.markAction();
-    }
-  }, [value]);
-
   const applyChange = (next: string, mark = false) => {
+    const selection = getSelection();
     if (mark) history.markAction();
-    history.setValue(next);
+    history.setValue(next, selection);
     onChange(next);
   };
 
@@ -143,19 +149,6 @@ export const MarkdownEditor = ({
     if (isMod && e.key === "z" && !e.shiftKey) {
       e.preventDefault();
       history.undo();
-
-      requestAnimationFrame(() => {
-        onChange(history.value);
-      });
-    }
-
-    if (isMod && e.key === "z" && !e.shiftKey) {
-      e.preventDefault();
-      history.undo();
-
-      requestAnimationFrame(() => {
-        onChange(history.value);
-      });
     }
 
     /* ================= BACKSPACE ================= */
@@ -193,13 +186,6 @@ export const MarkdownEditor = ({
         value.slice(0, selectionStart) + insert + value.slice(selectionStart);
 
       applyChange(next, true);
-
-      requestAnimationFrame(() => {
-        textarea.setSelectionRange(
-          selectionStart + insert.length,
-          selectionStart + insert.length,
-        );
-      });
 
       return;
     }
@@ -251,27 +237,34 @@ export const MarkdownEditor = ({
       value.slice(0, selectionStart) + snippet + value.slice(selectionEnd);
 
     applyChange(next, true);
+  };
+
+  useEffect(() => {
+    if (value !== history.value) {
+      onChange(history.value);
+    }
+  }, [history.value]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const { selection } = history;
+    if (!selection) return;
 
     requestAnimationFrame(() => {
       textarea.focus();
-      textarea.selectionStart = textarea.selectionEnd =
-        selectionStart + snippet.length;
+      textarea.setSelectionRange(selection.start, selection.end);
     });
-  };
+  }, [history.value]);
 
   return (
     <div className="flex flex-col gap-3">
       <div>
         <MarkdownToolbar
           toolbar={toolbar}
-          onUndo={() => {
-            history.undo();
-            requestAnimationFrame(() => onChange(history.value));
-          }}
-          onRedo={() => {
-            history.redo();
-            requestAnimationFrame(() => onChange(history.value));
-          }}
+          onUndo={() => history.undo()}
+          onRedo={() => history.redo()}
           canUndo={history.canUndo}
           canRedo={history.canRedo}
           onImport={handleImport}
