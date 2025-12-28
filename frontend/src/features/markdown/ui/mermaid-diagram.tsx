@@ -9,7 +9,7 @@ export const MermaidDiagram = ({ code }: Props) => {
 
   if (error) {
     return (
-      <div className="my-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+      <div className="my-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive min-h-[300px]">
         <div className="font-medium mb-1">Mermaid diagram error</div>
         <div className="opacity-80">{error}</div>
       </div>
@@ -17,6 +17,9 @@ export const MermaidDiagram = ({ code }: Props) => {
   }
 
   return (
-    <div ref={containerRef} className="mermaid-diagram my-4 overflow-auto" />
+    <div
+      ref={containerRef}
+      className="mermaid-diagram my-4 overflow-auto min-h-[300px]"
+    />
   );
 };

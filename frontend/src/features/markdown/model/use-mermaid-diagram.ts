@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import mermaid from "mermaid";
 import { initMermaid } from "../lib/mermaid";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 
 export const useMermaidDiagram = (code: string) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const debouncedCode = useDebounce(code, 300);
 
   useEffect(() => {
     let cancelled = false;
@@ -16,7 +19,7 @@ export const useMermaidDiagram = (code: string) => {
 
         const id = `mermaid-${crypto.randomUUID()}`;
 
-        const { svg } = await mermaid.render(id, code);
+        const { svg } = await mermaid.render(id, debouncedCode);
 
         if (cancelled || !containerRef.current) return;
 
@@ -34,7 +37,7 @@ export const useMermaidDiagram = (code: string) => {
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [debouncedCode]);
 
   return {
     containerRef,
