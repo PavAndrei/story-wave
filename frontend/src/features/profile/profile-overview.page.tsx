@@ -35,7 +35,7 @@ const ProfileOverviewPage = () => {
             </CardTitle>
 
             <span className="text-slate-500 text-xs">
-              registered on {formatDate(userData.createdAt.toString())}
+              registered on {formatDate(userData.createdAt)}
             </span>
 
             <CardDescription className="text-slate-500">

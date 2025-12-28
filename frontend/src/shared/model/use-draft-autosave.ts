@@ -5,7 +5,7 @@ type UseDraftAutosaveProps = {
   blogId?: string;
   title?: string;
   content: string;
-  categories?: string[] | null;
+  categories?: string[];
   coverImgUrl?: string;
   enabled?: boolean;
 };

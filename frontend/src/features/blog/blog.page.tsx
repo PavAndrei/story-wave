@@ -36,7 +36,7 @@ const BlogPage = () => {
 
   return (
     <div className="border rounded-md p-3 prose max-w-none overflow-auto">
-      <MarkdownRenderer content={blog?.content || ""} />
+      <MarkdownRenderer content={blog?.content || ""} onToggleTask={() => {}} />
     </div>
   );
 };
