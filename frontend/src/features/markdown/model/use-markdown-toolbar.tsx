@@ -1,16 +1,8 @@
-// features/markdown/use-markdown-toolbar.ts
-
 import type { RefObject } from "react";
 import type { ApplyPayload } from "../ui/markdown-editor";
 
 type ApplyFn = (payload: ApplyPayload) => void;
 type ListType = "ul" | "ol";
-
-const MERMAID_TEMPLATE = `\`\`\`mermaid
-graph TD
-  A[Start] --> B[End]
-\`\`\`
-`;
 
 const isInsideFencedBlock = (
   value: string,
@@ -472,26 +464,6 @@ export const useMarkdownToolbar = (
     return ctx.value.slice(ctx.selectionStart, ctx.selectionEnd);
   };
 
-  const insertDiagram = () => {
-    const ctx = getCtx();
-    if (!ctx) return;
-
-    const { selectionStart, value } = ctx;
-
-    const next =
-      value.slice(0, selectionStart) +
-      MERMAID_TEMPLATE +
-      value.slice(selectionStart);
-
-    apply({
-      value: next,
-      selection: {
-        start: selectionStart + MERMAID_TEMPLATE.length,
-        end: selectionStart + MERMAID_TEMPLATE.length,
-      },
-    });
-  };
-
   /* ================= public api ================= */
 
   return {
@@ -514,7 +486,6 @@ export const useMarkdownToolbar = (
 
       insertLink,
       insertTable,
-      insertDiagram,
 
       getSelectionText,
     },

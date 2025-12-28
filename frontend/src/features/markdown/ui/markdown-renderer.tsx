@@ -2,7 +2,6 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { MermaidDiagram } from "./mermaid-diagram";
 
 type MarkdownRendererProps = {
   content: string;
@@ -60,15 +59,10 @@ export const MarkdownRenderer = ({
               className="rounded-md my-4 max-w-full"
             />
           ),
-          code: ({ className, children }) => {
-            const language = className?.replace("language-", "");
-
-            if (language === "mermaid") {
-              return <MermaidDiagram code={String(children).trim()} />;
-            }
+          code: ({ children }) => {
             return (
               <code className="bg-muted p-3 rounded-md overflow-x-auto my-4">
-                {children}
+                {children?.toString().trim()}
               </code>
             );
           },

@@ -256,17 +256,6 @@ export const MarkdownToolbar = ({
         ❝
       </button>
 
-      <button
-        type="button"
-        className={btn()}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          actions.insertDiagram();
-        }}
-      >
-        📈
-      </button>
-
       {/* LINK POPOVER */}
       <Popover open={linkOpen} onOpenChange={setLinkOpen}>
         <PopoverTrigger asChild>

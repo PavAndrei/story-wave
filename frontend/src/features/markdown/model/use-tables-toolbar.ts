@@ -14,7 +14,6 @@ export const useTablesToolbar = (toolbar: Toolbar) => {
   };
 
   return {
-    // table
     tableOpen,
     setTableOpen,
     tableRows,
