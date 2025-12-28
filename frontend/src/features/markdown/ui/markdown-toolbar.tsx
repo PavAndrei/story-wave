@@ -1,6 +1,3 @@
-// features/markdown/markdown-toolbar.tsx
-
-import { useState } from "react";
 import {
   Popover,
   PopoverContent,
@@ -9,6 +6,8 @@ import {
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
 import type { useMarkdownToolbar } from "../model/use-markdown-toolbar";
+import { useLinksToolbar } from "../model/use-links-toolbar";
+import { useTablesToolbar } from "../model/use-tables-toolbar";
 
 type Props = {
   toolbar: ReturnType<typeof useMarkdownToolbar>;
@@ -33,13 +32,25 @@ export const MarkdownToolbar = ({
   handleExportHtml,
   handleExportPdf,
 }: Props) => {
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [linkText, setLinkText] = useState("");
-  const [linkUrl, setLinkUrl] = useState("");
-
-  const [tableOpen, setTableOpen] = useState(false);
-  const [tableRows, setTableRows] = useState(2);
-  const [tableCols, setTableCols] = useState(2);
+  const {
+    insertLink,
+    linkOpen,
+    linkText,
+    linkUrl,
+    openLinkPopover,
+    setLinkOpen,
+    setLinkText,
+    setLinkUrl,
+  } = useLinksToolbar(toolbar);
+  const {
+    insertTable,
+    tableOpen,
+    tableRows,
+    tableCols,
+    setTableOpen,
+    setTableRows,
+    setTableCols,
+  } = useTablesToolbar(toolbar);
 
   if (!toolbar) return null;
 
@@ -48,22 +59,13 @@ export const MarkdownToolbar = ({
   const btn = (active?: boolean) =>
     `px-2 py-1 rounded ${active ? "bg-primary text-white" : "bg-muted"}`;
 
-  /* ================= LINK ================= */
-
-  const openLinkPopover = () => {
-    const sel = actions.getSelectionText();
-    setLinkText(sel || "link");
-    setLinkUrl("");
-    setLinkOpen(true);
-  };
-
   return (
     <div className="flex gap-1 p-2 border rounded">
+      {/* undo / redo */}
       <button
         type="button"
         className={btn(canUndo)}
         disabled={!canUndo}
-        title="Undo (Ctrl/Cmd + Z)"
         onMouseDown={(e) => {
           e.preventDefault();
           onUndo();
@@ -76,7 +78,6 @@ export const MarkdownToolbar = ({
         type="button"
         className={btn(canRedo)}
         disabled={!canRedo}
-        title="Redo (Ctrl/Cmd + Shift + Z)"
         onMouseDown={(e) => {
           e.preventDefault();
           onRedo();
@@ -87,6 +88,7 @@ export const MarkdownToolbar = ({
 
       <span>|</span>
 
+      {/* import / export */}
       <button
         type="button"
         className={btn()}
@@ -97,7 +99,6 @@ export const MarkdownToolbar = ({
       >
         📥
       </button>
-
       <button
         type="button"
         className={btn()}
@@ -119,9 +120,8 @@ export const MarkdownToolbar = ({
           handleExportHtml();
         }}
       >
-        🌐 HTML
+        🌐
       </button>
-
       <button
         type="button"
         className={btn()}
@@ -130,9 +130,12 @@ export const MarkdownToolbar = ({
           handleExportPdf();
         }}
       >
-        📄 PDF
+        📄
       </button>
 
+      <span>|</span>
+
+      {/* formatting */}
       <button
         type="button"
         className={btn(state.bold)}
@@ -143,7 +146,6 @@ export const MarkdownToolbar = ({
       >
         B
       </button>
-
       <button
         type="button"
         className={btn(state.italic)}
@@ -154,7 +156,6 @@ export const MarkdownToolbar = ({
       >
         I
       </button>
-
       <button
         type="button"
         className={btn(state.strike)}
@@ -168,6 +169,7 @@ export const MarkdownToolbar = ({
 
       <span>|</span>
 
+      {/* headings */}
       <button
         type="button"
         className={btn(state.h1)}
@@ -178,7 +180,6 @@ export const MarkdownToolbar = ({
       >
         H1
       </button>
-
       <button
         type="button"
         className={btn(state.h2)}
@@ -189,7 +190,6 @@ export const MarkdownToolbar = ({
       >
         H2
       </button>
-
       <button
         type="button"
         className={btn(state.h3)}
@@ -203,6 +203,7 @@ export const MarkdownToolbar = ({
 
       <span>|</span>
 
+      {/* lists */}
       <button
         type="button"
         className={btn(state.ul)}
@@ -213,7 +214,6 @@ export const MarkdownToolbar = ({
       >
         •
       </button>
-
       <button
         type="button"
         className={btn(state.ol)}
@@ -224,7 +224,6 @@ export const MarkdownToolbar = ({
       >
         1.
       </button>
-
       <button
         type="button"
         className={btn(state.task)}
@@ -246,7 +245,6 @@ export const MarkdownToolbar = ({
       >
         {"</>"}
       </button>
-
       <button
         type="button"
         className={btn(state.quote)}
@@ -269,8 +267,7 @@ export const MarkdownToolbar = ({
         📈
       </button>
 
-      {/* ================= LINK POPOVER ================= */}
-
+      {/* LINK POPOVER */}
       <Popover open={linkOpen} onOpenChange={setLinkOpen}>
         <PopoverTrigger asChild>
           <button
@@ -287,27 +284,18 @@ export const MarkdownToolbar = ({
 
         <PopoverContent className="w-72 space-y-3">
           <Input
-            placeholder="Text"
             value={linkText}
             onChange={(e) => setLinkText(e.target.value)}
           />
-
-          <Input
-            placeholder="URL"
-            value={linkUrl}
-            onChange={(e) => setLinkUrl(e.target.value)}
-          />
+          <Input value={linkUrl} onChange={(e) => setLinkUrl(e.target.value)} />
 
           <Button
+            type="button"
             size="sm"
             className="w-full"
             onMouseDown={(e) => {
               e.preventDefault();
-              actions.insertLink(
-                linkText || "link",
-                linkUrl || "https://www.example.com",
-              );
-              setLinkOpen(false);
+              insertLink();
             }}
           >
             Insert link
@@ -315,9 +303,10 @@ export const MarkdownToolbar = ({
         </PopoverContent>
       </Popover>
 
+      {/* TABLE POPOVER */}
       <Popover open={tableOpen} onOpenChange={setTableOpen}>
         <PopoverTrigger asChild>
-          <button
+          <Button
             type="button"
             className={btn()}
             onClick={(e) => {
@@ -326,35 +315,28 @@ export const MarkdownToolbar = ({
             }}
           >
             📊
-          </button>
+          </Button>
         </PopoverTrigger>
 
         <PopoverContent className="w-64 space-y-3">
           <Input
             type="number"
-            min={1}
-            max={20}
-            placeholder="Rows"
             value={tableRows}
-            onChange={(e) => setTableRows(Number(e.target.value))}
+            onChange={(e) => setTableRows(+e.target.value)}
           />
-
           <Input
             type="number"
-            min={1}
-            max={10}
-            placeholder="Columns"
             value={tableCols}
-            onChange={(e) => setTableCols(Number(e.target.value))}
+            onChange={(e) => setTableCols(+e.target.value)}
           />
 
           <Button
+            type="button"
             size="sm"
             className="w-full"
             onMouseDown={(e) => {
               e.preventDefault();
-              actions.insertTable(tableRows, tableCols);
-              setTableOpen(false);
+              insertTable();
             }}
           >
             Insert table

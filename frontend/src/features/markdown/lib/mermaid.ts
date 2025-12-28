@@ -8,6 +8,7 @@ export const initMermaid = () => {
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: "strict",
+    suppressErrorRendering: true,
     theme: "default", // позже сделать dark/light
   });
 

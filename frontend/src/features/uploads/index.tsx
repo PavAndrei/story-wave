@@ -1,3 +1,3 @@
-import { ImageUploader } from "./image-uploader";
+import { ImageUploader, CoverImageUploader } from "./image-uploader";
 
-export { ImageUploader };
+export { ImageUploader, CoverImageUploader };

@@ -17,9 +17,8 @@ import { usePublishBlog } from "../model/use-publish-blog";
 import { useSaveDraft } from "@/shared/model/use-save-draft";
 import { categoryOptions } from "@/shared/model/categories";
 import { MarkdownEditor } from "@/features/markdown";
-import { CoverImageUploader } from "@/features/uploads/image-uploader";
 import { useDraftAutosave } from "@/shared/model/use-draft-autosave";
-import { useState } from "react";
+import { CoverImageUploader } from "@/features/uploads";
 
 /* ---------- schema ONLY for publish ---------- */
 const publishBlogSchema = z.object({
@@ -163,7 +162,7 @@ export const CreateBlogForm = () => {
               <FormLabel>Content</FormLabel>
               <FormControl>
                 <MarkdownEditor
-                  title={form.watch("title")}
+                  title={form.getValues("title")}
                   value={field.value}
                   onChange={field.onChange}
                   blogId={blogId!}
