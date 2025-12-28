@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import mermaid from "mermaid";
-import { initMermaid } from "./mermaid";
+import { initMermaid } from "../lib/mermaid";
 
 type Props = {
   code: string;

@@ -1,7 +1,6 @@
 // features/markdown/markdown-toolbar.tsx
 
 import { useState } from "react";
-import type { useMarkdownToolbar } from "./use-markdown-toolbar";
 import {
   Popover,
   PopoverContent,
@@ -9,6 +8,7 @@ import {
 } from "@/shared/ui/kit/popover";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
+import type { useMarkdownToolbar } from "../model/use-markdown-toolbar";
 
 type Props = {
   toolbar: ReturnType<typeof useMarkdownToolbar>;

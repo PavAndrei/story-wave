@@ -37,8 +37,11 @@ export const useEditorHistory = (initialValue: string) => {
 
   /* ================= helpers ================= */
 
-  const pushToPast = (past: string[], value: string) => {
-    const next = [...past, value];
+  const pushToPast = (
+    past: HistoryEntry[],
+    entry: HistoryEntry,
+  ): HistoryEntry[] => {
+    const next = [...past, entry];
     return next.length > MAX_HISTORY ? next.slice(1) : next;
   };
 

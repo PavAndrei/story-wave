@@ -1,8 +1,9 @@
 // features/markdown/use-markdown-toolbar.ts
 
 import type { RefObject } from "react";
+import type { ApplyPayload } from "../ui/markdown-editor";
 
-type ApplyFn = (next: string) => void;
+type ApplyFn = (payload: ApplyPayload) => void;
 type ListType = "ul" | "ol";
 
 const MERMAID_TEMPLATE = `\`\`\`mermaid
@@ -40,7 +41,7 @@ const isInsideFencedBlock = (
 };
 
 export const useMarkdownToolbar = (
-  textareaRef: RefObject<HTMLTextAreaElement>,
+  textareaRef: RefObject<HTMLTextAreaElement | null>,
   value: string,
   apply: ApplyFn,
 ) => {
@@ -55,17 +56,6 @@ export const useMarkdownToolbar = (
     return { textarea, selectionStart, selectionEnd, value };
   };
 
-  const restoreSelection = (
-    textarea: HTMLTextAreaElement,
-    start: number,
-    end: number,
-  ) => {
-    requestAnimationFrame(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start, end);
-    });
-  };
-
   const getCurrentLine = (value: string, pos: number) => {
     const start = value.lastIndexOf("\n", pos - 1) + 1;
     const end =
@@ -76,6 +66,8 @@ export const useMarkdownToolbar = (
 
   /* ================= inline toggle ================= */
 
+  // features/markdown/use-markdown-toolbar.ts
+
   const toggleInline = (
     wrapperStart: string,
     wrapperEnd: string = wrapperStart,
@@ -84,70 +76,83 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, selectionEnd, value } = ctx;
+    const { selectionStart: from, selectionEnd: to, value } = ctx;
 
-    const from = selectionStart;
-    const to = selectionEnd;
-
+    // CASE 1: нет выделения
     if (from === to) {
       const insert = `${wrapperStart}${placeholder}${wrapperEnd}`;
-      const next = value.slice(0, from) + insert + value.slice(from);
+      const nextValue = value.slice(0, from) + insert + value.slice(from);
 
-      apply(next);
+      apply({
+        value: nextValue,
+        selection: {
+          start: from + wrapperStart.length,
+          end: from + wrapperStart.length + placeholder.length,
+        },
+      });
 
-      restoreSelection(
-        textarea,
-        from + wrapperStart.length,
-        from + wrapperStart.length + placeholder.length,
-      );
       return;
     }
 
     const selected = value.slice(from, to);
-    const before = value.slice(0, from);
-    const after = value.slice(to);
 
     const hasWrapper =
-      before.endsWith(wrapperStart) && after.startsWith(wrapperEnd);
+      value.slice(from - wrapperStart.length, from) === wrapperStart &&
+      value.slice(to, to + wrapperEnd.length) === wrapperEnd;
 
+    // CASE 2: toggle OFF
     if (hasWrapper) {
-      const next =
-        before.slice(0, -wrapperStart.length) +
+      const nextValue =
+        value.slice(0, from - wrapperStart.length) +
         selected +
-        after.slice(wrapperEnd.length);
+        value.slice(to + wrapperEnd.length);
 
-      apply(next);
-      restoreSelection(
-        textarea,
-        from - wrapperStart.length,
-        to - wrapperStart.length,
-      );
+      apply({
+        value: nextValue,
+        selection: {
+          start: from - wrapperStart.length,
+          end: to - wrapperStart.length,
+        },
+      });
+
       return;
     }
 
-    const next = before + wrapperStart + selected + wrapperEnd + after;
+    // CASE 3: toggle ON
+    const nextValue =
+      value.slice(0, from) +
+      wrapperStart +
+      selected +
+      wrapperEnd +
+      value.slice(to);
 
-    apply(next);
-    restoreSelection(
-      textarea,
-      from + wrapperStart.length,
-      to + wrapperStart.length,
-    );
+    apply({
+      value: nextValue,
+      selection: {
+        start: from + wrapperStart.length,
+        end: to + wrapperStart.length,
+      },
+    });
   };
 
   const toggleQuote = () => {
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, value } = ctx;
+    const { selectionStart, value } = ctx;
     const { start, end, text } = getCurrentLine(value, selectionStart);
 
     if (!text.trim()) {
       const insert = "> quote text";
       const next = value.slice(0, start) + insert + value.slice(end);
 
-      apply(next);
-      restoreSelection(textarea, start + 2, start + insert.length);
+      apply({
+        value: next,
+        selection: {
+          start,
+          end: start + next.length,
+        },
+      });
       return;
     }
 
@@ -155,7 +160,13 @@ export const useMarkdownToolbar = (
     const nextLine = isQuote ? text.replace(/^>\s+/, "") : `> ${text}`;
 
     const next = value.slice(0, start) + nextLine + value.slice(end);
-    apply(next);
+    apply({
+      value: next,
+      selection: {
+        start,
+        end: start + nextLine.length,
+      },
+    });
   };
 
   /* ================= headings ================= */
@@ -164,26 +175,31 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, value } = ctx;
+    const { selectionStart, value } = ctx;
     const { start, end, text } = getCurrentLine(value, selectionStart);
 
     const headingRegex = /^(#{1,6})\s+/;
     const current = text.match(headingRegex)?.[1]?.length;
 
-    let nextLine = text;
+    let nextLine: string;
 
     if (current === level) {
       // toggle OFF
       nextLine = text.replace(headingRegex, "");
     } else {
-      // replace or add
+      // toggle ON / replace
       nextLine = `${"#".repeat(level)} ${text.replace(headingRegex, "")}`;
     }
 
-    const next = value.slice(0, start) + nextLine + value.slice(end);
+    const nextValue = value.slice(0, start) + nextLine + value.slice(end);
 
-    apply(next);
-    restoreSelection(textarea, start, start + nextLine.length);
+    apply({
+      value: nextValue,
+      selection: {
+        start,
+        end: start + nextLine.length,
+      },
+    });
   };
 
   /* ================= lists ================= */
@@ -192,7 +208,7 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, selectionEnd, value } = ctx;
+    const { selectionStart, selectionEnd, value } = ctx;
 
     if (selectionStart === selectionEnd) {
       const lineStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
@@ -205,17 +221,15 @@ export const useMarkdownToolbar = (
 
       if (!line.trim()) {
         const insert = type === "ul" ? "- " : "1. ";
-
         const next = value.slice(0, lineStart) + insert + value.slice(lineEnd);
 
-        apply(next);
-
-        restoreSelection(
-          textarea,
-          lineStart + insert.length,
-          lineStart + insert.length,
-        );
-
+        apply({
+          value: next,
+          selection: {
+            start: lineStart + insert.length,
+            end: lineStart + insert.length,
+          },
+        });
         return;
       }
     }
@@ -258,20 +272,20 @@ export const useMarkdownToolbar = (
       transformed.join("\n") +
       value.slice(blockEnd);
 
-    apply(next);
-
-    restoreSelection(
-      textarea,
-      blockStart,
-      blockStart + transformed.join("\n").length,
-    );
+    apply({
+      value: next,
+      selection: {
+        start: blockStart,
+        end: blockStart + transformed.join("\n").length,
+      },
+    });
   };
 
   const toggleTaskList = () => {
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, selectionEnd, value } = ctx;
+    const { selectionStart, selectionEnd, value } = ctx;
 
     // CASE: пустая строка + нет выделения
     if (selectionStart === selectionEnd) {
@@ -285,16 +299,15 @@ export const useMarkdownToolbar = (
 
       if (!line.trim()) {
         const insert = "- [ ] check-me";
-
         const next = value.slice(0, lineStart) + insert + value.slice(lineEnd);
 
-        apply(next);
-
-        restoreSelection(
-          textarea,
-          lineStart + insert.length,
-          lineStart + insert.length,
-        );
+        apply({
+          value: next,
+          selection: {
+            start: lineStart + insert.length,
+            end: lineStart + insert.length,
+          },
+        });
 
         return;
       }
@@ -344,13 +357,13 @@ export const useMarkdownToolbar = (
       transformed.join("\n") +
       value.slice(blockEnd);
 
-    apply(next);
-
-    restoreSelection(
-      textarea,
-      blockStart,
-      blockStart + transformed.join("\n").length,
-    );
+    apply({
+      value: next,
+      selection: {
+        start: blockStart,
+        end: blockStart + transformed.join("\n").length,
+      },
+    });
   };
 
   /* ================= active state ================= */
@@ -401,7 +414,7 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, selectionEnd, value } = ctx;
+    const { selectionStart, selectionEnd, value } = ctx;
 
     const insert =
       selectionStart !== selectionEnd
@@ -413,17 +426,20 @@ export const useMarkdownToolbar = (
 
     const next = value.slice(0, start) + insert + value.slice(end);
 
-    apply(next);
-
-    const cursor = start + insert.length;
-    restoreSelection(textarea, cursor, cursor);
+    apply({
+      value: next,
+      selection: {
+        start: start + insert.length,
+        end: start + insert.length,
+      },
+    });
   };
 
   const insertTable = (rows: number, cols: number) => {
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, value } = ctx;
+    const { selectionStart, value } = ctx;
 
     const header = `| ${Array(cols).fill("Header").join(" | ")} |`;
     const divider = `| ${Array(cols).fill("---").join(" | ")} |`;
@@ -441,10 +457,13 @@ export const useMarkdownToolbar = (
       "\n\n" +
       value.slice(selectionStart);
 
-    apply(next);
-
-    const cursor = selectionStart + header.length + divider.length + 2;
-    restoreSelection(textarea, cursor, cursor);
+    apply({
+      value: next,
+      selection: {
+        start: selectionStart + table.length + 2,
+        end: selectionStart + table.length + 2,
+      },
+    });
   };
 
   const getSelectionText = () => {
@@ -457,17 +476,20 @@ export const useMarkdownToolbar = (
     const ctx = getCtx();
     if (!ctx) return;
 
-    const { textarea, selectionStart, value } = ctx;
+    const { selectionStart, value } = ctx;
 
     const next =
       value.slice(0, selectionStart) +
       MERMAID_TEMPLATE +
       value.slice(selectionStart);
 
-    apply(next);
-
-    const cursor = selectionStart + MERMAID_TEMPLATE.length;
-    restoreSelection(textarea, cursor, cursor);
+    apply({
+      value: next,
+      selection: {
+        start: selectionStart + MERMAID_TEMPLATE.length,
+        end: selectionStart + MERMAID_TEMPLATE.length,
+      },
+    });
   };
 
   /* ================= public api ================= */

@@ -10,7 +10,7 @@ type MarkdownStats = {
 
 export const useMarkdownStats = (
   value: string,
-  textareaRef: RefObject<HTMLTextAreaElement>,
+  textareaRef: RefObject<HTMLTextAreaElement | null>,
 ): MarkdownStats => {
   const [stats, setStats] = useState<MarkdownStats>({
     bytes: 0,

@@ -7,7 +7,7 @@ type PreviewStats = {
 };
 
 export const usePreviewStats = (
-  previewRef: RefObject<HTMLElement>,
+  previewRef: RefObject<HTMLElement | null>,
   value: string,
 ): PreviewStats => {
   const [stats, setStats] = useState<PreviewStats>({

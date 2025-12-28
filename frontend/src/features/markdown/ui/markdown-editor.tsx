@@ -2,22 +2,27 @@
 import { useEffect, useRef } from "react";
 import { Textarea } from "@/shared/ui/kit/textarea";
 import { MarkdownRenderer } from "./markdown-renderer";
-import { MarkdownToolbar } from "./markdown-toolbar";
-import { useMarkdownToolbar } from "./use-markdown-toolbar";
-import { ImageUploader } from "../uploads";
-import { useMarkdownStats } from "./use-markdown-stats";
-import { usePreviewStats } from "./use-preview-stats";
+import { useMarkdownToolbar } from "../model/use-markdown-toolbar";
+import { ImageUploader } from "../../uploads";
+import { useMarkdownStats } from "../model/use-markdown-stats";
+import { usePreviewStats } from "../model/use-preview-stats";
 import { StatsBar } from "./stats-bar";
-import { useEditorHistory } from "./use-editor-history";
-import { exportMarkdown, importMarkdownFile } from "./import-export";
-import { exportHtml } from "./export-html";
-import { exportPdf } from "./export-pdf";
-import { getExportFilename } from "./filename";
-import { renumberOrderedList } from "./renumber-ordered-list";
+import { useEditorHistory } from "../model/use-editor-history";
+import { exportMarkdown, importMarkdownFile } from "../services/import-export";
+import { exportHtml } from "../services/export-html";
+import { exportPdf } from "../services/export-pdf";
+import { getExportFilename } from "../lib/filename";
+import { renumberOrderedList } from "../lib/renumber-ordered-list";
+import { MarkdownToolbar } from "./markdown-toolbar";
 
 export type UploadedImage = {
   id: string; // image _id из Mongo
   url: string; // cloudinary url
+};
+
+export type ApplyPayload = {
+  value: string;
+  selection?: { start: number; end: number };
 };
 
 type Props = {
@@ -41,25 +46,14 @@ export const MarkdownEditor = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // selection
-  const getSelection = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return undefined;
-
-    return {
-      start: textarea.selectionStart,
-      end: textarea.selectionEnd,
-    };
-  };
-
   // history
   const history = useEditorHistory(value);
 
-  const applyChange = (next: string, mark = false) => {
-    const selection = getSelection();
+  const applyChange = (payload: ApplyPayload, mark = false) => {
     if (mark) history.markAction();
-    history.setValue(next, selection);
-    onChange(next);
+
+    history.setValue(payload.value, payload.selection);
+    onChange(payload.value);
   };
 
   // imports & exports
@@ -82,7 +76,13 @@ export const MarkdownEditor = ({
 
       try {
         const content = await importMarkdownFile(file);
-        applyChange(content, true);
+        applyChange(
+          {
+            value: content,
+            selection: { start: 0, end: 0 },
+          },
+          true,
+        );
       } catch (err) {
         alert((err as Error).message);
       }
@@ -104,8 +104,8 @@ export const MarkdownEditor = ({
   const markdownStats = useMarkdownStats(value, textareaRef);
   const previewStats = usePreviewStats(previewRef, value);
 
-  const toolbar = useMarkdownToolbar(textareaRef, value, (next) =>
-    applyChange(next, true),
+  const toolbar = useMarkdownToolbar(textareaRef, value, (payload) =>
+    applyChange(payload, true),
   );
 
   const toggleTaskAtIndex = (index: number) => {
@@ -124,7 +124,9 @@ export const MarkdownEditor = ({
       return line;
     });
 
-    onChange(next.join("\n"));
+    applyChange({
+      value: next.join("\n"),
+    });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -162,7 +164,13 @@ export const MarkdownEditor = ({
         const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
         const nextCursor = lineStart;
 
-        applyChange(renumberOrderedList(next, nextCursor), true);
+        applyChange(
+          {
+            value: renumberOrderedList(next, nextCursor),
+            selection: { start: nextCursor, end: nextCursor },
+          },
+          true,
+        );
       }
       return;
     }
@@ -185,7 +193,16 @@ export const MarkdownEditor = ({
       const next =
         value.slice(0, selectionStart) + insert + value.slice(selectionStart);
 
-      applyChange(next, true);
+      applyChange(
+        {
+          value: next,
+          selection: {
+            start: selectionStart + insert.length,
+            end: selectionStart + insert.length,
+          },
+        },
+        true,
+      );
 
       return;
     }
@@ -196,13 +213,33 @@ export const MarkdownEditor = ({
 
       if (!line.replace(/^- /, "").trim()) {
         const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
-        onChange(next);
+        applyChange(
+          {
+            value: renumberOrderedList(next, lineStart),
+            selection: {
+              start: lineStart,
+              end: lineStart,
+            },
+          },
+          true,
+        );
+
         return;
       }
 
       const insert = "\n- ";
-      onChange(
-        value.slice(0, selectionStart) + insert + value.slice(selectionStart),
+      const next =
+        value.slice(0, selectionStart) + insert + value.slice(selectionStart);
+
+      applyChange(
+        {
+          value: next,
+          selection: {
+            start: selectionStart + insert.length,
+            end: selectionStart + insert.length,
+          },
+        },
+        true,
       );
       return;
     }
@@ -212,8 +249,22 @@ export const MarkdownEditor = ({
       e.preventDefault();
 
       if (!line.replace(/^\d+\.\s+/, "").trim()) {
-        const next = value.slice(0, lineStart) + value.slice(lineEnd + 1);
-        onChange(renumberOrderedList(next, lineStart));
+        const current = Number(line.match(/^(\d+)\./)?.[1] ?? 1);
+        const insert = `\n${current + 1}. `;
+        const next =
+          value.slice(0, selectionStart) + insert + value.slice(selectionStart);
+
+        applyChange(
+          {
+            value: next,
+            selection: {
+              start: selectionStart + insert.length,
+              end: selectionStart + insert.length,
+            },
+          },
+          true,
+        );
+
         return;
       }
 
@@ -233,17 +284,22 @@ export const MarkdownEditor = ({
 
     const { selectionStart, selectionEnd } = textarea;
 
-    const next =
+    const nextValue =
       value.slice(0, selectionStart) + snippet + value.slice(selectionEnd);
 
-    applyChange(next, true);
-  };
+    const cursor = selectionStart + snippet.length;
 
-  useEffect(() => {
-    if (value !== history.value) {
-      onChange(history.value);
-    }
-  }, [history.value]);
+    applyChange(
+      {
+        value: nextValue,
+        selection: {
+          start: cursor,
+          end: cursor,
+        },
+      },
+      true,
+    );
+  };
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -256,6 +312,10 @@ export const MarkdownEditor = ({
       textarea.focus();
       textarea.setSelectionRange(selection.start, selection.end);
     });
+  }, [history.value]);
+
+  useEffect(() => {
+    onChange(history.value);
   }, [history.value]);
 
   return (
@@ -274,7 +334,6 @@ export const MarkdownEditor = ({
         />
 
         <ImageUploader
-          variant="editor"
           blogId={blogId}
           images={images}
           onImagesChange={onImagesChange}
@@ -285,8 +344,16 @@ export const MarkdownEditor = ({
       <div className="grid grid-cols-2 gap-4">
         <Textarea
           ref={textareaRef}
-          value={value}
-          onChange={(e) => applyChange(e.target.value)}
+          value={history.value}
+          onChange={(e) =>
+            applyChange({
+              value: e.target.value,
+              selection: {
+                start: e.target.selectionStart ?? 0,
+                end: e.target.selectionEnd ?? 0,
+              },
+            })
+          }
           onKeyDown={handleKeyDown}
           rows={14}
           className="resize-none min-h-[300px]"

@@ -13,7 +13,12 @@ export const MarkdownRenderer = ({
   content,
   onToggleTask,
 }: MarkdownRendererProps) => {
-  let taskIndex = -1;
+  const taskLineIndices = content
+    .split("\n")
+    .map((line, index) => (/- \[[ x]\]/i.test(line) ? index : null))
+    .filter((v): v is number => v !== null);
+
+  let taskPointer = 0;
 
   return (
     <div className="markdown prose max-w-none">
@@ -55,25 +60,16 @@ export const MarkdownRenderer = ({
               className="rounded-md my-4 max-w-full"
             />
           ),
-          code: ({ inline, className, children }) => {
+          code: ({ className, children }) => {
             const language = className?.replace("language-", "");
 
-            if (!inline && language === "mermaid") {
+            if (language === "mermaid") {
               return <MermaidDiagram code={String(children).trim()} />;
             }
-
-            if (inline) {
-              return (
-                <code className="bg-muted px-1 py-0.5 rounded text-sm">
-                  {children}
-                </code>
-              );
-            }
-
             return (
-              <pre className="bg-muted p-3 rounded-md overflow-x-auto my-4">
-                <code>{children}</code>
-              </pre>
+              <code className="bg-muted p-3 rounded-md overflow-x-auto my-4">
+                {children}
+              </code>
             );
           },
           blockquote: ({ children }) => (
@@ -95,13 +91,16 @@ export const MarkdownRenderer = ({
             <td className="border px-3 py-2">{children}</td>
           ),
           input: ({ checked }) => {
-            taskIndex++;
+            const lineIndex = taskLineIndices[taskPointer];
+            taskPointer++;
+
+            if (lineIndex === undefined) return null;
 
             return (
               <input
                 type="checkbox"
                 checked={checked}
-                onChange={() => onToggleTask(taskIndex)}
+                onChange={() => onToggleTask(lineIndex)}
               />
             );
           },

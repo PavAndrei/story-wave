@@ -1,4 +1,4 @@
-import { MarkdownRenderer } from "./markdown-renderer";
-import { MarkdownEditor } from "./markdown-editor";
+import { MarkdownRenderer } from "./ui/markdown-renderer";
+import { MarkdownEditor } from "./ui/markdown-editor";
 
 export { MarkdownRenderer, MarkdownEditor };
