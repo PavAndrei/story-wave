@@ -227,6 +227,13 @@ export const blogApi = {
       credentials: "include",
     });
   },
+
+  deleteBlogById: (id: string) => {
+    return apiInstance<ApiResponse>(`/blog/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  },
 };
 
 export const uploadApi = {

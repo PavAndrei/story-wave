@@ -5,8 +5,11 @@ import { Button } from "@/shared/ui/kit/button";
 import { Card, CardHeader, CardFooter } from "@/shared/ui/kit/card";
 import { Image } from "lucide-react";
 import { href, Link } from "react-router-dom";
+import { useDeleteBlog } from "../model/use-delete-blog";
 
 export const MyBlogItem = (blog: Blog) => {
+  const { deleteBlog, errorMessage, isDeleting } = useDeleteBlog(blog._id);
+
   return (
     <li>
       <Card className="border border-slate-700">
@@ -41,9 +44,16 @@ export const MyBlogItem = (blog: Blog) => {
               <Button className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-1 px-3 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2">
                 Edit
               </Button>
-              <Button className="cursor-pointer bg-red-800 text-slate-200 font-medium text-base py-1 px-3 hover:bg-red-700 active:scale-95 ml-auto mr-0 flex gap-2">
-                Delete
+              <Button
+                disabled={isDeleting}
+                onClick={() => deleteBlog()}
+                className="cursor-pointer bg-red-800 text-slate-200 font-medium text-base py-1 px-3 hover:bg-red-700 active:scale-95 ml-auto mr-0 flex gap-2"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
               </Button>
+              {errorMessage && (
+                <p className="text-sm text-red-600">{errorMessage}</p>
+              )}
             </div>
 
             {blog.status === "published" && (

@@ -3,7 +3,8 @@ import BlogModel from '../models/blog.model.js';
 import appAssert from '../utils/appAssert.js';
 import { FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import imageModel from '../models/image.model.js';
-import { deleteFromCloudinary } from '../utils/cloudinary.js';
+import { cloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
+import UserModel from '../models/user.model.js';
 
 type SaveBlogProps = {
   blogId?: string;
@@ -58,6 +59,10 @@ export const saveBlogService = async ({
   if (data?.content !== undefined) blog.content = data.content;
   if (data?.categories !== undefined) blog.categories = data.categories;
   if (data?.coverImgUrl !== undefined) blog.coverImgUrl = data.coverImgUrl;
+
+  await UserModel.findByIdAndUpdate(authorId, {
+    $addToSet: { blogs: blog._id },
+  });
 
   blog.status = status;
 
@@ -160,4 +165,50 @@ export const getMyBlogsService = async ({
       totalPages,
     },
   };
+};
+
+export const deleteBlogById = async (
+  blogId: mongoose.Types.ObjectId,
+  userId: mongoose.Types.ObjectId
+) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const blog = await BlogModel.findById(blogId).session(session);
+
+    appAssert(blog, NOT_FOUND, 'Blog not found');
+
+    appAssert(blog.authorId.equals(userId), FORBIDDEN, 'Not your blog');
+
+    /* ---------- 1. Collecting images ---------- */
+    const images = await imageModel.find({ blogId }).session(session);
+
+    /* ---------- 2. Delete images ---------- */
+    for (const image of images) {
+      await cloudinary.uploader.destroy(image.publicId);
+    }
+
+    /* ---------- 3. Delete image docs ---------- */
+    await imageModel.deleteMany({ blogId }).session(session);
+
+    /* ---------- 4. Delete blog ---------- */
+    await BlogModel.findByIdAndDelete(blogId).session(session);
+
+    /* ---------- 5. Delete blogId from user ---------- */
+    await UserModel.findByIdAndUpdate(
+      userId,
+      { $pull: { blogs: blog._id } },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return { success: true };
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };

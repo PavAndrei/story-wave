@@ -1,7 +1,8 @@
-import { BAD_REQUEST, OK } from '../constants/http.js';
+import { BAD_REQUEST, NOT_FOUND, OK } from '../constants/http.js';
 import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
 import {
+  deleteBlogById,
   getMyBlogsService,
   saveBlogService,
 } from '../services/blog.service.js';
@@ -93,4 +94,16 @@ export const getOneBlogHandler = catchErrors(async (req, res) => {
     message: 'Blog found',
     blog,
   });
+});
+
+export const deleteBlogHandler = catchErrors(async (req, res) => {
+  const blogId = req.params.id;
+  const userId = req.userId!;
+
+  await deleteBlogById(
+    new mongoose.Types.ObjectId(blogId),
+    new mongoose.Types.ObjectId(userId)
+  );
+
+  return res.status(OK).json({ success: true, message: 'Blog deleted' });
 });
