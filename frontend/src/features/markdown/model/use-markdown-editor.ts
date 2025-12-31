@@ -267,6 +267,16 @@ export const useMarkdownEditor = ({
   };
 
   useEffect(() => {
+    if (value !== history.value) {
+      history.markAction();
+      history.setValue(value, {
+        start: value.length,
+        end: value.length,
+      });
+    }
+  }, [value]);
+
+  useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 

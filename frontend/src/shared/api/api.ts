@@ -89,6 +89,7 @@ export type EditMyProfileApiResponse = ApiResponse & {
   data?: User;
 };
 export type CreateBlogApiResponse = ApiResponse & { blog: Blog };
+export type GetBlogByIdApiResponse = ApiResponse & { blog: Blog };
 export type GetMyBlogsApiResponse = ApiResponse & {
   blogs?: Blog[];
   pagination: {
@@ -215,6 +216,13 @@ export const blogApi = {
     });
 
     return apiInstance<GetMyBlogsApiResponse>(`/blog/my${query}`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
+
+  getBlogById: (id: string) => {
+    return apiInstance<GetBlogByIdApiResponse>(`/blog/${id}`, {
       method: "GET",
       credentials: "include",
     });

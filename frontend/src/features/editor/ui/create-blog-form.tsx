@@ -11,7 +11,6 @@ import { Button } from "@/shared/ui/kit/button";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { z } from "zod";
 import Multiselect from "react-select";
-// import { ImageUploader } from "@/features/uploads";
 import { useParams } from "react-router-dom";
 import { usePublishBlog } from "../model/use-publish-blog";
 import { useSaveDraft } from "@/shared/model/use-save-draft";
@@ -19,6 +18,9 @@ import { categoryOptions } from "@/shared/model/categories";
 import { MarkdownEditor } from "@/features/markdown";
 import { useDraftAutosave } from "@/shared/model/use-draft-autosave";
 import { CoverImageUploader } from "@/features/uploads";
+import { blogApi } from "@/shared/api/api";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 /* ---------- schema ONLY for publish ---------- */
 const publishBlogSchema = z.object({
@@ -62,13 +64,35 @@ export const CreateBlogForm = () => {
     name: "content",
   });
 
-  const autoSave = useDraftAutosave({
-    blogId,
-    title: form.watch("title"),
-    content,
-    categories: form.watch("categories"),
-    coverImgUrl: form.watch("coverImage")?.url ?? undefined,
+  // const autoSave = useDraftAutosave({
+  //   blogId,
+  //   title: form.watch("title"),
+  //   content,
+  //   categories: form.watch("categories"),
+  //   coverImgUrl: form.watch("coverImage")?.url ?? undefined,
+  // });
+
+  /* ---------- query ---------- */
+
+  const getBlogByIdQuery = useQuery({
+    queryKey: [blogApi.baseKey, blogId],
+    queryFn: () => blogApi.getBlogById(blogId!),
+    enabled: !!blogId,
   });
+
+  const blog = getBlogByIdQuery.data?.blog;
+
+  useEffect(() => {
+    if (!blog) return;
+
+    form.reset({
+      title: blog.title ?? "",
+      content: blog.content,
+      categories: blog.categories ?? [],
+      coverImage: blog.coverImgUrl,
+      images: blog.imagesUrls,
+    });
+  }, [blog, form]);
 
   /* ---------- SAVE DRAFT (NO VALIDATION) ---------- */
   const handleSaveDraft = () => {
@@ -110,6 +134,8 @@ export const CreateBlogForm = () => {
       coverImgUrl: data.coverImage?.url ?? null,
     });
   };
+
+  console.log(form.watch());
 
   return (
     <Form {...form}>
@@ -175,13 +201,13 @@ export const CreateBlogForm = () => {
           )}
         />
 
-        <span className="text-xs text-muted">
+        {/* <span className="text-xs text-muted">
           {autoSave.status === "saving" && "Saving…"}
           {autoSave.status === "saved" && autoSave.lastSavedAt && (
             <>Saved at {autoSave.lastSavedAt.toLocaleTimeString()}</>
           )}
           {autoSave.status === "error" && "Autosave failed"}
-        </span>
+        </span> */}
 
         <div className="flex gap-3">
           <Button

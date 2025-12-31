@@ -2,10 +2,12 @@ import { Button } from "@/shared/ui/kit/button";
 import { Upload } from "lucide-react";
 import { useImageUploader } from "./use-image-uploader";
 
-export type UploadedImage = {
-  id: string; // image _id из Mongo
-  url: string; // cloudinary url
-};
+export type UploadedImage =
+  | {
+      id: string; // image _id из Mongo
+      url: string; // cloudinary url
+    }
+  | string; // временно: для совместимости с уже загруженными изображениями (url-строка)
 
 export type EditorUploaderProps = {
   blogId: string;
@@ -45,6 +47,7 @@ export const ImageUploader = ({
     onUploaded: (uploaded) => {
       // 1. вставляем markdown
       uploaded.forEach((img) => {
+        if (typeof img === "string") return;
         insertMarkdown(`\n\n![](${img.url})\n\n`);
       });
 
@@ -100,7 +103,7 @@ export const CoverImageUploader = ({
     <div className="flex flex-col gap-3">
       {value && (
         <img
-          src={value.url}
+          src={typeof value === "string" ? value : value.url}
           alt="Cover"
           className="w-full max-h-64 object-cover rounded-md"
         />
