@@ -15,3 +15,13 @@ export const publishSchema = z.object({
   coverImgUrl: z.string().min(1, 'Cover image is required'),
   imagesUrls: z.array(z.string()).optional(),
 });
+
+export const EditBlogSchema = z.object({
+  title: z.string().optional(),
+  content: z.string().optional(),
+  categories: z.array(z.string()).optional(),
+  coverImgUrl: z.string().nullable().optional(),
+  status: z.enum(['draft', 'published']).optional(),
+});
+
+export type EditBlogSchemaValues = z.infer<typeof EditBlogSchema>;

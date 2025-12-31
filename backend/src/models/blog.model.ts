@@ -11,14 +11,13 @@ export interface BlogDocument extends mongoose.Document {
 
   createdAt: Date;
   updatedAt: Date;
+  lastEditedAt?: Date | null;
   publishedAt?: Date;
 
   categories: string[];
 
   coverImgUrl: string;
   imagesUrls: string[];
-
-  isDeleted: boolean;
 }
 
 const blogSchema = new mongoose.Schema<BlogDocument>(
@@ -53,10 +52,9 @@ const blogSchema = new mongoose.Schema<BlogDocument>(
     },
     coverImgUrl: { type: String, default: '' },
     imagesUrls: { type: [String], default: [] },
-    isDeleted: {
-      type: Boolean,
-      required: true,
-      default: false,
+    lastEditedAt: {
+      type: Date,
+      default: null,
     },
   },
   {
