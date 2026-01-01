@@ -41,8 +41,13 @@ export const MyBlogItem = (blog: Blog) => {
 
           <div className="flex gap-2 items-end flex-col">
             <div className="flex gap-2 items-center">
-              <Button className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-1 px-3 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2">
-                Edit
+              <Button
+                asChild
+                className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-1 px-3 hover:bg-cyan-600 active:scale-95 ml-auto mr-0 flex gap-2"
+              >
+                <Link to={href(ROUTES.CREATE_BLOG, { blogId: blog._id })}>
+                  Edit
+                </Link>
               </Button>
               <Button
                 disabled={isDeleting}

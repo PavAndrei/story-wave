@@ -5,7 +5,6 @@ import { FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import imageModel from '../models/image.model.js';
 import { cloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
 import UserModel from '../models/user.model.js';
-import { EditBlogSchemaValues } from '../controllers/blog.schemas.js';
 
 type SaveBlogProps = {
   blogId?: string;
@@ -16,6 +15,25 @@ type SaveBlogProps = {
     content?: string;
     categories?: string[];
     coverImgUrl?: string;
+  };
+};
+
+const mapBlogToFrontend = async (blog: any) => {
+  const images = await imageModel.find({ blogId: blog._id }).lean();
+
+  return {
+    ...blog,
+
+    coverImage: blog.coverImgUrl
+      ? {
+          url: blog.coverImgUrl,
+        }
+      : null,
+
+    images: images.map((img) => ({
+      id: img._id.toString(),
+      url: img.url,
+    })),
   };
 };
 
@@ -91,11 +109,19 @@ export const saveBlogService = async ({
 
   blog.imagesUrls = Array.from(usedUrls);
 
-  /* ================= SAVE ================= */
+  const contentFieldsChanged =
+    data?.title !== undefined ||
+    data?.content !== undefined ||
+    data?.categories !== undefined ||
+    data?.coverImgUrl !== undefined;
+
+  if (contentFieldsChanged) {
+    blog.lastEditedAt = new Date();
+  }
 
   await blog.save();
 
-  return blog;
+  return await mapBlogToFrontend(blog.toObject());
 };
 
 type GetMyBlogsServiceProps = {
@@ -212,39 +238,4 @@ export const deleteBlogById = async (
     session.endSession();
     throw error;
   }
-};
-
-export const editBlog = async (
-  id: string,
-  authorId: mongoose.Types.ObjectId,
-  data: EditBlogSchemaValues
-) => {
-  const blog = await BlogModel.findById(id);
-
-  appAssert(blog, NOT_FOUND, 'Blog not found');
-
-  appAssert(
-    blog.authorId.equals(authorId),
-    FORBIDDEN,
-    'You are not allowed to edit this blog'
-  );
-
-  if (data.title !== undefined) blog.title = data.title;
-  if (data.content !== undefined) blog.content = data.content;
-  if (data.categories !== undefined) blog.categories = data.categories;
-  if (data.coverImgUrl !== undefined) blog.coverImgUrl = data.coverImgUrl ?? '';
-
-  if (data.status !== undefined) {
-    blog.status = data.status;
-
-    if (data.status === 'published' && !blog.publishedAt) {
-      blog.publishedAt = new Date();
-    }
-  }
-
-  blog.lastEditedAt = new Date();
-
-  await blog.save();
-
-  return blog;
 };

@@ -3,12 +3,11 @@ import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
 import {
   deleteBlogById,
-  editBlog,
   getMyBlogsService,
   saveBlogService,
 } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
-import { draftSchema, EditBlogSchema, publishSchema } from './blog.schemas.js';
+import { draftSchema, publishSchema } from './blog.schemas.js';
 import BlogModel from '../models/blog.model.js';
 
 export const saveBlogHandler = catchErrors(async (req, res) => {
@@ -39,10 +38,7 @@ export const saveBlogHandler = catchErrors(async (req, res) => {
 
   return res.status(OK).json({
     success: true,
-    blog: {
-      _id: blog._id,
-      status: blog.status,
-    },
+    blog,
   });
 });
 
@@ -107,19 +103,4 @@ export const deleteBlogHandler = catchErrors(async (req, res) => {
   );
 
   return res.status(OK).json({ success: true, message: 'Blog deleted' });
-});
-
-export const editBlogHandler = catchErrors(async (req, res) => {
-  const authorId = req.userId!;
-  const { id } = req.params;
-
-  const data = EditBlogSchema.parse(req.body);
-
-  const blog = await editBlog(id, authorId, data);
-
-  return res.status(OK).json({
-    success: true,
-    message: 'Blog edited successfully',
-    blog,
-  });
 });

@@ -4,7 +4,6 @@ import {
   getMyBlogsHandler,
   getOneBlogHandler,
   deleteBlogHandler,
-  editBlogHandler,
 } from '../controllers/blog.controller.js';
 import authenticate from '../middleware/authentificate.js';
 import { setRequestExtensions } from '../middleware/requestExtension.js';
@@ -20,6 +19,5 @@ blogRoutes.delete(
   authenticate,
   deleteBlogHandler
 );
-blogRoutes.patch('/:id', setRequestExtensions, authenticate, editBlogHandler);
 
 export default blogRoutes;

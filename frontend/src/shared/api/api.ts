@@ -32,6 +32,7 @@ export type Blog = {
   isDeleted: boolean;
   _id: string;
   createdAt: Date;
+  lastEditedAt: Date;
   updatedAt: Date;
   __v: number;
 };

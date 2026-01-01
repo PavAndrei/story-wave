@@ -68,10 +68,10 @@ export const ImageUploader = ({
       />
 
       <Button
+        disabled={!blogId || isPending || !canAddMore}
         type="button"
         size="sm"
         variant="ghost"
-        disabled={!canAddMore || isPending}
         onClick={() => inputRef.current?.click()}
       >
         <Upload size={16} />
@@ -120,7 +120,7 @@ export const CoverImageUploader = ({
       <Button
         type="button"
         variant="outline"
-        disabled={isPending}
+        disabled={!blogId || isPending}
         onClick={() => inputRef.current?.click()}
       >
         <Upload size={16} className="mr-2" />

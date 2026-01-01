@@ -35,6 +35,13 @@ export const useUploadImages = (files: File[], blogId: string) => {
     uploadMutation.mutate(formData);
   }, [files, blogId, formData]);
 
+  if (!blogId || files.length === 0) {
+    return {
+      images: [],
+      isPending: false,
+    };
+  }
+
   return {
     images, // ← { id, url }[]
     isPending: uploadMutation.isPending,

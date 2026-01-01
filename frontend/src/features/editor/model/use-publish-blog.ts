@@ -1,35 +1,37 @@
-import { blogApi, type BlogParams } from "@/shared/api/api";
-import { queryClient } from "@/shared/api/query-client";
+import { blogApi, type Blog, type BlogParams } from "@/shared/api/api";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { href, useNavigate } from "react-router-dom";
 
+type PublishBlogResponse = {
+  blog: Blog;
+};
+
 export const usePublishBlog = () => {
   const navigate = useNavigate();
 
-  const publishBlogMutation = useMutation({
-    mutationFn: (data: BlogParams) => blogApi.saveBlog(data),
+  const mutation = useMutation<PublishBlogResponse, Error, BlogParams>({
+    mutationFn: blogApi.saveBlog,
 
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["blogs"] });
-
-      navigate(
-        href(ROUTES.BLOG, {
-          blogId: data.blog._id,
-        }),
-      );
+      navigate(href(ROUTES.BLOG, { blogId: data.blog._id }));
     },
 
     onError: (error) => {
-      console.error("PUBLISH FAILED:", error.message);
+      console.error("Failed to publish blog:", error);
     },
   });
 
+  const publishBlog = async (payload: BlogParams) => {
+    const result = await mutation.mutateAsync(payload);
+    return result.blog;
+  };
+
+  const errorMessage = mutation.isError ? mutation.error.message : undefined;
+
   return {
-    publishBlog: publishBlogMutation.mutate,
-    isPending: publishBlogMutation.isPending,
-    errorMessage: publishBlogMutation.isError
-      ? publishBlogMutation.error.message
-      : null,
+    publishBlog,
+    isPending: mutation.isPending,
+    errorMessage,
   };
 };

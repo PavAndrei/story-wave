@@ -17,8 +17,6 @@ export const useDeleteBlog = (blogId: string) => {
     ? deleteBlogMutation.error.message
     : null;
 
-  console.log(errorMessage);
-
   return {
     deleteBlog: deleteBlogMutation.mutate,
     isDeleting: deleteBlogMutation.isPending,

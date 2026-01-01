@@ -8,134 +8,16 @@ import {
 } from "@/shared/ui/kit/form";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
-import { useForm, Controller, useWatch } from "react-hook-form";
-import { z } from "zod";
+import { Controller } from "react-hook-form";
 import Multiselect from "react-select";
-import { useParams } from "react-router-dom";
-import { usePublishBlog } from "../model/use-publish-blog";
-import { useSaveDraft } from "@/shared/model/use-save-draft";
 import { categoryOptions } from "@/shared/model/categories";
 import { MarkdownEditor } from "@/features/markdown";
-import { useDraftAutosave } from "@/shared/model/use-draft-autosave";
 import { CoverImageUploader } from "@/features/uploads";
-import { blogApi } from "@/shared/api/api";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-
-/* ---------- schema ONLY for publish ---------- */
-const publishBlogSchema = z.object({
-  title: z.string().min(1, { message: "Title is required" }),
-  content: z.string().min(1, { message: "Content is required" }),
-  categories: z.array(z.string()),
-  coverImage: z
-    .object({
-      id: z.string(),
-      url: z.string(),
-    })
-    .nullable(),
-  images: z.array(
-    z.object({
-      id: z.string(),
-      url: z.string(),
-    }),
-  ),
-});
-
-type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
+import { useBlogEditor } from "../model/use-blog-editor";
 
 export const CreateBlogForm = () => {
-  const { blogId } = useParams();
-
-  const form = useForm<PublishBlogFormValues>({
-    defaultValues: {
-      title: "",
-      content: "",
-      categories: [],
-      coverImage: null,
-      images: [],
-    },
-  });
-
-  const publishBlog = usePublishBlog();
-  const saveDraft = useSaveDraft();
-
-  const content = useWatch({
-    control: form.control,
-    name: "content",
-  });
-
-  // const autoSave = useDraftAutosave({
-  //   blogId,
-  //   title: form.watch("title"),
-  //   content,
-  //   categories: form.watch("categories"),
-  //   coverImgUrl: form.watch("coverImage")?.url ?? undefined,
-  // });
-
-  /* ---------- query ---------- */
-
-  const getBlogByIdQuery = useQuery({
-    queryKey: [blogApi.baseKey, blogId],
-    queryFn: () => blogApi.getBlogById(blogId!),
-    enabled: !!blogId,
-  });
-
-  const blog = getBlogByIdQuery.data?.blog;
-
-  useEffect(() => {
-    if (!blog) return;
-
-    form.reset({
-      title: blog.title ?? "",
-      content: blog.content,
-      categories: blog.categories ?? [],
-      coverImage: blog.coverImgUrl,
-      images: blog.imagesUrls,
-    });
-  }, [blog, form]);
-
-  /* ---------- SAVE DRAFT (NO VALIDATION) ---------- */
-  const handleSaveDraft = () => {
-    const data = form.getValues();
-
-    saveDraft.saveDraftFunction({
-      blogId,
-      status: "draft",
-      title: data.title,
-      content: data.content,
-      categories: data.categories,
-      coverImgUrl: data.coverImage?.url ?? null,
-    });
-  };
-
-  /* ---------- PUBLISH (STRICT VALIDATION) ---------- */
-  const handlePublish = async () => {
-    const data = form.getValues();
-
-    const result = publishBlogSchema.safeParse(data);
-
-    if (!result.success) {
-      result.error.issues.forEach((err) => {
-        const field = err.path[0] as keyof PublishBlogFormValues;
-        form.setError(field, {
-          type: "manual",
-          message: err.message,
-        });
-      });
-      return;
-    }
-
-    publishBlog.publishBlog({
-      blogId,
-      status: "published",
-      title: data.title,
-      content: data.content,
-      categories: data.categories,
-      coverImgUrl: data.coverImage?.url ?? null,
-    });
-  };
-
-  console.log(form.watch());
+  const { form, blogId, autoSave, handlePublish, handleSaveDraft, isBusy } =
+    useBlogEditor();
 
   return (
     <Form {...form}>
@@ -201,20 +83,16 @@ export const CreateBlogForm = () => {
           )}
         />
 
-        {/* <span className="text-xs text-muted">
+        <span className="text-xs text-muted">
           {autoSave.status === "saving" && "Saving…"}
           {autoSave.status === "saved" && autoSave.lastSavedAt && (
             <>Saved at {autoSave.lastSavedAt.toLocaleTimeString()}</>
           )}
           {autoSave.status === "error" && "Autosave failed"}
-        </span> */}
+        </span>
 
         <div className="flex gap-3">
-          <Button
-            type="button"
-            disabled={saveDraft.isPending}
-            onClick={handleSaveDraft}
-          >
+          <Button type="button" disabled={isBusy} onClick={handleSaveDraft}>
             Save draft
           </Button>
 
@@ -225,22 +103,20 @@ export const CreateBlogForm = () => {
               <FormItem>
                 <FormLabel>Cover image</FormLabel>
                 <FormControl>
-                  <CoverImageUploader
-                    blogId={blogId!}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
+                  {blogId && (
+                    <CoverImageUploader
+                      blogId={blogId}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button
-            type="button"
-            disabled={publishBlog.isPending}
-            onClick={handlePublish}
-          >
+          <Button type="button" disabled={isBusy} onClick={handlePublish}>
             Publish
           </Button>
         </div>
