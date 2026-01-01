@@ -101,7 +101,30 @@ export const CreateBlogForm = () => {
           )}
         />
 
-        <span className="text-xs text-muted">
+        <FormField
+          control={form.control}
+          name="coverImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Cover image</FormLabel>
+              <FormControl>
+                {blogId && (
+                  <CoverImageUploader
+                    blogId={blogId}
+                    value={field.value}
+                    onChange={(image) => {
+                      field.onChange(image);
+                      setHasUserInteracted(true);
+                    }}
+                  />
+                )}
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <span className="text-xs text-stale-400">
           {autoSave.status === "saving" && "Saving…"}
           {autoSave.status === "saved" && autoSave.lastSavedAt && (
             <>Saved at {autoSave.lastSavedAt.toLocaleTimeString()}</>
@@ -110,34 +133,21 @@ export const CreateBlogForm = () => {
         </span>
 
         <div className="flex gap-3">
-          <Button type="button" disabled={isBusy} onClick={handleSaveDraft}>
+          <Button
+            type="button"
+            disabled={isBusy}
+            onClick={handleSaveDraft}
+            className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 flex gap-2"
+          >
             Save draft
           </Button>
 
-          <FormField
-            control={form.control}
-            name="coverImage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cover image</FormLabel>
-                <FormControl>
-                  {blogId && (
-                    <CoverImageUploader
-                      blogId={blogId}
-                      value={field.value}
-                      onChange={() => {
-                        field.onChange();
-                        setHasUserInteracted(true);
-                      }}
-                    />
-                  )}
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="button" disabled={isBusy} onClick={handlePublish}>
+          <Button
+            type="button"
+            disabled={isBusy}
+            onClick={handlePublish}
+            className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 flex gap-2"
+          >
             Publish
           </Button>
         </div>

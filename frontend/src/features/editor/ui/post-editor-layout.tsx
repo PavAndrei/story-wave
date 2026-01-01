@@ -8,12 +8,14 @@ import {
 export const PostEditorLayout = ({
   title,
   description,
+  toolbar,
+
   content,
   footer,
 }: {
   title: React.ReactNode;
   description: React.ReactNode;
-
+  toolbar: React.ReactNode;
   content: React.ReactNode;
   footer: React.ReactNode;
 }) => {
@@ -25,7 +27,10 @@ export const PostEditorLayout = ({
             {title}
           </h1>
           <p className="text-slate-700 text-lg">{description}</p>
+
+          {toolbar && <div className="mt-4 flex gap-2">{toolbar}</div>}
         </CardHeader>
+
         <CardContent className="">{content}</CardContent>
         <CardFooter className="border-t border-slate-700">{footer}</CardFooter>
       </Card>

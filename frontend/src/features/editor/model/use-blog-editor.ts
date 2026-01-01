@@ -39,7 +39,7 @@ export type EditorStatus =
   | "published"
   | "error";
 
-type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
+export type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
 
 export const useBlogEditor = () => {
   const [isInitialized, setIsInitialized] = useState(false);

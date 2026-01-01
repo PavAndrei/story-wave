@@ -33,7 +33,7 @@ export const useUploadImages = (files: File[], blogId: string) => {
   useEffect(() => {
     if (!files.length || !blogId) return;
     uploadMutation.mutate(formData);
-  }, [files, blogId, formData]);
+  }, [files, blogId, formData, uploadMutation]);
 
   if (!blogId || files.length === 0) {
     return {
