@@ -8,6 +8,8 @@ type Params = {
   categories?: string[];
   coverImgUrl?: string;
   onFirstSave?: (blogId: string) => void;
+  enabled?: boolean;
+  canAutoSave?: boolean;
 };
 
 export const useDraftAutosave = ({
@@ -16,6 +18,7 @@ export const useDraftAutosave = ({
   content,
   categories,
   coverImgUrl,
+  enabled,
   onFirstSave,
 }: Params) => {
   const { saveDraftFunction } = useSaveDraft();
@@ -25,11 +28,22 @@ export const useDraftAutosave = ({
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
   useEffect(() => {
+    if (!enabled) return;
+
     if (!title && !content) return;
 
     const timeout = setTimeout(async () => {
       try {
         setStatus("saving");
+
+        if (!blogId) {
+          const blog = await saveDraftFunction({
+            blogId,
+            status: "draft",
+          });
+          onFirstSave?.(blog._id);
+          return;
+        }
 
         const blog = await saveDraftFunction({
           blogId,

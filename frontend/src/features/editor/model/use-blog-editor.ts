@@ -42,6 +42,9 @@ export type EditorStatus =
 type PublishBlogFormValues = z.infer<typeof publishBlogSchema>;
 
 export const useBlogEditor = () => {
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   const params = useParams<{ blogId?: string }>();
   const navigate = useNavigate();
 
@@ -74,15 +77,21 @@ export const useBlogEditor = () => {
   useEffect(() => {
     if (!blog) return;
 
-    form.reset({
-      title: blog.title ?? "",
-      content: blog.content,
-      categories: blog.categories ?? [],
-      coverImage: blog.coverImgUrl
-        ? mapImageUrlToUploaded(blog.coverImgUrl)
-        : null,
-      images: mapImageUrlsToUploaded(blog.imagesUrls),
-    });
+    const initialize = () => {
+      form.reset({
+        title: blog.title ?? "",
+        content: blog.content,
+        categories: blog.categories ?? [],
+        coverImage: blog.coverImgUrl
+          ? mapImageUrlToUploaded(blog.coverImgUrl)
+          : null,
+        images: mapImageUrlsToUploaded(blog.imagesUrls),
+      });
+
+      setIsInitialized(true);
+    };
+
+    initialize();
   }, [blog, form]);
 
   /* ---------- set blog id ---------- */
@@ -114,11 +123,19 @@ export const useBlogEditor = () => {
     name: "coverImage",
   });
 
+  // const hasContent =
+  //   Boolean(title?.trim()) ||
+  //   Boolean(content?.trim()) ||
+  //   (categories?.length ?? 0) > 0;
+
+  const canAutosave = isInitialized && hasUserInteracted;
+
   const autoSave = useDraftAutosave({
     blogId,
     title,
     content,
     categories,
+    enabled: canAutosave,
     coverImgUrl: coverImage?.url,
     onFirstSave: (id) => {
       setBlogId(id);
@@ -195,6 +212,29 @@ export const useBlogEditor = () => {
     form.formState.isDirty,
   ]);
 
+  const isCreateMode = !blogId;
+
+  useEffect(() => {
+    if (!isCreateMode) return;
+    if (!hasUserInteracted) return;
+
+    const createDraft = async () => {
+      const blog = await saveDraftFunction({
+        status: "draft",
+        title: form.getValues("title"),
+        content: form.getValues("content"),
+        categories: form.getValues("categories"),
+        coverImgUrl: form.getValues("coverImage")?.url,
+      });
+
+      if (blog?._id) {
+        setBlogId(blog._id);
+      }
+    };
+
+    createDraft();
+  }, [isCreateMode, hasUserInteracted]);
+
   return {
     editorStatus,
     isBusy: isSavingDraft || isPublishingDraft,
@@ -205,5 +245,6 @@ export const useBlogEditor = () => {
     autoSave,
     handleSaveDraft,
     handlePublish,
+    setHasUserInteracted,
   };
 };

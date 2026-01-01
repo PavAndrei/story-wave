@@ -16,8 +16,15 @@ import { CoverImageUploader } from "@/features/uploads";
 import { useBlogEditor } from "../model/use-blog-editor";
 
 export const CreateBlogForm = () => {
-  const { form, blogId, autoSave, handlePublish, handleSaveDraft, isBusy } =
-    useBlogEditor();
+  const {
+    form,
+    blogId,
+    autoSave,
+    handlePublish,
+    handleSaveDraft,
+    isBusy,
+    setHasUserInteracted,
+  } = useBlogEditor();
 
   return (
     <Form {...form}>
@@ -30,7 +37,14 @@ export const CreateBlogForm = () => {
             <FormItem>
               <FormLabel>Title</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="The title of your story" />
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    setHasUserInteracted(true);
+                  }}
+                  placeholder="The title of your story"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -51,9 +65,10 @@ export const CreateBlogForm = () => {
                   value={categoryOptions.filter((opt) =>
                     field.value.includes(opt.value),
                   )}
-                  onChange={(values) =>
-                    field.onChange(values.map((v) => v.value))
-                  }
+                  onChange={(values) => {
+                    field.onChange(values.map((v) => v.value));
+                    setHasUserInteracted(true);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -72,7 +87,10 @@ export const CreateBlogForm = () => {
                 <MarkdownEditor
                   title={form.getValues("title")}
                   value={field.value}
-                  onChange={field.onChange}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    setHasUserInteracted(true);
+                  }}
                   blogId={blogId!}
                   images={form.watch("images")}
                   onImagesChange={(imgs) => form.setValue("images", imgs)}
@@ -107,7 +125,10 @@ export const CreateBlogForm = () => {
                     <CoverImageUploader
                       blogId={blogId}
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={() => {
+                        field.onChange();
+                        setHasUserInteracted(true);
+                      }}
                     />
                   )}
                 </FormControl>

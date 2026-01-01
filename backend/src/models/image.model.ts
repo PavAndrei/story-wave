@@ -11,7 +11,7 @@ const imageSchema = new mongoose.Schema<ImageDocument>(
   {
     blogId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Post',
+      ref: 'Blog',
       required: true,
       index: true,
     },
