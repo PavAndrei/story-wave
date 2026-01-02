@@ -5,6 +5,7 @@ import { FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import imageModel from '../models/image.model.js';
 import { cloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
 import UserModel from '../models/user.model.js';
+import blogRoutes from 'routes/blog.route.js';
 
 type SaveBlogProps = {
   blogId?: string;
@@ -255,7 +256,7 @@ type GetAllBlogsParams = {
   limit: number;
   sort: 'asc' | 'desc';
   title?: string;
-  categories?: string;
+  categories?: string[] | string;
   author?: string;
 };
 
@@ -278,14 +279,17 @@ export const getAllBlogs = async (filters: GetAllBlogsParams) => {
 
   /* ===== categories filter ===== */
   if (categories) {
-    const categoriesArray = categories.split(',').map((c) => c.trim());
-    filter.categories = { $in: categoriesArray };
+    const arr = Array.isArray(categories)
+      ? categories
+      : categories.split(',').map((c) => c.trim());
+
+    filter.categories = { $in: arr };
   }
 
-  /* ===== author nickname filter ===== */
+  /* ===== author username filter ===== */
   if (author) {
     const user = await UserModel.findOne({
-      nickname: {
+      username: {
         $regex: `^${author}$`,
         $options: 'i',
       },
@@ -293,10 +297,13 @@ export const getAllBlogs = async (filters: GetAllBlogsParams) => {
 
     if (!user) {
       return {
-        items: [],
-        total: 0,
-        page,
-        limit,
+        blogs: [],
+        pagination: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
       };
     }
 
@@ -315,10 +322,12 @@ export const getAllBlogs = async (filters: GetAllBlogsParams) => {
   ]);
 
   return {
-    items,
-    total,
-    page,
-    limit,
-    pages: Math.ceil(total / limit),
+    blogs: items,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
   };
 };

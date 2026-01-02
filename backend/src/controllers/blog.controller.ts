@@ -110,20 +110,24 @@ export const getAllBlogsHandler = catchErrors(async (req, res) => {
   const {
     page = '1',
     limit = '10',
-    sort = 'desc',
-    title,
+    sort = 'newest',
+    search,
     categories,
     author,
   } = req.query;
 
-  const blogs = await getAllBlogs({
+  const result = await getAllBlogs({
     page: Number(page),
     limit: Number(limit),
-    sort: sort === 'asc' ? 'asc' : 'desc',
-    title: title as string | undefined,
+    sort: sort === 'oldest' ? 'asc' : 'desc',
+    title: search as string | undefined,
     categories: categories as string | undefined,
     author: author as string | undefined,
   });
 
-  return res.status(OK).json({ success: true, blogs });
+  return res.status(OK).json({
+    success: true,
+    blogs: result.blogs,
+    pagination: result.pagination,
+  });
 });

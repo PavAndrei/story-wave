@@ -1,23 +1,23 @@
 // filters-url.ts
-import type { MyBlogsFilters } from "@/shared/api/api";
+import type { BlogsFilters } from "@/shared/api/api";
 
 export const searchParamsToFilters = (
   params: URLSearchParams,
-): MyBlogsFilters => {
+): BlogsFilters => {
   return {
-    status: params.get("status") as MyBlogsFilters["status"] | undefined,
     sort: (params.get("sort") as "newest" | "oldest") ?? "newest",
+    author: params.get("author") ?? "",
     search: params.get("search") ?? "",
     categories: params.get("categories")?.split(",").filter(Boolean) ?? [],
   };
 };
 
-export const filtersToSearchParams = (filters: MyBlogsFilters) => {
+export const filtersToSearchParams = (filters: BlogsFilters) => {
   const params = new URLSearchParams();
 
-  if (filters.status) params.set("status", filters.status);
   if (filters.sort !== "newest") params.set("sort", filters.sort);
   if (filters.search.trim()) params.set("search", filters.search.trim());
+  if (filters.author.trim()) params.set("author", filters.author.trim());
   if (filters.categories.length > 0) {
     params.set("categories", filters.categories.join(","));
   }
@@ -30,7 +30,7 @@ import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export const useMyBlogsFilters = () => {
+export const useBlogsFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // 🔹 filters = всегда из URL
@@ -43,21 +43,29 @@ export const useMyBlogsFilters = () => {
   const [searchInput, setSearchInput] = useState(filters.search);
   const debouncedSearch = useDebounce(searchInput, 400);
 
+  // 🔹 локальный author (для debounce)
+  const [authorInput, setAuthorInput] = useState(filters.author);
+  const debouncedAuthor = useDebounce(authorInput, 400);
+
   // 🔹 debounce → URL
   useEffect(() => {
-    if (debouncedSearch === filters.search) return;
+    const isSearchChanged = debouncedSearch !== filters.search;
+    const isAuthorChanged = debouncedAuthor !== filters.author;
+
+    if (!isSearchChanged && !isAuthorChanged) return;
 
     setSearchParams(
       filtersToSearchParams({
         ...filters,
         search: debouncedSearch,
+        author: debouncedAuthor,
       }),
       { replace: true },
     );
-  }, [debouncedSearch, filters, setSearchParams]);
+  }, [debouncedSearch, debouncedAuthor, filters, setSearchParams]);
 
   // 🔹 универсальный update
-  const updateFilters = (patch: Partial<MyBlogsFilters>) => {
+  const updateFilters = (patch: Partial<BlogsFilters>) => {
     setSearchParams(
       filtersToSearchParams({
         ...filters,
@@ -71,26 +79,19 @@ export const useMyBlogsFilters = () => {
 
     ui: {
       search: searchInput,
+      author: authorInput,
       sort: filters.sort,
       categories: filters.categories,
-      statuses: filters.status ? [filters.status] : [],
     },
 
     handlers: {
       handleSearchChange: setSearchInput,
+      handleAuthorChange: setAuthorInput,
 
       handleSortChange: (sort: "newest" | "oldest") => updateFilters({ sort }),
 
       handleCategoriesChange: (categories: string[]) =>
         updateFilters({ categories }),
-
-      handleStatusesChange: (statuses: string[]) =>
-        updateFilters({
-          status:
-            statuses.length > 0
-              ? (statuses[statuses.length - 1] as MyBlogsFilters["status"])
-              : undefined,
-        }),
     },
   };
 };

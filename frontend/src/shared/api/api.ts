@@ -37,7 +37,7 @@ export type Blog = {
   __v: number;
 };
 
-export type BlogsFilters = {
+export type MyBlogsFilters = {
   status: "draft" | "published" | "archived" | undefined;
   sort: "newest" | "oldest";
   search: string;
@@ -47,13 +47,14 @@ export type BlogsFilters = {
   limit?: number;
 };
 
-export type BlogsPagination = {
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
+export type BlogsFilters = {
+  sort: "newest" | "oldest";
+  search: string;
+  author: string;
+  categories: string[];
+
+  page?: number;
+  limit?: number;
 };
 
 export type Session = {
@@ -93,6 +94,18 @@ export type CreateBlogApiResponse = ApiResponse & { blog: Blog };
 export type GetBlogByIdApiResponse = ApiResponse & { blog: Blog };
 export type GetMyBlogsApiResponse = ApiResponse & {
   blogs?: Blog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+export type GetAllBlogsApiResponse = ApiResponse & {
+  blogs: {
+    items: Blog[];
+  };
   pagination: {
     page: number;
     limit: number;
@@ -203,7 +216,7 @@ export const blogApi = {
     });
   },
 
-  getMyBlogs: (filters: BlogsFilters) => {
+  getMyBlogs: (filters: MyBlogsFilters) => {
     const query = buildQueryString({
       page: String(filters.page),
       limit: String(filters.limit),
@@ -217,6 +230,25 @@ export const blogApi = {
     });
 
     return apiInstance<GetMyBlogsApiResponse>(`/blog/my${query}`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
+
+  getAllBlogs: (filters: BlogsFilters) => {
+    const query = buildQueryString({
+      page: String(filters.page),
+      limit: String(filters.limit),
+      sort: filters.sort,
+      search: filters.search,
+      author: filters.author,
+      categories:
+        filters.categories.length > 0
+          ? filters.categories.join(",")
+          : undefined,
+    });
+
+    return apiInstance<GetAllBlogsApiResponse>(`/blog${query}`, {
       method: "GET",
       credentials: "include",
     });

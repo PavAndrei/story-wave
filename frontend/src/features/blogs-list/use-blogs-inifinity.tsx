@@ -2,9 +2,9 @@
 import { blogApi } from "@/shared/api/api";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useCallback, type RefCallback } from "react";
-import type { GetMyBlogsApiResponse, MyBlogsFilters } from "@/shared/api/api";
+import type { GetAllBlogsApiResponse, BlogsFilters } from "@/shared/api/api";
 
-export const useMyBlogsInfinite = (filters: MyBlogsFilters) => {
+export const useBlogsInfinite = (filters: BlogsFilters) => {
   const {
     data,
     fetchNextPage,
@@ -14,21 +14,21 @@ export const useMyBlogsInfinite = (filters: MyBlogsFilters) => {
     isError,
     error,
   } = useInfiniteQuery<
-    GetMyBlogsApiResponse,
+    GetAllBlogsApiResponse,
     Error,
-    InfiniteData<GetMyBlogsApiResponse>,
-    readonly [string, "my", MyBlogsFilters],
+    InfiniteData<GetAllBlogsApiResponse>,
+    readonly [string, "public", BlogsFilters],
     number
   >({
-    queryKey: [blogApi.baseKey, "my", filters],
+    queryKey: [blogApi.baseKey, "public", filters],
 
     initialPageParam: 1,
 
     queryFn: ({ pageParam }) =>
-      blogApi.getMyBlogs({
+      blogApi.getAllBlogs({
         ...filters,
         page: pageParam,
-        limit: 3,
+        limit: 6,
       }),
 
     getNextPageParam: (lastPage) => {
