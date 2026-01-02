@@ -249,3 +249,76 @@ export const deleteBlogById = async (
     throw error;
   }
 };
+
+type GetAllBlogsParams = {
+  page: number;
+  limit: number;
+  sort: 'asc' | 'desc';
+  title?: string;
+  categories?: string;
+  author?: string;
+};
+
+export const getAllBlogs = async (filters: GetAllBlogsParams) => {
+  const { page, limit, sort, title, categories, author } = filters;
+
+  const skip = (page - 1) * limit;
+
+  const filter: Record<string, any> = {
+    status: 'published',
+  };
+
+  /* ===== title search ===== */
+  if (title) {
+    filter.title = {
+      $regex: title,
+      $options: 'i',
+    };
+  }
+
+  /* ===== categories filter ===== */
+  if (categories) {
+    const categoriesArray = categories.split(',').map((c) => c.trim());
+    filter.categories = { $in: categoriesArray };
+  }
+
+  /* ===== author nickname filter ===== */
+  if (author) {
+    const user = await UserModel.findOne({
+      nickname: {
+        $regex: `^${author}$`,
+        $options: 'i',
+      },
+    }).select('_id');
+
+    if (!user) {
+      return {
+        items: [],
+        total: 0,
+        page,
+        limit,
+      };
+    }
+
+    filter.authorId = user._id;
+  }
+
+  const [items, total] = await Promise.all([
+    BlogModel.find(filter)
+      .populate('authorId', 'username')
+      .sort({ createdAt: sort === 'asc' ? 1 : -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    BlogModel.countDocuments(filter),
+  ]);
+
+  return {
+    items,
+    total,
+    page,
+    limit,
+    pages: Math.ceil(total / limit),
+  };
+};

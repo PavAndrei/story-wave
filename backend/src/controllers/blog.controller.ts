@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
 import {
   deleteBlogById,
+  getAllBlogs,
   getMyBlogsService,
   saveBlogService,
 } from '../services/blog.service.js';
@@ -103,4 +104,26 @@ export const deleteBlogHandler = catchErrors(async (req, res) => {
   );
 
   return res.status(OK).json({ success: true, message: 'Blog deleted' });
+});
+
+export const getAllBlogsHandler = catchErrors(async (req, res) => {
+  const {
+    page = '1',
+    limit = '10',
+    sort = 'desc',
+    title,
+    categories,
+    author,
+  } = req.query;
+
+  const blogs = await getAllBlogs({
+    page: Number(page),
+    limit: Number(limit),
+    sort: sort === 'asc' ? 'asc' : 'desc',
+    title: title as string | undefined,
+    categories: categories as string | undefined,
+    author: author as string | undefined,
+  });
+
+  return res.status(OK).json({ success: true, blogs });
 });

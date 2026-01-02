@@ -1,20 +1,14 @@
 import { uploadApi } from "@/shared/api/api";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 export type UploadedImage = {
   id: string;
   url: string;
 };
 
-export const useUploadImages = (files: File[], blogId: string) => {
+export const useUploadImages = (blogId: string) => {
   const [images, setImages] = useState<UploadedImage[]>([]);
-
-  const formData = useMemo(() => {
-    const fd = new FormData();
-    files.forEach((file) => fd.append("images", file));
-    return fd;
-  }, [files]);
 
   const uploadMutation = useMutation({
     mutationFn: (data: FormData) => uploadApi.uploadImages(blogId, data),
@@ -24,29 +18,21 @@ export const useUploadImages = (files: File[], blogId: string) => {
         setImages(response.data);
       }
     },
-
-    onError: (error) => {
-      console.error("UPLOAD FAILED:", error?.message);
-    },
   });
 
-  useEffect(() => {
+  const upload = (files: File[]) => {
     if (!files.length || !blogId) return;
-    uploadMutation.mutate(formData);
-  }, [files, blogId, formData, uploadMutation]);
 
-  if (!blogId || files.length === 0) {
-    return {
-      images: [],
-      isPending: false,
-    };
-  }
+    const fd = new FormData();
+    files.forEach((file) => fd.append("images", file));
+
+    uploadMutation.mutate(fd);
+  };
 
   return {
-    images, // ← { id, url }[]
+    upload,
+    images,
     isPending: uploadMutation.isPending,
-    errorMessage: uploadMutation.isError
-      ? (uploadMutation.error?.message ?? "Upload failed")
-      : null,
+    error: uploadMutation.error,
   };
 };
