@@ -59,8 +59,6 @@ export const saveBlogService = async ({
 }: SaveBlogProps) => {
   let blog;
 
-  /* ================= CREATE OR LOAD ================= */
-
   if (blogId) {
     blog = await BlogModel.findById(blogId);
     appAssert(blog, NOT_FOUND, 'Blog not found');
@@ -71,8 +69,6 @@ export const saveBlogService = async ({
       status: 'draft',
     });
   }
-
-  /* ================= UPDATE FIELDS ================= */
 
   if (data?.title !== undefined) blog.title = data.title;
   if (data?.content !== undefined) blog.content = data.content;
@@ -89,13 +85,27 @@ export const saveBlogService = async ({
     blog.publishedAt = new Date();
   }
 
-  /* ================= IMAGE SYNC ================= */
+  const prevCoverUrl = blog.coverImgUrl ?? null;
+
+  if ('coverImgUrl' in (data ?? {})) {
+    blog.coverImgUrl = data!.coverImgUrl ?? null;
+  } else {
+    blog.coverImgUrl = null;
+  }
 
   const contentImageUrls = extractImageUrlsFromContent(blog.content);
   const usedUrls = new Set<string>(contentImageUrls);
 
-  if (blog.coverImgUrl) {
-    usedUrls.add(blog.coverImgUrl);
+  if (prevCoverUrl && blog.coverImgUrl !== prevCoverUrl) {
+    const oldCoverImage = await imageModel.findOne({
+      blogId: blog._id,
+      url: prevCoverUrl,
+    });
+
+    if (oldCoverImage) {
+      await deleteFromCloudinary(oldCoverImage.publicId);
+      await oldCoverImage.deleteOne();
+    }
   }
 
   const allImages = await imageModel.find({ blogId: blog._id });

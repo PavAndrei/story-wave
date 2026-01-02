@@ -16,7 +16,7 @@ export interface BlogDocument extends mongoose.Document {
 
   categories: string[];
 
-  coverImgUrl: string;
+  coverImgUrl: string | null;
   imagesUrls: string[];
 }
 

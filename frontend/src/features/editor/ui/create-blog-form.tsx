@@ -109,14 +109,29 @@ export const CreateBlogForm = () => {
               <FormLabel>Cover image</FormLabel>
               <FormControl>
                 {blogId && (
-                  <CoverImageUploader
-                    blogId={blogId}
-                    value={field.value}
-                    onChange={(image) => {
-                      field.onChange(image);
-                      setHasUserInteracted(true);
-                    }}
-                  />
+                  <>
+                    <CoverImageUploader
+                      blogId={blogId}
+                      value={field.value}
+                      onChange={(image) => {
+                        field.onChange(image);
+                        setHasUserInteracted(true);
+                      }}
+                    />
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange(null);
+                          setHasUserInteracted(true);
+                        }}
+                      >
+                        Remove cover
+                      </Button>
+                    )}
+                  </>
                 )}
               </FormControl>
               <FormMessage />
