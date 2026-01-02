@@ -47,6 +47,20 @@ export const useEditorHistory = (initialValue: string) => {
 
   /* ================= set value ================= */
 
+  const replaceValue = useCallback(
+    (nextValue: string, selection?: Selection) => {
+      setHistory((current) => ({
+        past: current.past,
+        present: {
+          value: nextValue,
+          selection: selection ?? current.present.selection,
+        },
+        future: current.future,
+      }));
+    },
+    [],
+  );
+
   const setValue = useCallback((nextValue: string, selection?: Selection) => {
     setHistory((current) => {
       const now = Date.now();
@@ -120,6 +134,7 @@ export const useEditorHistory = (initialValue: string) => {
     selection: history.present.selection,
 
     setValue,
+    replaceValue,
     undo,
     redo,
     markAction,

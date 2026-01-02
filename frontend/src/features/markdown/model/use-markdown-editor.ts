@@ -76,22 +76,21 @@ export const useMarkdownEditor = ({
     applyChange(payload, true),
   );
 
-  const toggleTaskAtIndex = (index: number) => {
+  const toggleTaskAtIndex = (lineIndex: number) => {
     const lines = history.value.split("\n");
-    let current = -1;
+    const line = lines[lineIndex];
 
-    const next = lines.map((line) => {
-      if (/^- \[[ x]\]/.test(line)) {
-        current++;
-        if (current === index) {
-          return line.includes("[x]")
-            ? line.replace("[x]", "[ ]")
-            : line.replace("[ ]", "[x]");
-        }
-      }
-      return line;
-    });
-    applyChange({ value: next.join("\n") });
+    if (!line) return;
+
+    if (/^- \[ \]/.test(line)) {
+      lines[lineIndex] = line.replace("- [ ]", "- [x]");
+    } else if (/^- \[x\]/i.test(line)) {
+      lines[lineIndex] = line.replace(/- \[x\]/i, "- [ ]");
+    } else {
+      return;
+    }
+
+    applyChange({ value: lines.join("\n") });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -267,13 +266,21 @@ export const useMarkdownEditor = ({
   };
 
   useEffect(() => {
-    if (value !== history.value) {
-      history.markAction();
-      history.setValue(value, {
+    if (value === history.value) return;
+
+    if (history.value.length === 0 && history.value === "") {
+      history.replaceValue(value, {
         start: value.length,
         end: value.length,
       });
+      return;
     }
+
+    history.markAction();
+    history.setValue(value, {
+      start: value.length,
+      end: value.length,
+    });
   }, [value]);
 
   useEffect(() => {
