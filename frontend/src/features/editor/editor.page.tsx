@@ -1,16 +1,25 @@
 import { useState } from "react";
 import { useBlogEditor } from "./model/use-blog-editor";
-import { CreateBlogForm } from "./ui/create-blog-form";
+import { CreateBlogForm } from "./ui/editor-blog-form";
 import { EditorStatusBar } from "./ui/editor-status-bar";
-import { PostEditorLayout } from "./ui/post-editor-layout";
+import { BlogEditorLayout } from "./ui/blog-editor-layout";
 import { BlogPreview } from "./ui/blog-preview";
 
 const CreatePostPage = () => {
-  const { editorStatus, form } = useBlogEditor();
+  const {
+    editorStatus,
+    form,
+    blogId,
+    autoSave,
+    handlePublish,
+    handleSaveDraft,
+    isBusy,
+    setHasUserInteracted,
+  } = useBlogEditor();
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
 
   return (
-    <PostEditorLayout
+    <BlogEditorLayout
       title={"Create Blog"}
       description={"Write your story and share it with the world"}
       toolbar={
@@ -21,7 +30,19 @@ const CreatePostPage = () => {
         )
       }
       content={
-        viewMode === "edit" ? <CreateBlogForm /> : <BlogPreview form={form} />
+        viewMode === "edit" ? (
+          <CreateBlogForm
+            autoSave={autoSave}
+            form={form}
+            blogId={blogId}
+            handlePublish={handlePublish}
+            handleSaveDraft={handleSaveDraft}
+            isBusy={isBusy}
+            setHasUserInteracted={setHasUserInteracted}
+          />
+        ) : (
+          <BlogPreview form={form} />
+        )
       }
       footer={<EditorStatusBar status={editorStatus} />}
     />

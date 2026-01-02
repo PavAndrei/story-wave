@@ -18,7 +18,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: ROUTES.CREATE_BLOG,
-            lazy: () => import("@/features/editor/create-blog.page"),
+            lazy: () => import("@/features/editor/editor.page"),
           },
           {
             path: ROUTES.PROFILE,

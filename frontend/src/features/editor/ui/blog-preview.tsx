@@ -2,11 +2,11 @@ import { useWatch, type UseFormReturn } from "react-hook-form";
 import { MarkdownRenderer } from "@/features/markdown";
 import type { PublishBlogFormValues } from "../model/use-blog-editor";
 
-type Props = {
+export const BlogPreview = ({
+  form,
+}: {
   form: UseFormReturn<PublishBlogFormValues>;
-};
-
-export const BlogPreview = ({ form }: Props) => {
+}) => {
   const title = useWatch({ control: form.control, name: "title" });
   const content = useWatch({ control: form.control, name: "content" });
   const coverImage = useWatch({

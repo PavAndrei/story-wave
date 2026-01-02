@@ -5,11 +5,10 @@ import {
   CardHeader,
 } from "@/shared/ui/kit/card";
 
-export const PostEditorLayout = ({
+export const BlogEditorLayout = ({
   title,
   description,
   toolbar,
-
   content,
   footer,
 }: {

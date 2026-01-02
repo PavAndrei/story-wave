@@ -8,24 +8,33 @@ import {
 } from "@/shared/ui/kit/form";
 import { Input } from "@/shared/ui/kit/input";
 import { Button } from "@/shared/ui/kit/button";
-import { Controller } from "react-hook-form";
+import { Controller, type UseFormReturn } from "react-hook-form";
 import Multiselect from "react-select";
 import { categoryOptions } from "@/shared/model/categories";
 import { MarkdownEditor } from "@/features/markdown";
 import { CoverImageUploader } from "@/features/uploads";
-import { useBlogEditor } from "../model/use-blog-editor";
+import type { PublishBlogFormValues } from "../model/use-blog-editor";
 
-export const CreateBlogForm = () => {
-  const {
-    form,
-    blogId,
-    autoSave,
-    handlePublish,
-    handleSaveDraft,
-    isBusy,
-    setHasUserInteracted,
-  } = useBlogEditor();
-
+export const CreateBlogForm = ({
+  form,
+  blogId,
+  autoSave,
+  handlePublish,
+  handleSaveDraft,
+  isBusy,
+  setHasUserInteracted,
+}: {
+  form: UseFormReturn<PublishBlogFormValues>;
+  blogId: string | undefined;
+  autoSave: {
+    status: "error" | "saving" | "saved" | "idle";
+    lastSavedAt: Date | null;
+  };
+  handlePublish: () => void;
+  handleSaveDraft: () => void;
+  isBusy: boolean;
+  setHasUserInteracted: (hasInteracted: boolean) => void;
+}) => {
   return (
     <Form {...form}>
       <form className="w-full flex flex-col gap-5" noValidate>
@@ -109,7 +118,7 @@ export const CreateBlogForm = () => {
               <FormLabel>Cover image</FormLabel>
               <FormControl>
                 {blogId && (
-                  <>
+                  <div>
                     <CoverImageUploader
                       blogId={blogId}
                       value={field.value}
@@ -131,7 +140,7 @@ export const CreateBlogForm = () => {
                         Remove cover
                       </Button>
                     )}
-                  </>
+                  </div>
                 )}
               </FormControl>
               <FormMessage />
