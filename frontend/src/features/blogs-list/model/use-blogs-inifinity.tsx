@@ -56,6 +56,8 @@ export const useBlogsInfinite = (filters: BlogsFilters) => {
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
 
+  console.log(data);
+
   const blogs =
     data?.pages
       .map((page) => page.blogs)

@@ -17,16 +17,12 @@ export type BlogListItem = {
   publishedAt?: string;
 };
 
-type Props = {
-  blog: BlogListItem;
-};
-
-export const BlogCard = ({ blog }: Props) => {
+export const BlogCard = ({ blog }: { blog: BlogListItem }) => {
   return (
     <Card className="flex flex-col gap-2 p-0 rounded-md border-slate-700 bg-slate-200">
       {/* Cover */}
       {blog.coverImgUrl && (
-        <div className="h-48 w-full overflow-hidden rounded-md">
+        <div className="h-60 w-full overflow-hidden rounded-md">
           <img
             src={blog.coverImgUrl}
             alt={blog.title}
@@ -36,7 +32,7 @@ export const BlogCard = ({ blog }: Props) => {
       )}
 
       {/* Content */}
-      <div className="p-4 flex flex-col gap-3">
+      <div className="p-4 flex flex-col gap-3 h-2/3">
         <h3 className="text-lg font-semibold text-slate-700 line-clamp-2">
           {blog.title}
         </h3>
@@ -46,7 +42,7 @@ export const BlogCard = ({ blog }: Props) => {
         </p>
 
         {/* Meta */}
-        <div className="flex justify-between text-xs text-slate-500">
+        <div className="flex justify-between text-xs text-slate-500 mt-auto mb-0">
           <span>@{blog.authorId.username}</span>
           {blog.publishedAt && (
             <span>{new Date(blog.publishedAt).toLocaleDateString()}</span>

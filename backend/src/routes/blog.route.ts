@@ -12,7 +12,7 @@ import { setRequestExtensions } from '../middleware/requestExtension.js';
 const blogRoutes = Router();
 
 blogRoutes.post('/', setRequestExtensions, authenticate, saveBlogHandler);
-blogRoutes.get('/', getAllBlogsHandler);
+blogRoutes.get('/public', getAllBlogsHandler);
 blogRoutes.get('/my', setRequestExtensions, authenticate, getMyBlogsHandler);
 blogRoutes.get('/:id', getOneBlogHandler);
 blogRoutes.delete(

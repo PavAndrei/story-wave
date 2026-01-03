@@ -1,19 +1,17 @@
 import { ROUTES } from "@/shared/model/routes";
 import { Button } from "@/shared/ui/kit/button";
 import { Link, href } from "react-router-dom";
-import { BlogCard } from "./blog-card";
-import { BlogFilters } from "./blogs-filters";
-import { useBlogsFilters } from "./use-blogs-filters";
-import { useBlogsInfinite } from "./use-blogs-inifinity";
-import { Spinner } from "@/shared/ui/kit/spinner";
+import { useBlogsFilters } from "./model/use-blogs-filters";
+import { useBlogsInfinite } from "./model/use-blogs-inifinity";
+import { BlogFilters } from "./ui/blogs-filters";
+import { BlogsList } from "./ui/blogs-list";
 
 const BlogsListPage = () => {
   const filtersState = useBlogsFilters();
-  const { blogs, cursorRef, isFetchingNextPage, isLoading } = useBlogsInfinite(
-    filtersState.filters,
-  );
+  const { blogs, cursorRef, isFetchingNextPage, isLoading, hasNextPage } =
+    useBlogsInfinite(filtersState.filters);
 
-  console.log(filtersState.filters);
+  console.log(blogs);
 
   return (
     <main className="max-w-[1440px] px-4 mx-auto py-6">
@@ -36,16 +34,11 @@ const BlogsListPage = () => {
           <p className="text-slate-400">Loading…</p>
         ) : (
           <>
-            <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {blogs?.map((blog) => (
-                <BlogCard key={blog._id} blog={blog} />
-              ))}
-            </ul>
-            <div>{isFetchingNextPage && <Spinner />}</div>
-            <div ref={cursorRef} className="h-10" />
+            <BlogsList blogs={blogs} isFetchingNextPage={isFetchingNextPage} />
           </>
         )}
       </div>
+      {hasNextPage && <div ref={cursorRef} className="h-10" />}
     </main>
   );
 };

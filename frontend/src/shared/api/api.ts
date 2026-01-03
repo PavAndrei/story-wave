@@ -22,7 +22,7 @@ export type User = {
 };
 
 export type Blog = {
-  authorId: string;
+  authorId: string | Partial<User>;
   title: string;
   content: string;
   status: "draft" | "published" | "archived";
@@ -34,6 +34,7 @@ export type Blog = {
   createdAt: Date;
   lastEditedAt: Date;
   updatedAt: Date;
+  publishedAt?: Date;
   __v: number;
 };
 
@@ -103,9 +104,7 @@ export type GetMyBlogsApiResponse = ApiResponse & {
 };
 
 export type GetAllBlogsApiResponse = ApiResponse & {
-  blogs: {
-    items: Blog[];
-  };
+  blogs: Blog[];
   pagination: {
     page: number;
     limit: number;
@@ -248,9 +247,8 @@ export const blogApi = {
           : undefined,
     });
 
-    return apiInstance<GetAllBlogsApiResponse>(`/blog${query}`, {
+    return apiInstance<GetAllBlogsApiResponse>(`/blog/public${query}`, {
       method: "GET",
-      credentials: "include",
     });
   },
 
