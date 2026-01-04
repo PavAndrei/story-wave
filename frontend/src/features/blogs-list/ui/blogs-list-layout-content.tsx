@@ -1,4 +1,5 @@
 import type { Blog } from "@/shared/api/api";
+import { BlogsGrid } from "./blogs-grid";
 import { BlogsList } from "./blogs-list";
 
 export const BlogsListLayoutContent = ({
@@ -7,12 +8,14 @@ export const BlogsListLayoutContent = ({
   isFetchingNextPage,
   hasNextPage,
   cursorRef,
+  viewMode,
 }: {
   items: Blog[];
   isLoading?: boolean;
   isFetchingNextPage: boolean;
   hasNextPage?: boolean;
   cursorRef?: React.Ref<HTMLDivElement>;
+  viewMode?: "list" | "grid";
 }) => {
   return (
     <section>
@@ -20,7 +23,12 @@ export const BlogsListLayoutContent = ({
         <p className="text-slate-400">Loading…</p>
       ) : (
         <>
-          <BlogsList blogs={items} isFetchingNextPage={isFetchingNextPage} />
+          {viewMode === "list" && (
+            <BlogsList blogs={items} isFetchingNextPage={isFetchingNextPage} />
+          )}
+          {viewMode === "grid" && (
+            <BlogsGrid blogs={items} isFetchingNextPage={isFetchingNextPage} />
+          )}
         </>
       )}
 

@@ -1,6 +1,5 @@
 import { Spinner } from "@/shared/ui/kit/spinner";
-import { BlogCard, type BlogListItem } from "./blog-card";
-
+import { BlogListItem } from "./blog-list-item";
 type Props = {
   blogs: BlogListItem[];
   isFetchingNextPage: boolean;
@@ -9,9 +8,9 @@ type Props = {
 export const BlogsList = ({ blogs, isFetchingNextPage }: Props) => {
   return (
     <section>
-      <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+      <ul className="flex flex-col gap-4 items-center">
         {blogs?.map((blog) => (
-          <BlogCard key={blog._id} blog={blog} />
+          <BlogListItem key={blog._id} blog={blog} />
         ))}
       </ul>
       <div>{isFetchingNextPage && <Spinner />}</div>

@@ -3,7 +3,7 @@ import { ROUTES } from "@/shared/model/routes";
 import { Card } from "@/shared/ui/kit/card";
 import { Button } from "@/shared/ui/kit/button";
 
-export type BlogListItem = {
+export type BlogGridItem = {
   _id: string;
   title: string;
   content: string;
@@ -17,7 +17,7 @@ export type BlogListItem = {
   publishedAt?: string;
 };
 
-export const BlogCard = ({ blog }: { blog: BlogListItem }) => {
+export const BlogGridCard = ({ blog }: { blog: BlogGridItem }) => {
   return (
     <Card className="flex flex-col gap-2 p-0 rounded-md border-slate-700 bg-slate-200">
       {/* Cover */}

@@ -1,15 +1,16 @@
 import { LayoutGrid, LayoutList } from "lucide-react";
-import { useState } from "react";
 
 export const BlogsListLayoutHeader = ({
   title,
   description,
+  viewMode,
+  changeViewMode,
 }: {
   title: React.ReactNode;
   description: React.ReactNode;
+  viewMode: "list" | "grid";
+  changeViewMode: (viewMode: "list" | "grid") => void;
 }) => {
-  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
-
   return (
     <div className="flex justify-between">
       <div className="flex flex-col">
@@ -20,9 +21,7 @@ export const BlogsListLayoutHeader = ({
         className="border p-1.5 self-end border-slate-700 rounded-lg cursor-pointer hover:bg-slate-200 transition-all duration-200 ease-in-out active:scale-95"
         type="button"
         aria-label="toggle view mode"
-        onClick={() =>
-          setViewMode((prev) => (prev === "grid" ? "list" : "grid"))
-        }
+        onClick={() => changeViewMode(viewMode === "grid" ? "list" : "grid")}
       >
         {viewMode === "list" ? <LayoutList /> : <LayoutGrid />}
       </button>
