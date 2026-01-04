@@ -19,6 +19,8 @@ export interface BlogDocument extends mongoose.Document {
   coverImgUrl: string | null;
   imagesUrls: string[];
 
+  viewsCount: number;
+
   likesCount: number;
   likedBy: mongoose.Types.ObjectId[];
 }
@@ -59,11 +61,14 @@ const blogSchema = new mongoose.Schema<BlogDocument>(
       type: Date,
       default: null,
     },
+    viewsCount: {
+      type: Number,
+      default: 0,
+    },
     likesCount: {
       type: Number,
       default: 0,
     },
-
     likedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

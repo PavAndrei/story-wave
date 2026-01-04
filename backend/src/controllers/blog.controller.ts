@@ -168,3 +168,13 @@ export const toggleLikeHandler = catchErrors(async (req, res) => {
     },
   });
 });
+
+export const viewBlogHandler = catchErrors(async (req, res) => {
+  const { id } = req.params;
+
+  await BlogModel.findByIdAndUpdate(id, {
+    $inc: { viewsCount: 1 },
+  });
+
+  res.status(OK).json({ success: true, message: 'Blog viewed' });
+});

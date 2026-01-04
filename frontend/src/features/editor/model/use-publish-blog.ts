@@ -1,4 +1,5 @@
 import { blogApi, type Blog, type BlogParams } from "@/shared/api/api";
+import { queryClient } from "@/shared/api/query-client";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { href, useNavigate } from "react-router-dom";
@@ -15,6 +16,7 @@ export const usePublishBlog = () => {
 
     onSuccess: (data) => {
       navigate(href(ROUTES.BLOG, { blogId: data.blog._id }));
+      queryClient.invalidateQueries({ queryKey: [blogApi.baseKey] });
     },
 
     onError: (error) => {
