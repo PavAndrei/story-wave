@@ -2,7 +2,7 @@ import { blogApi } from "@/shared/api/api";
 import { queryClient } from "@/shared/api/query-client";
 import { useMutation } from "@tanstack/react-query";
 import { startTransition, useOptimistic } from "react";
-import type { BlogGridItem } from "../ui/blog-grid-card";
+import type { BlogFavoriteCardTogglerProps } from "./blog-favorite-card-toggler";
 
 type OptimisticFavoriteState = {
   isFavorite: boolean;
@@ -24,7 +24,7 @@ export const useToggleFavorite = () => {
     },
   });
 
-  const toggle = (blog: BlogGridItem) => {
+  const toggle = (blog: BlogFavoriteCardTogglerProps) => {
     startTransition(async () => {
       const current = favorites[blog._id] ?? {
         isFavorite: blog.isFavorite ?? false,
@@ -44,7 +44,9 @@ export const useToggleFavorite = () => {
     });
   };
 
-  const getFavoritesState = (blog: BlogGridItem): OptimisticFavoriteState => {
+  const getFavoritesState = (
+    blog: BlogFavoriteCardTogglerProps,
+  ): OptimisticFavoriteState => {
     return (
       favorites[blog._id] ?? {
         isFavorite: blog.isFavorite ?? false,

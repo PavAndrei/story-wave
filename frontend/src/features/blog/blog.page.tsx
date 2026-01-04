@@ -4,6 +4,7 @@ import { useToggleLike } from "./use-toggle-like";
 import { useBlog } from "./use-blog";
 import { useMyProfile } from "@/shared/model/user";
 import { useBlogView } from "./use-blog-view";
+import { BlogFavoriteCardToggler } from "../blog-favorite";
 
 const BlogPage = () => {
   const { blog } = useBlog();
@@ -41,6 +42,7 @@ const BlogPage = () => {
         <Eye />
         {blog.viewsCount}
       </div>
+      <BlogFavoriteCardToggler blog={blog} className="static" />
     </div>
   );
 };

@@ -13,6 +13,7 @@ import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
 import BlogModel from '../models/blog.model.js';
 import { verifyToken } from '../utils/jwt.js';
+import UserModel from '../models/user.model.js';
 
 export const saveBlogHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
@@ -95,11 +96,15 @@ export const getOneBlogHandler = catchErrors(async (req, res) => {
   appAssert(blog, BAD_REQUEST, 'Blog not found');
 
   let isLiked;
+  let isFavorite;
 
   const { payload } = verifyToken(accessToken || '');
 
   if (payload) {
     isLiked = blog.likedBy.some((id) => id.equals(payload.userId));
+
+    const user = await UserModel.findById(payload.userId).lean();
+    isFavorite = user?.favorites.some((id) => id.equals(blog._id));
   }
 
   return res.status(OK).json({
@@ -108,6 +113,7 @@ export const getOneBlogHandler = catchErrors(async (req, res) => {
     blog: {
       ...blog,
       isLiked,
+      isFavorite,
     },
   });
 });

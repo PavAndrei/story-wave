@@ -2,9 +2,7 @@ import { href, Link } from "react-router-dom";
 import { ROUTES } from "@/shared/model/routes";
 import { Card } from "@/shared/ui/kit/card";
 import { Button } from "@/shared/ui/kit/button";
-import { Toggle } from "@/shared/ui/kit/toggle";
-import { Star } from "lucide-react";
-import { useToggleFavorite } from "../model/use-toggle-favorite";
+import { BlogFavoriteCardToggler } from "@/features/blog-favorite";
 
 export type BlogGridItem = {
   _id: string;
@@ -24,10 +22,6 @@ export type BlogGridItem = {
 };
 
 export const BlogGridCard = ({ blog }: { blog: BlogGridItem }) => {
-  const { getFavoritesState, toggle } = useToggleFavorite();
-
-  const { isFavorite } = getFavoritesState(blog);
-
   return (
     <Card className="flex flex-col gap-2 p-0 rounded-md border-slate-700 bg-slate-200 relative">
       {/* Cover */}
@@ -69,17 +63,7 @@ export const BlogGridCard = ({ blog }: { blog: BlogGridItem }) => {
           <div>{blog.likesCount > 0 && `${blog.likesCount} likes`}</div>
         </div>
       </div>
-
-      <Toggle
-        aria-label="Toggle bookmark"
-        size="sm"
-        variant="outline"
-        pressed={isFavorite}
-        onPressedChange={() => toggle(blog)}
-        className="data-[state=on]:bg-slate-200 data-[state=on]:*:[svg]:fill-yellow-500 data-[state=on]:*:[svg]:stroke-cyan-600 size-8 absolute top-2 right-2 bg-slate-200 cursor-pointer text-slate-700 hover:bg-slate-200 hover:text-cyan-700 hover:shadow-lg hover:shadow-cyan-500/50 transition-all duration-200 ease-in-out active:scale-95"
-      >
-        <Star />
-      </Toggle>
+      <BlogFavoriteCardToggler blog={blog} />
     </Card>
   );
 };

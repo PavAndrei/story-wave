@@ -2,6 +2,7 @@ import { href, Link } from "react-router-dom";
 import { ROUTES } from "@/shared/model/routes";
 import { Card } from "@/shared/ui/kit/card";
 import { Button } from "@/shared/ui/kit/button";
+import { BlogFavoriteCardToggler } from "@/features/blog-favorite";
 
 export type BlogListItem = {
   _id: string;
@@ -15,11 +16,14 @@ export type BlogListItem = {
   };
   createdAt: string;
   publishedAt?: string;
+  likesCount: number;
+  viewsCount: number;
+  isFavorite?: boolean;
 };
 
 export const BlogListItem = ({ blog }: { blog: BlogListItem }) => {
   return (
-    <Card className="flex flex-row items-center gap-2 p-5 rounded-md border-slate-700 bg-slate-200">
+    <Card className="relative flex flex-row items-center gap-2 p-5 rounded-md border-slate-700 bg-slate-200">
       {/* Image */}
       {blog.coverImgUrl && (
         <div className="overflow-hidden rounded-md w-1/4 h-35 self-start">
@@ -55,6 +59,7 @@ export const BlogListItem = ({ blog }: { blog: BlogListItem }) => {
           <Link to={href(ROUTES.BLOG, { blogId: blog._id })}>View</Link>
         </Button>
       </div>
+      <BlogFavoriteCardToggler blog={blog} />
     </Card>
   );
 };
