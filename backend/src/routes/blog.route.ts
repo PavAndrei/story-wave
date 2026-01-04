@@ -5,6 +5,7 @@ import {
   getOneBlogHandler,
   deleteBlogHandler,
   getAllBlogsHandler,
+  toggleLikeHandler,
 } from '../controllers/blog.controller.js';
 import authenticate from '../middleware/authentificate.js';
 import { setRequestExtensions } from '../middleware/requestExtension.js';
@@ -20,6 +21,12 @@ blogRoutes.delete(
   setRequestExtensions,
   authenticate,
   deleteBlogHandler
+);
+blogRoutes.post(
+  '/:id/like',
+  setRequestExtensions,
+  authenticate,
+  toggleLikeHandler
 );
 
 export default blogRoutes;

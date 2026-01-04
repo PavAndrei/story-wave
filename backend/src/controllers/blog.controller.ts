@@ -6,6 +6,7 @@ import {
   getAllBlogs,
   getMyBlogsService,
   saveBlogService,
+  toggleBlogLike,
 } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
@@ -129,5 +130,20 @@ export const getAllBlogsHandler = catchErrors(async (req, res) => {
     success: true,
     blogs: result.blogs,
     pagination: result.pagination,
+  });
+});
+
+export const toggleLikeHandler = catchErrors(async (req, res) => {
+  const userId = req.userId!;
+  const { id: blogId } = req.params;
+
+  const result = await toggleBlogLike({
+    blogId: new mongoose.Types.ObjectId(blogId),
+    userId: new mongoose.Types.ObjectId(userId),
+  });
+
+  return res.status(OK).json({
+    success: true,
+    ...result,
   });
 });

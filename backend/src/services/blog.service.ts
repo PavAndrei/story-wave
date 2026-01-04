@@ -331,3 +331,32 @@ export const getAllBlogs = async (filters: GetAllBlogsParams) => {
     },
   };
 };
+
+export const toggleBlogLike = async ({
+  blogId,
+  userId,
+}: {
+  blogId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+}) => {
+  const blog = await BlogModel.findById(blogId);
+
+  appAssert(blog, NOT_FOUND, 'Blog not found');
+
+  const hasLiked = blog.likedBy.some((id) => id.equals(userId));
+
+  if (hasLiked) {
+    blog.likedBy = blog.likedBy.filter((id) => !id.equals(userId));
+    blog.likesCount = Math.max(blog.likesCount - 1, 0);
+  } else {
+    blog.likedBy.push(userId);
+    blog.likesCount += 1;
+  }
+
+  await blog.save();
+
+  return {
+    likesCount: blog.likesCount,
+    isLiked: !hasLiked,
+  };
+};
