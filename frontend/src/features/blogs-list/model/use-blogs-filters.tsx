@@ -1,4 +1,3 @@
-// filters-url.ts
 import type { BlogsFilters } from "@/shared/api/api";
 
 export const searchParamsToFilters = (
@@ -25,7 +24,6 @@ export const filtersToSearchParams = (filters: BlogsFilters) => {
   return params;
 };
 
-// use-my-blogs-filters.ts
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -33,21 +31,17 @@ import { useSearchParams } from "react-router-dom";
 export const useBlogsFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // 🔹 filters = всегда из URL
   const filters = useMemo(
     () => searchParamsToFilters(searchParams),
     [searchParams],
   );
 
-  // 🔹 локальный search (для debounce)
   const [searchInput, setSearchInput] = useState(filters.search);
   const debouncedSearch = useDebounce(searchInput, 400);
 
-  // 🔹 локальный author (для debounce)
   const [authorInput, setAuthorInput] = useState(filters.author);
   const debouncedAuthor = useDebounce(authorInput, 400);
 
-  // 🔹 debounce → URL
   useEffect(() => {
     const isSearchChanged = debouncedSearch !== filters.search;
     const isAuthorChanged = debouncedAuthor !== filters.author;
@@ -64,7 +58,6 @@ export const useBlogsFilters = () => {
     );
   }, [debouncedSearch, debouncedAuthor, filters, setSearchParams]);
 
-  // 🔹 универсальный update
   const updateFilters = (patch: Partial<BlogsFilters>) => {
     setSearchParams(
       filtersToSearchParams({

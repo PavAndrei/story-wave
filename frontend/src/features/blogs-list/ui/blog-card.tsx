@@ -48,7 +48,10 @@ export const BlogCard = ({ blog }: { blog: BlogListItem }) => {
             <span>{new Date(blog.publishedAt).toLocaleDateString()}</span>
           )}
         </div>
-        <Button asChild>
+        <Button
+          asChild
+          className="cursor-pointer bg-cyan-700 text-slate-200 font-medium text-base py-2 px-4 hover:bg-cyan-600 active:scale-95 flex gap-2"
+        >
           <Link to={href(ROUTES.BLOG, { blogId: blog._id })}>View</Link>
         </Button>
       </div>

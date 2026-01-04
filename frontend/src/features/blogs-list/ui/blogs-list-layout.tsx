@@ -1,29 +1,33 @@
 export const BlogListLayout = ({
   header,
-  filters,
   children,
   sidebar,
   templates,
+  discoveryColumn,
 }: {
   header: React.ReactNode;
-  filters?: React.ReactNode;
   children: React.ReactNode;
   sidebar?: React.ReactNode;
   templates?: React.ReactNode;
+  discoveryColumn?: React.ReactNode;
 }) => {
   return (
-    <div className="container mx-auto">
-      <div className="flex gap-4">
-        {sidebar}
-        <div className="flex-1  p-4 flex flex-col gap-6">
+    <main className="mx-auto my-0 max-w-[1460px] px-2.5 py-10">
+      <div className="flex gap-2 w-full">
+        <aside className="w-1/6 bg-slate-200 border border-slate-700 rounded-lg">
+          {sidebar}
+        </aside>
+        <div className="flex-1 flex flex-col gap-6 w-2/3">
           {templates && (
-            <div className="rounded-md bg-gray-100 p-4">{templates}</div>
+            <div className="rounded-md bg-slate-200 p-4 border border-slate-700">
+              {templates}
+            </div>
           )}
           {header}
-          {filters}
           {children}
         </div>
+        <div className="w-1/6">{discoveryColumn}</div>
       </div>
-    </div>
+    </main>
   );
 };

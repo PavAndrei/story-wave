@@ -21,7 +21,7 @@ import {
 //   onChange: (next: Props["filters"]) => void;
 // };
 
-type PublicBlogsFormProps = {
+export type PublicBlogsFormProps = {
   ui: {
     search: string;
     author: string;
@@ -38,7 +38,7 @@ type PublicBlogsFormProps = {
 
 export const BlogFilters = ({ ui, handlers }: PublicBlogsFormProps) => {
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-xl border border-slate-700 bg-slate-200">
+    <div className="flex flex-col gap-4 p-4">
       {/* Search by title */}
       <Input
         placeholder="Search by title"
@@ -61,7 +61,7 @@ export const BlogFilters = ({ ui, handlers }: PublicBlogsFormProps) => {
           handlers.handleSortChange(v as "newest" | "oldest")
         }
       >
-        <SelectTrigger className="w-[180px] border border-slate-700">
+        <SelectTrigger className="w-full border border-slate-700">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
