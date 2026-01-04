@@ -40,11 +40,16 @@ export type Blog = {
   likedBy: string[];
   isLiked?: boolean;
   viewsCount: number;
+  isFavorite?: boolean;
 };
 
 export type Like = {
   likesCount: number;
   isLiked: boolean;
+};
+
+export type Favorite = {
+  isFavorite: boolean;
 };
 
 export type MyBlogsFilters = {
@@ -124,6 +129,10 @@ export type GetAllBlogsApiResponse = ApiResponse & {
 
 export type ToggleLikeApiResponse = ApiResponse & {
   data?: Like;
+};
+
+export type ToggleFavoriteApiResponse = ApiResponse & {
+  data?: Favorite;
 };
 
 export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
@@ -262,6 +271,7 @@ export const blogApi = {
 
     return apiInstance<GetAllBlogsApiResponse>(`/blog/public${query}`, {
       method: "GET",
+      credentials: "include",
     });
   },
 
@@ -289,6 +299,13 @@ export const blogApi = {
   registerView: (blogId: string) => {
     return apiInstance<ApiResponse>(`/blog/${blogId}/view`, {
       method: "POST",
+    });
+  },
+
+  toggleFavorite: (blogId: string) => {
+    return apiInstance<ToggleFavoriteApiResponse>(`/blog/${blogId}/favorite`, {
+      method: "POST",
+      credentials: "include",
     });
   },
 };

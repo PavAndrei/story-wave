@@ -14,6 +14,7 @@ export interface UserDocument extends mongoose.Document {
   comparePassword(val: string): Promise<boolean>;
   omitPassword(): Omit<UserDocument, 'password'>;
   blogs: mongoose.Types.ObjectId[];
+  favorites: mongoose.Types.ObjectId[];
 }
 
 const userSchema = new mongoose.Schema<UserDocument>(
@@ -53,6 +54,12 @@ const userSchema = new mongoose.Schema<UserDocument>(
       default: '',
     },
     blogs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Blog',
+      },
+    ],
+    favorites: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Blog',

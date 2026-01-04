@@ -7,6 +7,7 @@ import {
   getAllBlogsHandler,
   toggleLikeHandler,
   viewBlogHandler,
+  toggleFavoriteHandler,
 } from '../controllers/blog.controller.js';
 import authenticate from '../middleware/authentificate.js';
 import { setRequestExtensions } from '../middleware/requestExtension.js';
@@ -30,5 +31,11 @@ blogRoutes.post(
   toggleLikeHandler
 );
 blogRoutes.post('/:id/view', viewBlogHandler);
+blogRoutes.post(
+  '/:id/favorite',
+  setRequestExtensions,
+  authenticate,
+  toggleFavoriteHandler
+);
 
 export default blogRoutes;

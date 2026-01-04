@@ -6,6 +6,7 @@ import {
   getAllBlogs,
   getMyBlogsService,
   saveBlogService,
+  toggleBlogFavorite,
   toggleBlogLike,
 } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
@@ -99,7 +100,6 @@ export const getOneBlogHandler = catchErrors(async (req, res) => {
 
   if (payload) {
     isLiked = blog.likedBy.some((id) => id.equals(payload.userId));
-    console.log(isLiked);
   }
 
   return res.status(OK).json({
@@ -134,6 +134,15 @@ export const getAllBlogsHandler = catchErrors(async (req, res) => {
     author,
   } = req.query;
 
+  const accessToken = req.cookies.accessToken;
+  const { payload } = verifyToken(accessToken || '');
+
+  let userId;
+
+  if (payload) {
+    userId = payload.userId;
+  }
+
   const result = await getAllBlogs({
     page: Number(page),
     limit: Number(limit),
@@ -141,6 +150,7 @@ export const getAllBlogsHandler = catchErrors(async (req, res) => {
     title: search as string | undefined,
     categories: categories as string | undefined,
     author: author as string | undefined,
+    userId,
   });
 
   return res.status(OK).json({
@@ -177,4 +187,22 @@ export const viewBlogHandler = catchErrors(async (req, res) => {
   });
 
   res.status(OK).json({ success: true, message: 'Blog viewed' });
+});
+
+export const toggleFavoriteHandler = catchErrors(async (req, res) => {
+  const userId = req.userId!;
+  const { id: blogId } = req.params;
+
+  const result = await toggleBlogFavorite({
+    blogId: new mongoose.Types.ObjectId(blogId),
+    userId: new mongoose.Types.ObjectId(userId),
+  });
+
+  return res.status(OK).json({
+    success: true,
+    message: 'Favorite toggled successfully',
+    data: {
+      isFavorite: result.isFavorite,
+    },
+  });
 });

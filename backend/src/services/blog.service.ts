@@ -258,10 +258,11 @@ type GetAllBlogsParams = {
   title?: string;
   categories?: string[] | string;
   author?: string;
+  userId?: mongoose.Types.ObjectId;
 };
 
 export const getAllBlogs = async (filters: GetAllBlogsParams) => {
-  const { page, limit, sort, title, categories, author } = filters;
+  const { page, limit, sort, title, categories, author, userId } = filters;
 
   const skip = (page - 1) * limit;
 
@@ -310,7 +311,7 @@ export const getAllBlogs = async (filters: GetAllBlogsParams) => {
     filter.authorId = user._id;
   }
 
-  const [items, total] = await Promise.all([
+  const [items, total, user] = await Promise.all([
     BlogModel.find(filter)
       .populate('authorId', 'username')
       .sort({ createdAt: sort === 'asc' ? 1 : -1 })
@@ -319,10 +320,21 @@ export const getAllBlogs = async (filters: GetAllBlogsParams) => {
       .lean(),
 
     BlogModel.countDocuments(filter),
+
+    userId ? UserModel.findById(userId).select('favorites').lean() : null,
   ]);
 
+  const favoriteSet = new Set(
+    user?.favorites?.map((id) => id.toString()) ?? []
+  );
+
+  const blogs = items.map((blog) => ({
+    ...blog,
+    isFavorite: favoriteSet.has(blog._id.toString()),
+  }));
+
   return {
-    blogs: items,
+    blogs,
     pagination: {
       total,
       page,
@@ -358,5 +370,33 @@ export const toggleBlogLike = async ({
   return {
     likesCount: blog.likesCount,
     isLiked: !hasLiked,
+  };
+};
+
+export const toggleBlogFavorite = async ({
+  blogId,
+  userId,
+}: {
+  blogId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+}) => {
+  const blog = await BlogModel.findById(blogId).select('_id');
+  appAssert(blog, NOT_FOUND, 'Blog not found');
+
+  const user = await UserModel.findById(userId);
+  appAssert(user, NOT_FOUND, 'User not found');
+
+  const isFavorite = user.favorites.some((id) => id.equals(blogId));
+
+  if (isFavorite) {
+    user.favorites = user.favorites.filter((id) => !id.equals(blogId));
+  } else {
+    user.favorites.push(blogId);
+  }
+
+  await user.save();
+
+  return {
+    isFavorite: !isFavorite,
   };
 };
