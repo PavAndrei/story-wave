@@ -11,6 +11,7 @@ import {
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
 import BlogModel from '../models/blog.model.js';
+import { verifyToken } from '../utils/jwt.js';
 
 export const saveBlogHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
@@ -86,12 +87,28 @@ export const getMyBlogsHandler = catchErrors(async (req, res) => {
 
 export const getOneBlogHandler = catchErrors(async (req, res) => {
   const { id } = req.params;
-  const blog = await BlogModel.findById(id);
+
+  const accessToken = req.cookies.accessToken;
+
+  const blog = await BlogModel.findById(id).lean();
   appAssert(blog, BAD_REQUEST, 'Blog not found');
+
+  let isLiked;
+
+  const { payload } = verifyToken(accessToken || '');
+
+  if (payload) {
+    isLiked = blog.likedBy.some((id) => id.equals(payload.userId));
+    console.log(isLiked);
+  }
+
   return res.status(OK).json({
     success: true,
     message: 'Blog found',
-    blog,
+    blog: {
+      ...blog,
+      isLiked,
+    },
   });
 });
 
@@ -144,6 +161,10 @@ export const toggleLikeHandler = catchErrors(async (req, res) => {
 
   return res.status(OK).json({
     success: true,
-    ...result,
+    message: 'Like toggled successfully',
+    data: {
+      isLiked: result.isLiked,
+      likesCount: result.likesCount,
+    },
   });
 });

@@ -36,6 +36,14 @@ export type Blog = {
   updatedAt: Date;
   publishedAt?: Date;
   __v: number;
+  likesCount: number;
+  likedBy: string[];
+  isLiked?: boolean;
+};
+
+export type Like = {
+  likesCount: number;
+  isLiked: boolean;
 };
 
 export type MyBlogsFilters = {
@@ -111,6 +119,10 @@ export type GetAllBlogsApiResponse = ApiResponse & {
     total: number;
     totalPages: number;
   };
+};
+
+export type ToggleLikeApiResponse = ApiResponse & {
+  data?: Like;
 };
 
 export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
@@ -262,6 +274,13 @@ export const blogApi = {
   deleteBlogById: (id: string) => {
     return apiInstance<ApiResponse>(`/blog/${id}`, {
       method: "DELETE",
+      credentials: "include",
+    });
+  },
+
+  toggleLike: (blogId: string) => {
+    return apiInstance<ToggleLikeApiResponse>(`/blog/${blogId}/like`, {
+      method: "POST",
       credentials: "include",
     });
   },
