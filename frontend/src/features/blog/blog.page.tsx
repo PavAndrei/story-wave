@@ -1,12 +1,14 @@
 import { MarkdownRenderer } from "../markdown";
-import { Heart } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 import { useToggleLike } from "./use-toggle-like";
 import { useBlog } from "./use-blog";
 import { useMyProfile } from "@/shared/model/user";
+import { useBlogView } from "./use-blog-view";
 
 const BlogPage = () => {
   const { blog } = useBlog();
   const { toggle, getLikeState } = useToggleLike();
+  useBlogView(blog?._id);
 
   const { userData } = useMyProfile();
 
@@ -35,6 +37,10 @@ const BlogPage = () => {
           this blog
         </span>
       )}
+      <div className="flex items-center gap-2">
+        <Eye />
+        {blog.viewsCount}
+      </div>
     </div>
   );
 };

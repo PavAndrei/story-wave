@@ -29,6 +29,6 @@ blogRoutes.post(
   authenticate,
   toggleLikeHandler
 );
-blogRoutes.post('/blog/:id/view', viewBlogHandler);
+blogRoutes.post('/:id/view', viewBlogHandler);
 
 export default blogRoutes;

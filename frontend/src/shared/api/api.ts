@@ -39,6 +39,7 @@ export type Blog = {
   likesCount: number;
   likedBy: string[];
   isLiked?: boolean;
+  viewsCount: number;
 };
 
 export type Like = {
@@ -282,6 +283,12 @@ export const blogApi = {
     return apiInstance<ToggleLikeApiResponse>(`/blog/${blogId}/like`, {
       method: "POST",
       credentials: "include",
+    });
+  },
+
+  registerView: (blogId: string) => {
+    return apiInstance<ApiResponse>(`/blog/${blogId}/view`, {
+      method: "POST",
     });
   },
 };
