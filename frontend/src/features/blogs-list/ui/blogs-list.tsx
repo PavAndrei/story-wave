@@ -2,7 +2,7 @@ import { Spinner } from "@/shared/ui/kit/spinner";
 import { BlogListItem } from "./blog-list-item";
 type Props = {
   blogs: BlogListItem[];
-  isFetchingNextPage: boolean;
+  isFetchingNextPage?: boolean;
 };
 
 export const BlogsList = ({ blogs, isFetchingNextPage }: Props) => {

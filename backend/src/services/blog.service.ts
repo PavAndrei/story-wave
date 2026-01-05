@@ -515,6 +515,11 @@ interface RecentBlogPopulated {
   viewedAt: Date;
 }
 
+type UserRecentLean = {
+  recentBlogs: RecentBlogPopulated[];
+  favorites: mongoose.Types.ObjectId[];
+};
+
 export const getRecentBlogs = async ({
   userId,
   limit = 5,
@@ -523,7 +528,7 @@ export const getRecentBlogs = async ({
   limit?: number;
 }) => {
   const user = await UserModel.findById(userId)
-    .select('recentBlogs')
+    .select('recentBlogs favorites')
     .populate({
       path: 'recentBlogs.blogId',
       populate: {
@@ -531,9 +536,11 @@ export const getRecentBlogs = async ({
         select: 'username',
       },
     })
-    .lean<{ recentBlogs: RecentBlogPopulated[] }>();
+    .lean<UserRecentLean>();
 
   appAssert(user, NOT_FOUND, 'User not found');
+
+  const favoriteSet = new Set(user.favorites?.map((id) => id.toString()) ?? []);
 
   const blogs = user.recentBlogs
     .filter((item) => item.blogId && item.blogId.status === 'published')
@@ -541,6 +548,7 @@ export const getRecentBlogs = async ({
     .map((item) => ({
       ...item.blogId,
       viewedAt: item.viewedAt,
+      isFavorite: favoriteSet.has(item.blogId._id.toString()),
     }));
 
   return blogs;

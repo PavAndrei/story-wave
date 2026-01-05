@@ -16,7 +16,11 @@ export const BlogsListLayoutSidebar = ({
   const location = useLocation();
 
   const value =
-    location.pathname === ROUTES.BLOGS_FAVORITES ? "favorites" : "all";
+    location.pathname === ROUTES.BLOGS_FAVORITES
+      ? "favorites"
+      : location.pathname === ROUTES.BLOGS_RECENT
+        ? "recent"
+        : "all";
 
   return (
     <div className="flex flex-col gap-2">
@@ -38,12 +42,14 @@ export const BlogsListLayoutSidebar = ({
               <Star />
             </TabsTrigger>
           </Link>
-          <TabsTrigger
-            className="cursor-pointer border-slate-700 bg-slate-200 data-[state=active]:bg-slate-50"
-            value="recent"
-          >
-            <History />
-          </TabsTrigger>
+          <Link to={href(ROUTES.BLOGS_RECENT)}>
+            <TabsTrigger
+              className="cursor-pointer border-slate-700 bg-slate-200 data-[state=active]:bg-slate-50"
+              value="recent"
+            >
+              <History />
+            </TabsTrigger>
+          </Link>
         </TabsList>
         <TabsContent className="text-sm text-slate-500" value="all">
           All blogs

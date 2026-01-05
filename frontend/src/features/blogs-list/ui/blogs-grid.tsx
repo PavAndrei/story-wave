@@ -3,7 +3,7 @@ import { BlogGridCard, type BlogGridItem } from "./blog-grid-card";
 
 type Props = {
   blogs: BlogGridItem[];
-  isFetchingNextPage: boolean;
+  isFetchingNextPage?: boolean;
 };
 
 export const BlogsGrid = ({ blogs, isFetchingNextPage }: Props) => {

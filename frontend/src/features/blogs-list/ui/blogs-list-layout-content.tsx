@@ -12,7 +12,7 @@ export const BlogsListLayoutContent = ({
 }: {
   items: Blog[];
   isLoading?: boolean;
-  isFetchingNextPage: boolean;
+  isFetchingNextPage?: boolean;
   hasNextPage?: boolean;
   cursorRef?: React.Ref<HTMLDivElement>;
   viewMode?: "list" | "grid";

@@ -5,11 +5,13 @@ import { useBlog } from "./use-blog";
 import { useMyProfile } from "@/shared/model/user";
 import { useBlogView } from "./use-blog-view";
 import { BlogFavoriteCardToggler } from "../blog-favorite";
+import { useAddRecentBlog } from "./use-add-to-recent";
 
 const BlogPage = () => {
   const { blog } = useBlog();
   const { toggle, getLikeState } = useToggleLike();
   useBlogView(blog?._id);
+  useAddRecentBlog(blog?._id);
 
   const { userData } = useMyProfile();
 

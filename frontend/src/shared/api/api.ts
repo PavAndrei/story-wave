@@ -326,6 +326,20 @@ export const blogApi = {
       credentials: "include",
     });
   },
+
+  addToRecentBlogs: (blogId: string) => {
+    return apiInstance<ApiResponse>(`/blog/${blogId}/recent`, {
+      method: "POST",
+      credentials: "include",
+    });
+  },
+
+  getRecent: () => {
+    return apiInstance<{ success: true; blogs: Blog[] }>(`/blog/recent`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
 };
 
 export const uploadApi = {

@@ -12,6 +12,7 @@ export const ROUTES = {
   CREATE_BLOG: "/create-blog/:blogId?",
   BLOGS: "/blogs",
   BLOGS_FAVORITES: "/blogs/favorites",
+  BLOGS_RECENT: "/blogs/recent",
   BLOG: "/blog/:blogId",
   PROFILE: "/profile",
   MY_BLOGS: "/profile/my-blogs",
