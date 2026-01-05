@@ -11,16 +11,6 @@ import {
   SelectValue,
 } from "@/shared/ui/kit/select";
 
-// type Props = {
-//   filters: {
-//     search: string;
-//     author: string;
-//     categories: string[];
-//     sort: "asc" | "desc";
-//   };
-//   onChange: (next: Props["filters"]) => void;
-// };
-
 export type PublicBlogsFormProps = {
   ui: {
     search: string;
@@ -46,13 +36,16 @@ export const BlogFilters = ({ ui, handlers }: PublicBlogsFormProps) => {
         value={ui.search}
         onChange={(e) => handlers.handleSearchChange(e.target.value)}
       />
+
       {/* Search by author */}
-      <Input
-        placeholder="Search by author"
-        className="border border-slate-700 placeholder:text-slate-400"
-        value={ui.author}
-        onChange={(e) => handlers.handleAuthorChange(e.target.value)}
-      />
+      {handlers.handleAuthorChange && (
+        <Input
+          placeholder="Search by author"
+          className="border border-slate-700 placeholder:text-slate-400"
+          value={ui.author ?? ""}
+          onChange={(e) => handlers.handleAuthorChange(e.target.value)}
+        />
+      )}
 
       {/* Categories */}
       <Select

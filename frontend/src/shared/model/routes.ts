@@ -11,6 +11,7 @@ export const ROUTES = {
   RESET_PASSWORD: "/password/reset",
   CREATE_BLOG: "/create-blog/:blogId?",
   BLOGS: "/blogs",
+  BLOGS_FAVORITES: "/blogs/favorites",
   BLOG: "/blog/:blogId",
   PROFILE: "/profile",
   MY_BLOGS: "/profile/my-blogs",

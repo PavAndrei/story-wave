@@ -275,6 +275,24 @@ export const blogApi = {
     });
   },
 
+  getFavoriteBlogs: (filters: BlogsFilters) => {
+    const query = buildQueryString({
+      page: String(filters.page),
+      limit: String(filters.limit),
+      sort: filters.sort,
+      search: filters.search,
+      categories:
+        filters.categories.length > 0
+          ? filters.categories.join(",")
+          : undefined,
+    });
+
+    return apiInstance<GetAllBlogsApiResponse>(`/blog/favorites${query}`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
+
   getBlogById: (id: string) => {
     return apiInstance<GetBlogByIdApiResponse>(`/blog/${id}`, {
       method: "GET",

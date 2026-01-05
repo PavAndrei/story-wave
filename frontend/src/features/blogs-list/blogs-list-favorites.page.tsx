@@ -1,19 +1,24 @@
-import { useBlogsFilters } from "./model/use-blogs-filters";
-import { useBlogsInfinite } from "./model/use-blogs-inifinity";
+import { useState } from "react";
 import { BlogListLayout } from "./ui/blogs-list-layout";
-import { BlogsListLayoutHeader } from "./ui/blogs-list-layout-header";
 import { BlogsListLayoutContent } from "./ui/blogs-list-layout-content";
+import { BlogsListLayoutHeader } from "./ui/blogs-list-layout-header";
 import { BlogsListLayoutSidebar } from "./ui/blogs-list-layout-sidebar";
 import { BlogsListLayoutTemplates } from "./ui/blogs-list-layout-templates";
-import { BlogsListLayoutDiscoveryColumn } from "./ui/blogs-list-layout-discovery-column";
-import { useState } from "react";
+import { useBlogsFilters } from "./model/use-blogs-filters";
+import { useBlogsFavoritesInfinite } from "./model/use-blogs-favorites-infinity";
 
-const BlogsListPage = () => {
+const BlogsListFavoritePage = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 
   const filtersState = useBlogsFilters();
-  const { blogs, cursorRef, isFetchingNextPage, isLoading, hasNextPage } =
-    useBlogsInfinite(filtersState.filters);
+  const {
+    blogs,
+    cursorRef,
+    isFetchingNextPage,
+    isLoading,
+    hasNextPage,
+    pagination,
+  } = useBlogsFavoritesInfinite(filtersState.filters);
 
   return (
     <BlogListLayout
@@ -26,10 +31,14 @@ const BlogsListPage = () => {
         />
       }
       sidebar={
-        <BlogsListLayoutSidebar filtersState={filtersState} enableFilters />
+        <BlogsListLayoutSidebar
+          filtersState={filtersState}
+          enableFilters={false}
+          total={pagination?.total}
+        />
       }
       templates={<BlogsListLayoutTemplates />}
-      discoveryColumn={<BlogsListLayoutDiscoveryColumn />}
+      discoveryColumn={null}
     >
       <BlogsListLayoutContent
         viewMode={viewMode}
@@ -43,4 +52,4 @@ const BlogsListPage = () => {
   );
 };
 
-export const Component = BlogsListPage;
+export const Component = BlogsListFavoritePage;

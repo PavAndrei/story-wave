@@ -58,6 +58,10 @@ export const router = createBrowserRouter([
         lazy: () => import("@/features/blogs-list/blogs-list.page"),
       },
       {
+        path: ROUTES.BLOGS_FAVORITES,
+        lazy: () => import("@/features/blogs-list/blogs-list-favorites.page"),
+      },
+      {
         path: ROUTES.ABOUT,
         lazy: () => import("@/features/about/about.page"),
       },
