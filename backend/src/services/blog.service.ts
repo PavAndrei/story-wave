@@ -400,3 +400,85 @@ export const toggleBlogFavorite = async ({
     isFavorite: !isFavorite,
   };
 };
+
+type GetFavoriteBlogsParams = {
+  userId: mongoose.Types.ObjectId;
+  page: number;
+  limit: number;
+  search?: string;
+  categories?: string;
+  sort: 'asc' | 'desc';
+};
+
+export const getFavoriteBlogs = async ({
+  userId,
+  page,
+  limit,
+  search,
+  categories,
+  sort,
+}: GetFavoriteBlogsParams) => {
+  const skip = (page - 1) * limit;
+
+  // 1️⃣ Получаем избранные ID пользователя
+  const user = await UserModel.findById(userId).select('favorites').lean();
+
+  appAssert(user, NOT_FOUND, 'User not found');
+
+  if (!user.favorites.length) {
+    return {
+      blogs: [],
+      pagination: {
+        page,
+        limit,
+        total: 0,
+        totalPages: 0,
+      },
+    };
+  }
+
+  // 2️⃣ Базовый фильтр
+  const filter: Record<string, any> = {
+    _id: { $in: user.favorites },
+    status: 'published',
+  };
+
+  // 3️⃣ Search по title
+  if (search) {
+    filter.title = {
+      $regex: search,
+      $options: 'i',
+    };
+  }
+
+  // 4️⃣ Categories
+  if (categories) {
+    const arr = categories.split(',').map((c) => c.trim());
+    filter.categories = { $in: arr };
+  }
+
+  // 5️⃣ Запросы
+  const [items, total] = await Promise.all([
+    BlogModel.find(filter)
+      .populate('authorId', 'username')
+      .sort({ createdAt: sort })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    BlogModel.countDocuments(filter),
+  ]);
+
+  return {
+    blogs: items.map((blog) => ({
+      ...blog,
+      isFavorite: true, // 💡 важно
+    })),
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
