@@ -9,6 +9,8 @@ import {
   toggleBlogFavorite,
   toggleBlogLike,
   getFavoriteBlogs,
+  addRecentBlog,
+  getRecentBlogs,
 } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
@@ -241,5 +243,39 @@ export const getFavoriteBlogsHandler = catchErrors(async (req, res) => {
     success: true,
     blogs: result.blogs,
     pagination: result.pagination,
+  });
+});
+
+export const addRecentBlogHandler = catchErrors(async (req, res) => {
+  const userId = req.userId;
+  const { id: blogId } = req.params;
+
+  if (!userId) {
+    return res
+      .status(OK)
+      .json({ success: true, message: 'User are not authenticated' });
+  }
+
+  await addRecentBlog({
+    userId: new mongoose.Types.ObjectId(userId),
+    blogId: new mongoose.Types.ObjectId(blogId),
+  });
+
+  return res.status(OK).json({
+    success: true,
+    message: 'Recent blog updated',
+  });
+});
+
+export const getRecentBlogsHandler = catchErrors(async (req, res) => {
+  const userId = req.userId!;
+
+  const blogs = await getRecentBlogs({
+    userId: new mongoose.Types.ObjectId(userId),
+  });
+
+  return res.status(OK).json({
+    success: true,
+    blogs,
   });
 });

@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 import { compareValue, hashValue } from '../utils/bcrypt.js';
 
+interface RecentBlog {
+  blogId: mongoose.Types.ObjectId;
+  viewedAt: Date;
+}
+
 export interface UserDocument extends mongoose.Document {
   username: string;
   email: string;
@@ -15,6 +20,7 @@ export interface UserDocument extends mongoose.Document {
   omitPassword(): Omit<UserDocument, 'password'>;
   blogs: mongoose.Types.ObjectId[];
   favorites: mongoose.Types.ObjectId[];
+  recentBlogs: RecentBlog[];
 }
 
 const userSchema = new mongoose.Schema<UserDocument>(
@@ -65,6 +71,21 @@ const userSchema = new mongoose.Schema<UserDocument>(
         ref: 'Blog',
       },
     ],
+    recentBlogs: {
+      type: [
+        {
+          blogId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Blog',
+          },
+          viewedAt: {
+            type: Date,
+            required: true,
+            default: Date.now(),
+          },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );

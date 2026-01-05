@@ -9,6 +9,8 @@ import {
   viewBlogHandler,
   toggleFavoriteHandler,
   getFavoriteBlogsHandler,
+  addRecentBlogHandler,
+  getRecentBlogsHandler,
 } from '../controllers/blog.controller.js';
 import authenticate from '../middleware/authentificate.js';
 import { setRequestExtensions } from '../middleware/requestExtension.js';
@@ -22,6 +24,13 @@ blogRoutes.get(
   setRequestExtensions,
   authenticate,
   getFavoriteBlogsHandler
+);
+
+blogRoutes.get(
+  '/recent',
+  setRequestExtensions,
+  authenticate,
+  getRecentBlogsHandler
 );
 
 blogRoutes.get('/my', setRequestExtensions, authenticate, getMyBlogsHandler);
@@ -45,6 +54,13 @@ blogRoutes.post(
   setRequestExtensions,
   authenticate,
   toggleFavoriteHandler
+);
+
+blogRoutes.post(
+  '/:id/recent',
+  setRequestExtensions,
+  authenticate,
+  addRecentBlogHandler
 );
 
 export default blogRoutes;

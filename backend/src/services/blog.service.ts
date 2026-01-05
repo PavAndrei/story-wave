@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
-import BlogModel from '../models/blog.model.js';
+import BlogModel, { BlogDocument } from '../models/blog.model.js';
 import appAssert from '../utils/appAssert.js';
 import { FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import imageModel from '../models/image.model.js';
 import { cloudinary, deleteFromCloudinary } from '../utils/cloudinary.js';
 import UserModel from '../models/user.model.js';
-import blogRoutes from 'routes/blog.route.js';
 
 type SaveBlogProps = {
   blogId?: string;
@@ -481,4 +480,68 @@ export const getFavoriteBlogs = async ({
       totalPages: Math.ceil(total / limit),
     },
   };
+};
+
+export const addRecentBlog = async ({
+  userId,
+  blogId,
+  limit = 5,
+}: {
+  userId: mongoose.Types.ObjectId;
+  blogId: mongoose.Types.ObjectId;
+  limit?: number;
+}) => {
+  const user = await UserModel.findById(userId);
+  appAssert(user, NOT_FOUND, 'User not found');
+
+  user.recentBlogs = user.recentBlogs.filter(
+    (item) => !item.blogId.equals(blogId)
+  );
+
+  user.recentBlogs.unshift({
+    blogId,
+    viewedAt: new Date(),
+  });
+
+  if (user.recentBlogs.length > limit) {
+    user.recentBlogs = user.recentBlogs.slice(0, limit);
+  }
+
+  await user.save();
+};
+
+interface RecentBlogPopulated {
+  blogId: BlogDocument;
+  viewedAt: Date;
+}
+
+export const getRecentBlogs = async ({
+  userId,
+  limit = 5,
+}: {
+  userId: mongoose.Types.ObjectId;
+  limit?: number;
+}) => {
+  const user = await UserModel.findById(userId)
+    .select('recentBlogs')
+    .populate({
+      path: 'recentBlogs.blogId',
+      populate: {
+        path: 'authorId',
+        select: 'username',
+      },
+    })
+    .lean<{ recentBlogs: RecentBlogPopulated[] }>();
+
+  appAssert(user, NOT_FOUND, 'User not found');
+
+  const blogs = user.recentBlogs
+    .filter((item) => item.blogId && item.blogId.status === 'published')
+    .slice(0, limit)
+    .map((item) => ({
+      ...item.blogId,
+      viewedAt: item.viewedAt,
+    }));
+
+  return blogs;
 };
