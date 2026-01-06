@@ -1,4 +1,8 @@
-import { changeUserData, deleteUserById } from '../services/user.service.js';
+import {
+  changeUserData,
+  deleteUserById,
+  getTopUsers,
+} from '../services/user.service.js';
 import { NOT_FOUND, OK } from '../constants/http.js';
 import UserModel from '../models/user.model.js';
 import appAssert from '../utils/appAssert.js';
@@ -43,5 +47,17 @@ export const deleteUserHandler = catchErrors(async (req, res) => {
   return clearAuthCookies(res).status(OK).json({
     success: true,
     message: 'User deleted',
+  });
+});
+
+export const getTopUsersHandler = catchErrors(async (req, res) => {
+  const limit = Number(req.query.limit) || 10;
+
+  const users = await getTopUsers({ limit });
+
+  res.json({
+    success: true,
+    message: 'Top users found',
+    users,
   });
 });

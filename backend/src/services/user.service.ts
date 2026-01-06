@@ -5,6 +5,7 @@ import appAssert from '../utils/appAssert.js';
 import { cloudinary, deleteFromCloudinaryByUrl } from '../utils/cloudinary.js';
 import SessionModel from '../models/session.model.js';
 import VerificationCodeModel from '../models/verificationCode.model.js';
+import BlogModel from '../models/blog.model.js';
 
 interface ChangeUserDataParams {
   request: {
@@ -70,4 +71,60 @@ export const deleteUserById = async (userId?: mongoose.Types.ObjectId) => {
   return {
     deletedUserId: userId,
   };
+};
+
+export const getTopUsers = async ({ limit = 10 }: { limit?: number }) => {
+  return BlogModel.aggregate([
+    // 1. Берём только опубликованные и не удалённые статьи
+    {
+      $match: {
+        status: 'published',
+      },
+    },
+
+    // 2. Группируем по автору
+    {
+      $group: {
+        _id: '$authorId',
+        totalViews: { $sum: '$viewsCount' },
+        articlesCount: { $sum: 1 },
+      },
+    },
+
+    // 3. Сортируем по просмотрам
+    {
+      $sort: { totalViews: -1 },
+    },
+
+    // 4. Ограничиваем топ
+    {
+      $limit: limit,
+    },
+
+    // 5. Подтягиваем данные пользователя
+    {
+      $lookup: {
+        from: 'users', // имя коллекции
+        localField: '_id',
+        foreignField: '_id',
+        as: 'author',
+      },
+    },
+
+    // 6. Разворачиваем массив
+    {
+      $unwind: '$author',
+    },
+
+    // 7. Проекция — возвращаем ТОЛЬКО нужное
+    {
+      $project: {
+        _id: '$author._id',
+        username: '$author.username',
+        avatar: '$author.avatar',
+        totalViews: 1,
+        articlesCount: 1,
+      },
+    },
+  ]);
 };

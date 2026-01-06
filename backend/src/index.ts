@@ -36,7 +36,7 @@ app.get('/', (req, res, next) => {
 });
 
 app.use('/auth', authRoutes);
-app.use('/user', setRequestExtensions, authenticate, userRoutes);
+app.use('/user', userRoutes);
 app.use('/session', setRequestExtensions, authenticate, sessionRoutes);
 app.use('/blog', blogRoutes);
 app.use('/upload', setRequestExtensions, authenticate, uploadRoutes);
