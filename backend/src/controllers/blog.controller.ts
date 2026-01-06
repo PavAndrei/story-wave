@@ -220,13 +220,7 @@ export const toggleFavoriteHandler = catchErrors(async (req, res) => {
 export const getFavoriteBlogsHandler = catchErrors(async (req, res) => {
   const userId = req.userId!;
 
-  const {
-    page = '1',
-    limit = '10',
-    sort = 'newest',
-    search,
-    categories,
-  } = req.query;
+  const { page = '1', limit = '10' } = req.query;
 
   const pageNumber = Math.max(Number(page) || 1, 1);
   const limitNumber = Math.min(Math.max(Number(limit) || 10, 1), 50);
@@ -235,9 +229,6 @@ export const getFavoriteBlogsHandler = catchErrors(async (req, res) => {
     userId: new mongoose.Types.ObjectId(userId),
     page: pageNumber,
     limit: limitNumber,
-    search: search as string | undefined,
-    categories: categories as string | undefined,
-    sort: sort === 'oldest' ? 'asc' : 'desc',
   });
 
   return res.status(OK).json({

@@ -1,7 +1,7 @@
+import { authApi } from "@/shared/api/auth-api";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { authApi } from "../../../shared/api/api";
 
 type LoginPayload = {
   email: string;

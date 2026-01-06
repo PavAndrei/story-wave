@@ -1,4 +1,4 @@
-import { authApi } from "@/shared/api/api";
+import { authApi } from "@/shared/api/auth-api";
 import { useMutation } from "@tanstack/react-query";
 
 export const useForgotPassword = () => {

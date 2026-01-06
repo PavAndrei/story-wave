@@ -1,4 +1,5 @@
-import { blogApi, type Blog } from "@/shared/api/api";
+import type { BlogDTO } from "@/shared/api/api-types";
+import { blogApi } from "@/shared/api/blog-api";
 import { queryClient } from "@/shared/api/query-client";
 import { useMutation } from "@tanstack/react-query";
 import { startTransition, useOptimistic } from "react";
@@ -24,7 +25,7 @@ export const useToggleLike = () => {
     },
   });
 
-  const toggle = (blog: Blog) => {
+  const toggle = (blog: BlogDTO) => {
     startTransition(async () => {
       const current = optimistic[blog._id] ?? {
         isLiked: blog.isLiked ?? false,
@@ -48,7 +49,7 @@ export const useToggleLike = () => {
     });
   };
 
-  const getLikeState = (blog: Blog): OptimisticLikeState => {
+  const getLikeState = (blog: BlogDTO): OptimisticLikeState => {
     return (
       optimistic[blog._id] ?? {
         isLiked: blog.isLiked ?? false,

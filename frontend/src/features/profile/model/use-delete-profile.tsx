@@ -1,5 +1,7 @@
-import { authApi, sessionApi, userApi } from "@/shared/api/api";
+import { userApi } from "@/shared/api/api";
+import { authApi } from "@/shared/api/auth-api";
 import { queryClient } from "@/shared/api/query-client";
+import { sessionApi } from "@/shared/api/session-api";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";

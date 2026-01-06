@@ -1,4 +1,4 @@
-import { blogApi } from "@/shared/api/api";
+import { blogApi } from "@/shared/api/blog-api";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetTopBlogs = () => {

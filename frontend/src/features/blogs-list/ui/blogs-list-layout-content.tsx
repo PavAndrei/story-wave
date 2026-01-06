@@ -1,4 +1,4 @@
-import type { Blog } from "@/shared/api/api";
+import type { BlogDTO } from "@/shared/api/api-types";
 import { BlogsGrid } from "./blogs-grid";
 import { BlogsList } from "./blogs-list";
 
@@ -10,7 +10,7 @@ export const BlogsListLayoutContent = ({
   cursorRef,
   viewMode,
 }: {
-  items: Blog[];
+  items: BlogDTO[];
   isLoading?: boolean;
   isFetchingNextPage?: boolean;
   hasNextPage?: boolean;

@@ -404,18 +404,12 @@ type GetFavoriteBlogsParams = {
   userId: mongoose.Types.ObjectId;
   page: number;
   limit: number;
-  search?: string;
-  categories?: string;
-  sort: 'asc' | 'desc';
 };
 
 export const getFavoriteBlogs = async ({
   userId,
   page,
   limit,
-  search,
-  categories,
-  sort,
 }: GetFavoriteBlogsParams) => {
   const skip = (page - 1) * limit;
 
@@ -442,25 +436,11 @@ export const getFavoriteBlogs = async ({
     status: 'published',
   };
 
-  // 3️⃣ Search по title
-  if (search) {
-    filter.title = {
-      $regex: search,
-      $options: 'i',
-    };
-  }
-
-  // 4️⃣ Categories
-  if (categories) {
-    const arr = categories.split(',').map((c) => c.trim());
-    filter.categories = { $in: arr };
-  }
-
   // 5️⃣ Запросы
   const [items, total] = await Promise.all([
     BlogModel.find(filter)
       .populate('authorId', 'username')
-      .sort({ createdAt: sort })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(),

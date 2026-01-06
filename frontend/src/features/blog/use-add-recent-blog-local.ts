@@ -1,7 +1,7 @@
-import type { Blog } from "@/shared/api/api";
+import type { BlogDTO } from "@/shared/api/api-types";
 import { useEffect } from "react";
 
-export type RecentBlogLS = Blog & { visitedAt: string };
+export type RecentBlogLS = BlogDTO & { visitedAt: string };
 
 type Options = {
   enabled?: boolean;

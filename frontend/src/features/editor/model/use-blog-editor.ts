@@ -2,7 +2,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
-import { blogApi } from "@/shared/api/api";
 import { useDraftAutosave } from "./use-draft-autosave";
 import { useSaveDraft } from "./use-save-draft";
 import { usePublishBlog } from "./use-publish-blog";
@@ -11,6 +10,7 @@ import {
   mapImageUrlsToUploaded,
   mapImageUrlToUploaded,
 } from "@/shared/helpers/blog-mapper";
+import { blogApi } from "@/shared/api/blog-api";
 
 export const publishBlogSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),

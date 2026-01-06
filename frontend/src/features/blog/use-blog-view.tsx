@@ -1,5 +1,5 @@
+import { blogApi } from "@/shared/api/blog-api";
 import { useEffect, useRef } from "react";
-import { blogApi } from "@/shared/api/api";
 
 const VIEW_KEY_PREFIX = "viewed_blog_";
 

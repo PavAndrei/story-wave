@@ -1,8 +1,11 @@
-import type { BlogsFilters } from "@/shared/api/api";
+import type { PublicBlogsFilters } from "@/shared/api/api-types";
+import { useDebounce } from "@/shared/lib/hooks/use-debounce";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export const searchParamsToFilters = (
   params: URLSearchParams,
-): BlogsFilters => {
+): Omit<PublicBlogsFilters, "page" | "limit" | "totalPages" | "total"> => {
   return {
     sort: (params.get("sort") as "newest" | "oldest") ?? "newest",
     author: params.get("author") ?? "",
@@ -11,7 +14,9 @@ export const searchParamsToFilters = (
   };
 };
 
-export const filtersToSearchParams = (filters: BlogsFilters) => {
+export const filtersToSearchParams = (
+  filters: Omit<PublicBlogsFilters, "page" | "limit" | "totalPages" | "total">,
+) => {
   const params = new URLSearchParams();
 
   if (filters.sort !== "newest") params.set("sort", filters.sort);
@@ -23,10 +28,6 @@ export const filtersToSearchParams = (filters: BlogsFilters) => {
 
   return params;
 };
-
-import { useDebounce } from "@/shared/lib/hooks/use-debounce";
-import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 
 export const useBlogsFilters = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,7 +59,9 @@ export const useBlogsFilters = () => {
     );
   }, [debouncedSearch, debouncedAuthor, filters, setSearchParams]);
 
-  const updateFilters = (patch: Partial<BlogsFilters>) => {
+  const updateFilters = (
+    patch>,
+  ) => {
     setSearchParams(
       filtersToSearchParams({
         ...filters,

@@ -1,4 +1,4 @@
-import { blogApi } from "@/shared/api/api";
+import { blogApi } from "@/shared/api/blog-api";
 import type { PathParams, ROUTES } from "@/shared/model/routes";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";

@@ -1,8 +1,8 @@
 // use-my-blogs-infinite.ts
-import { blogApi } from "@/shared/api/api";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useCallback, type RefCallback } from "react";
 import type { GetMyBlogsApiResponse, MyBlogsFilters } from "@/shared/api/api";
+import { blogApi } from "@/shared/api/blog-api";
 
 export const useMyBlogsInfinite = (filters: MyBlogsFilters) => {
   const {

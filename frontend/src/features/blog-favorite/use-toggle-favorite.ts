@@ -1,8 +1,8 @@
-import { blogApi } from "@/shared/api/api";
 import { queryClient } from "@/shared/api/query-client";
 import { useMutation } from "@tanstack/react-query";
 import { startTransition, useOptimistic } from "react";
 import type { BlogFavoriteCardTogglerProps } from "./blog-favorite-card-toggler";
+import { blogApi } from "@/shared/api/blog-api";
 
 type OptimisticFavoriteState = {
   isFavorite: boolean;

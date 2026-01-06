@@ -1,10 +1,12 @@
-// use-my-blogs-infinite.ts
-import { blogApi } from "@/shared/api/api";
+import type {
+  ApiResponseWithBlogsAndPagination,
+  PublicBlogsFilters,
+} from "@/shared/api/api-types";
+import { blogApi } from "@/shared/api/blog-api";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useCallback, type RefCallback } from "react";
-import type { GetAllBlogsApiResponse, BlogsFilters } from "@/shared/api/api";
 
-export const useBlogsInfinite = (filters: BlogsFilters) => {
+export const useBlogsInfinite = (filters: PublicBlogsFilters) => {
   const {
     data,
     fetchNextPage,
@@ -14,10 +16,10 @@ export const useBlogsInfinite = (filters: BlogsFilters) => {
     isError,
     error,
   } = useInfiniteQuery<
-    GetAllBlogsApiResponse,
+    ApiResponseWithBlogsAndPagination,
     Error,
-    InfiniteData<GetAllBlogsApiResponse>,
-    readonly [string, "public", BlogsFilters],
+    InfiniteData<ApiResponseWithBlogsAndPagination>,
+    readonly [string, "public", PublicBlogsFilters],
     number
   >({
     queryKey: [blogApi.baseKey, "public", filters],

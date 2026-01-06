@@ -1,4 +1,4 @@
-import { userApi } from "@/shared/api/api";
+import { userApi } from "@/shared/api/user-api";
 import { useQuery } from "@tanstack/react-query";
 
 export const useBlogsTopAuthors = () => {

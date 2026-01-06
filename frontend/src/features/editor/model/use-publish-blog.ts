@@ -1,11 +1,12 @@
-import { blogApi, type Blog, type BlogParams } from "@/shared/api/api";
+import type { BlogDTO } from "@/shared/api/api-types";
+import { blogApi } from "@/shared/api/blog-api";
 import { queryClient } from "@/shared/api/query-client";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { href, useNavigate } from "react-router-dom";
 
 type PublishBlogResponse = {
-  blog: Blog;
+  blog: BlogDTO;
 };
 
 export const usePublishBlog = () => {
