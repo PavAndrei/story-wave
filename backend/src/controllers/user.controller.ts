@@ -53,7 +53,9 @@ export const deleteUserHandler = catchErrors(async (req, res) => {
 export const getTopUsersHandler = catchErrors(async (req, res) => {
   const limit = Number(req.query.limit) || 10;
 
-  const users = await getTopUsers({ limit });
+  const result = await getTopUsers({ limit });
+
+  const users = result.map((item) => item.author);
 
   res.json({
     success: true,

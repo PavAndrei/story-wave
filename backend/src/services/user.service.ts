@@ -72,10 +72,9 @@ export const deleteUserById = async (userId?: mongoose.Types.ObjectId) => {
     deletedUserId: userId,
   };
 };
-
 export const getTopUsers = async ({ limit = 10 }: { limit?: number }) => {
   return BlogModel.aggregate([
-    // 1. Берём только опубликованные и не удалённые статьи
+    // 1. Только опубликованные статьи
     {
       $match: {
         status: 'published',
@@ -87,7 +86,7 @@ export const getTopUsers = async ({ limit = 10 }: { limit?: number }) => {
       $group: {
         _id: '$authorId',
         totalViews: { $sum: '$viewsCount' },
-        articlesCount: { $sum: 1 },
+        totalBlogs: { $sum: 1 },
       },
     },
 
@@ -101,29 +100,35 @@ export const getTopUsers = async ({ limit = 10 }: { limit?: number }) => {
       $limit: limit,
     },
 
-    // 5. Подтягиваем данные пользователя
+    // 5. Подтягиваем пользователя
     {
       $lookup: {
-        from: 'users', // имя коллекции
+        from: 'users',
         localField: '_id',
         foreignField: '_id',
         as: 'author',
       },
     },
 
-    // 6. Разворачиваем массив
+    // 6. Разворачиваем массив author
     {
       $unwind: '$author',
     },
 
-    // 7. Проекция — возвращаем ТОЛЬКО нужное
+    // 7. Перекладываем агрегаты ВНУТРЬ author
+    {
+      $addFields: {
+        'author.totalViews': '$totalViews',
+        'author.totalBlogs': '$totalBlogs',
+      },
+    },
+
+    // 8. Чистим верхний уровень
     {
       $project: {
-        _id: '$author._id',
-        username: '$author.username',
-        avatar: '$author.avatar',
-        totalViews: 1,
-        articlesCount: 1,
+        _id: 0,
+        totalViews: 0,
+        totalBlogs: 0,
       },
     },
   ]);

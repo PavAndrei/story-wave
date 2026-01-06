@@ -8,11 +8,14 @@ import { BlogsListLayoutTemplates } from "./ui/blogs-list-layout-templates";
 import { BlogsListLayoutDiscoveryColumn } from "./ui/blogs-list-layout-discovery-column";
 import { useState } from "react";
 import { useGetTopBlogs } from "./model/use-get-top-blogs";
+import { useBlogsTopAuthors } from "./model/use-blogs-top-authors";
 
 const BlogsListPage = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 
   const { topBlogs } = useGetTopBlogs();
+  const { topAuthors } = useBlogsTopAuthors();
+
   const filtersState = useBlogsFilters();
   const { blogs, cursorRef, isFetchingNextPage, isLoading, hasNextPage } =
     useBlogsInfinite(filtersState.filters);
@@ -31,7 +34,12 @@ const BlogsListPage = () => {
         <BlogsListLayoutSidebar filtersState={filtersState} enableFilters />
       }
       templates={<BlogsListLayoutTemplates />}
-      discoveryColumn={<BlogsListLayoutDiscoveryColumn topBlogs={topBlogs} />}
+      discoveryColumn={
+        <BlogsListLayoutDiscoveryColumn
+          topBlogs={topBlogs}
+          topAuthors={topAuthors}
+        />
+      }
     >
       <BlogsListLayoutContent
         viewMode={viewMode}

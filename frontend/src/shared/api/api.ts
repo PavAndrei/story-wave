@@ -19,6 +19,7 @@ export type User = {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
+  blogs: Blog[];
 };
 
 export type Blog = {
@@ -135,6 +136,10 @@ export type ToggleLikeApiResponse = ApiResponse & {
   data?: Like;
 };
 
+export type GetTopUsersApiResponse = ApiResponse & {
+  users: User[];
+};
+
 export type ToggleFavoriteApiResponse = ApiResponse & {
   data?: Favorite;
 };
@@ -217,6 +222,12 @@ export const userApi = {
     return apiInstance<ApiResponse>(`/user/me`, {
       method: "DELETE",
       credentials: "include",
+    });
+  },
+
+  getTopUsers: () => {
+    return apiInstance<GetTopUsersApiResponse>(`/user/top`, {
+      method: "GET",
     });
   },
 };

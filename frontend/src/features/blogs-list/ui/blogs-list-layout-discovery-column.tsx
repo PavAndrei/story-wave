@@ -1,35 +1,17 @@
-import { Flame, User, UserStar } from "lucide-react";
+import { Flame, UserStar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/kit/avatar";
-import type { Blog } from "@/shared/api/api";
+import type { Blog, User } from "@/shared/api/api";
 import { href, Link } from "react-router-dom";
 import { ROUTES } from "@/shared/model/routes";
 
-const TOP_AUTHORS = [
-  {
-    id: "1",
-    name: "Alex Johnson",
-    postsCount: 24,
-    avatar: null,
-  },
-  {
-    id: "2",
-    name: "Maria Petrova",
-    postsCount: 18,
-    avatar: null,
-  },
-  {
-    id: "3",
-    name: "Ivan Smirnov",
-    postsCount: 15,
-    avatar: null,
-  },
-];
-
 export const BlogsListLayoutDiscoveryColumn = ({
   topBlogs,
+  topAuthors,
 }: {
   topBlogs: Blog[] | undefined;
+  topAuthors: User[] | undefined;
 }) => {
+  console.log("topAuthors", topAuthors);
   return (
     <aside className="flex flex-col gap-6">
       {/* Trending blogs */}
@@ -62,22 +44,27 @@ export const BlogsListLayoutDiscoveryColumn = ({
         </header>
 
         <ul className="flex flex-col gap-3">
-          {TOP_AUTHORS.map((author) => (
-            <li key={author.id} className="flex items-center gap-3">
+          {topAuthors?.map((author) => (
+            <li key={author._id} className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
-                {author.avatar ? (
-                  <AvatarImage src={author.avatar} />
+                {author.avatarUrl ? (
+                  <AvatarImage src={author.avatarUrl} />
                 ) : (
                   <AvatarFallback>
-                    <User className="h-4 w-4 text-slate-700" />
+                    <UserStar className="h-4 w-4 text-slate-700" />
                   </AvatarFallback>
                 )}
               </Avatar>
 
               <div className="min-w-0">
-                <p className="truncate text-sm text-slate-700">{author.name}</p>
+                <p className="truncate text-sm text-slate-700">
+                  {author.username}
+                </p>
                 <p className="text-xs text-slate-700">
-                  {author.postsCount} posts
+                  {author?.totalBlogs} blogs
+                </p>
+                <p className="text-xs text-slate-700">
+                  {author?.totalViews} views
                 </p>
               </div>
             </li>
