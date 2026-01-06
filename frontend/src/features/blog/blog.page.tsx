@@ -5,15 +5,25 @@ import { useBlog } from "./use-blog";
 import { useMyProfile } from "@/shared/model/user";
 import { useBlogView } from "./use-blog-view";
 import { BlogFavoriteCardToggler } from "../blog-favorite";
-import { useAddRecentBlog } from "./use-add-to-recent";
+import { useAddRecentBlog } from "./use-add-recent-blog";
+import { useAddRecentBlogLocalStorage } from "./use-add-recent-blog-local";
 
 const BlogPage = () => {
   const { blog } = useBlog();
   const { toggle, getLikeState } = useToggleLike();
   useBlogView(blog?._id);
-  useAddRecentBlog(blog?._id);
 
   const { userData } = useMyProfile();
+
+  useAddRecentBlog(blog?._id, !!userData);
+
+  useAddRecentBlogLocalStorage({
+    blog,
+    options: {
+      enabled: !userData,
+      limit: 10,
+    },
+  });
 
   if (!blog) return null;
 

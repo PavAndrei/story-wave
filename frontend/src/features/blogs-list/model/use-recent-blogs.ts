@@ -3,7 +3,13 @@ import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useCallback, type RefCallback } from "react";
 import type { BlogsFilters, GetAllBlogsApiResponse } from "@/shared/api/api";
 
-export const useRecentBlogsFavorites = (filters: BlogsFilters) => {
+export const useRecentBlogs = ({
+  filters,
+  enabled,
+}: {
+  filters: BlogsFilters;
+  enabled: boolean | null;
+}) => {
   const {
     data,
     fetchNextPage,
@@ -20,7 +26,7 @@ export const useRecentBlogsFavorites = (filters: BlogsFilters) => {
     number
   >({
     queryKey: [blogApi.baseKey, "recent", filters],
-
+    enabled: !!enabled,
     initialPageParam: 1,
 
     queryFn: ({ pageParam }) =>
@@ -54,6 +60,12 @@ export const useRecentBlogsFavorites = (filters: BlogsFilters) => {
     },
     [fetchNextPage, hasNextPage, isFetchingNextPage],
   );
+
+  if (!enabled)
+    return {
+      blogs: [],
+      isLoading: false,
+    };
 
   const blogs =
     data?.pages
