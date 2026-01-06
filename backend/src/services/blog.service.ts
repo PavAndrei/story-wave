@@ -576,3 +576,21 @@ export const getRecentBlogs = async ({
     },
   };
 };
+
+export const getTopBlogs = async ({ limit = 10 }: { limit?: number }) => {
+  return BlogModel.find({
+    status: 'published',
+  })
+    .sort({ viewsCount: -1 })
+    .limit(limit)
+    .select({
+      title: 1,
+      excerpt: 1,
+      coverImgUrl: 1,
+      viewsCount: 1,
+      authorId: 1,
+      createdAt: 1,
+    })
+    .populate('authorId', 'username avatar')
+    .lean();
+};

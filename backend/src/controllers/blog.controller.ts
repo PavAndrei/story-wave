@@ -11,6 +11,7 @@ import {
   getFavoriteBlogs,
   addRecentBlog,
   getRecentBlogs,
+  getTopBlogs,
 } from '../services/blog.service.js';
 import appAssert from '../utils/appAssert.js';
 import { draftSchema, publishSchema } from './blog.schemas.js';
@@ -286,5 +287,15 @@ export const getRecentBlogsHandler = catchErrors(async (req, res) => {
     success: true,
     blogs: result.blogs,
     pagination: result.pagination,
+  });
+});
+
+export const getTopBlogsHandler = catchErrors(async (req, res) => {
+  const limit = Number(req.query.limit) || 10;
+
+  const blogs = await getTopBlogs({ limit });
+
+  res.json({
+    blogs,
   });
 });
