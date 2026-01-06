@@ -66,8 +66,9 @@ export const BlogsListLayoutSidebar = ({
             </p>
           )}
         </TabsContent>
-        <TabsContent className="text-sm text-slate-500" value="recent">
-          Only recent blogs
+        <TabsContent className="text-sm text-slate-500 px-2" value="recent">
+          <p>Only recent blogs.</p>
+          <p>Here are the last 12 blogs you visited.</p>
         </TabsContent>
       </Tabs>
       {enableFilters && (

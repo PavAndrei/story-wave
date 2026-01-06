@@ -259,6 +259,7 @@ export const addRecentBlogHandler = catchErrors(async (req, res) => {
   await addRecentBlog({
     userId: new mongoose.Types.ObjectId(userId),
     blogId: new mongoose.Types.ObjectId(blogId),
+    limit: 12,
   });
 
   return res.status(OK).json({
@@ -270,12 +271,20 @@ export const addRecentBlogHandler = catchErrors(async (req, res) => {
 export const getRecentBlogsHandler = catchErrors(async (req, res) => {
   const userId = req.userId!;
 
-  const blogs = await getRecentBlogs({
+  const { page = '1', limit = '10' } = req.query;
+
+  const pageNumber = Math.max(Number(page) || 1, 1);
+  const limitNumber = Math.min(Math.max(Number(limit) || 10, 1), 50);
+
+  const result = await getRecentBlogs({
     userId: new mongoose.Types.ObjectId(userId),
+    page: pageNumber,
+    limit: limitNumber,
   });
 
   return res.status(OK).json({
     success: true,
-    blogs,
+    blogs: result.blogs,
+    pagination: result.pagination,
   });
 });

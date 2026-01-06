@@ -293,6 +293,18 @@ export const blogApi = {
     });
   },
 
+  getRecentBlogs: (filters: BlogsFilters) => {
+    const query = buildQueryString({
+      page: String(filters.page),
+      limit: String(filters.limit),
+    });
+
+    return apiInstance<GetAllBlogsApiResponse>(`/blog/recent${query}`, {
+      method: "GET",
+      credentials: "include",
+    });
+  },
+
   getBlogById: (id: string) => {
     return apiInstance<GetBlogByIdApiResponse>(`/blog/${id}`, {
       method: "GET",
@@ -330,13 +342,6 @@ export const blogApi = {
   addToRecentBlogs: (blogId: string) => {
     return apiInstance<ApiResponse>(`/blog/${blogId}/recent`, {
       method: "POST",
-      credentials: "include",
-    });
-  },
-
-  getRecent: () => {
-    return apiInstance<{ success: true; blogs: Blog[] }>(`/blog/recent`, {
-      method: "GET",
       credentials: "include",
     });
   },

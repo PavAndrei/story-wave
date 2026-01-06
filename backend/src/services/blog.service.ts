@@ -485,7 +485,7 @@ export const getFavoriteBlogs = async ({
 export const addRecentBlog = async ({
   userId,
   blogId,
-  limit = 5,
+  limit = 12,
 }: {
   userId: mongoose.Types.ObjectId;
   blogId: mongoose.Types.ObjectId;
@@ -510,23 +510,17 @@ export const addRecentBlog = async ({
   await user.save();
 };
 
-interface RecentBlogPopulated {
-  blogId: BlogDocument;
-  viewedAt: Date;
-}
-
-type UserRecentLean = {
-  recentBlogs: RecentBlogPopulated[];
-  favorites: mongoose.Types.ObjectId[];
+type GetRecentBlogsParams = {
+  userId: mongoose.Types.ObjectId;
+  page: number;
+  limit: number;
 };
 
 export const getRecentBlogs = async ({
   userId,
-  limit = 5,
-}: {
-  userId: mongoose.Types.ObjectId;
-  limit?: number;
-}) => {
+  page,
+  limit,
+}: GetRecentBlogsParams) => {
   const user = await UserModel.findById(userId)
     .select('recentBlogs favorites')
     .populate({
@@ -536,20 +530,49 @@ export const getRecentBlogs = async ({
         select: 'username',
       },
     })
-    .lean<UserRecentLean>();
+    .lean<{
+      recentBlogs: {
+        blogId: any;
+        viewedAt: Date;
+      }[];
+      favorites: mongoose.Types.ObjectId[];
+    }>();
 
   appAssert(user, NOT_FOUND, 'User not found');
 
-  const favoriteSet = new Set(user.favorites?.map((id) => id.toString()) ?? []);
+  const favoriteSet = new Set(user.favorites.map((id) => id.toString()));
 
-  const blogs = user.recentBlogs
-    .filter((item) => item.blogId && item.blogId.status === 'published')
-    .slice(0, limit)
-    .map((item) => ({
-      ...item.blogId,
-      viewedAt: item.viewedAt,
-      isFavorite: favoriteSet.has(item.blogId._id.toString()),
-    }));
+  // 1️⃣ фильтрация + сортировка
+  const filtered = user.recentBlogs
+    .filter(
+      (item) =>
+        item.blogId &&
+        item.blogId.status === 'published' &&
+        item.blogId.isDeleted !== true
+    )
+    .sort(
+      (a, b) => new Date(b.viewedAt).getTime() - new Date(a.viewedAt).getTime()
+    );
 
-  return blogs;
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / limit);
+  const start = (page - 1) * limit;
+  const end = start + limit;
+
+  // 2️⃣ пагинация
+  const blogs = filtered.slice(start, end).map((item) => ({
+    ...item.blogId,
+    viewedAt: item.viewedAt,
+    isFavorite: favoriteSet.has(item.blogId._id.toString()),
+  }));
+
+  return {
+    blogs,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+  };
 };

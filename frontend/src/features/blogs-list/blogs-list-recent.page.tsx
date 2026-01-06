@@ -5,13 +5,13 @@ import { BlogsListLayoutHeader } from "./ui/blogs-list-layout-header";
 import { BlogsListLayoutSidebar } from "./ui/blogs-list-layout-sidebar";
 import { BlogsListLayoutTemplates } from "./ui/blogs-list-layout-templates";
 import { useBlogsFilters } from "./model/use-blogs-filters";
-import { useRecentBlogs } from "./model/use-recent-blogs";
+import { useRecentBlogsFavorites } from "./model/use-recent-blogs";
 
 const BlogsListRecentPage = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 
   const filtersState = useBlogsFilters();
-  const { blogs } = useRecentBlogs();
+  const { blogs } = useRecentBlogsFavorites(filtersState.filters);
 
   return (
     <BlogListLayout
