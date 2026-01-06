@@ -1,24 +1,8 @@
 import { Flame, User, UserStar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/kit/avatar";
-
-const TRENDING_BLOGS = [
-  {
-    id: "1",
-    title: "Understanding React Server Components in practice",
-  },
-  {
-    id: "2",
-    title: "Why Feature-Sliced Design actually works",
-  },
-  {
-    id: "3",
-    title: "Building a markdown editor from scratch",
-  },
-  {
-    id: "4",
-    title: "Common mistakes with React Query",
-  },
-];
+import type { Blog } from "@/shared/api/api";
+import { href, Link } from "react-router-dom";
+import { ROUTES } from "@/shared/model/routes";
 
 const TOP_AUTHORS = [
   {
@@ -41,7 +25,11 @@ const TOP_AUTHORS = [
   },
 ];
 
-export const BlogsListLayoutDiscoveryColumn = () => {
+export const BlogsListLayoutDiscoveryColumn = ({
+  topBlogs,
+}: {
+  topBlogs: Blog[] | undefined;
+}) => {
   return (
     <aside className="flex flex-col gap-6">
       {/* Trending blogs */}
@@ -52,16 +40,16 @@ export const BlogsListLayoutDiscoveryColumn = () => {
         </header>
 
         <ul className="flex flex-col gap-2">
-          {TRENDING_BLOGS.map((blog, index) => (
-            <li key={blog.id} className="group flex items-start gap-2 text-sm">
+          {topBlogs?.map((blog, index) => (
+            <li key={blog._id} className="group flex items-start gap-2 text-sm">
               <span className="mt-0.5 text-xs text-slate-700">{index + 1}</span>
 
-              <a
-                href="#"
+              <Link
+                to={href(ROUTES.BLOG, { blogId: blog._id })}
                 className="line-clamp-2 text-slate-700 transition-colors group-hover:text-white"
               >
                 {blog.title}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

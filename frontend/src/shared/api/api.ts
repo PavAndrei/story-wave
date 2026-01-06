@@ -127,6 +127,10 @@ export type GetAllBlogsApiResponse = ApiResponse & {
   };
 };
 
+export type GetTopBlogsApiResponse = ApiResponse & {
+  blogs: Blog[];
+};
+
 export type ToggleLikeApiResponse = ApiResponse & {
   data?: Like;
 };
@@ -302,6 +306,12 @@ export const blogApi = {
     return apiInstance<GetAllBlogsApiResponse>(`/blog/recent${query}`, {
       method: "GET",
       credentials: "include",
+    });
+  },
+
+  getTopBlogs: () => {
+    return apiInstance<GetTopBlogsApiResponse>(`/blog/top`, {
+      method: "GET",
     });
   },
 
