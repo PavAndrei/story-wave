@@ -3,25 +3,9 @@ import { ROUTES } from "@/shared/model/routes";
 import { Card } from "@/shared/ui/kit/card";
 import { Button } from "@/shared/ui/kit/button";
 import { BlogFavoriteCardToggler } from "@/features/blog-favorite";
+import type { BlogDTO } from "@/shared/api/api-types";
 
-export type BlogGridItem = {
-  _id: string;
-  title: string;
-  content: string;
-  coverImgUrl?: string | null;
-  categories: string[];
-  authorId: {
-    _id: string;
-    username: string;
-  };
-  createdAt: string;
-  publishedAt?: string;
-  likesCount: number;
-  viewsCount: number;
-  isFavorite?: boolean;
-};
-
-export const BlogGridCard = ({ blog }: { blog: BlogGridItem }) => {
+export const BlogGridCard = ({ blog }: { blog: BlogDTO }) => {
   return (
     <Card className="flex flex-col gap-2 p-0 rounded-md border-slate-700 bg-slate-200 relative">
       {/* Cover */}

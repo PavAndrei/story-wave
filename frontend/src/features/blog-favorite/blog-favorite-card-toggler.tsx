@@ -2,29 +2,13 @@ import { Toggle } from "@radix-ui/react-toggle";
 import { Star } from "lucide-react";
 import { useToggleFavorite } from "./use-toggle-favorite";
 import clsx from "clsx";
-
-export type BlogFavoriteCardTogglerProps = {
-  _id: string;
-  title: string;
-  content: string;
-  coverImgUrl?: string | null;
-  categories: string[];
-  authorId: {
-    _id: string;
-    username: string;
-  };
-  createdAt: string;
-  publishedAt?: string;
-  likesCount: number;
-  viewsCount: number;
-  isFavorite?: boolean;
-};
+import type { BlogDTO } from "@/shared/api/api-types";
 
 export const BlogFavoriteCardToggler = ({
   blog,
   className,
 }: {
-  blog: BlogFavoriteCardTogglerProps;
+  blog: BlogDTO;
   className?: string;
 }) => {
   const { getFavoritesState, toggle } = useToggleFavorite();

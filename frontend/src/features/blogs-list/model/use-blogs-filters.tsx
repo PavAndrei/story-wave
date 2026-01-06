@@ -1,11 +1,9 @@
-import type { PublicBlogsFilters } from "@/shared/api/api-types";
+import type { BlogsUiFilters } from "@/shared/api/api-types";
 import { useDebounce } from "@/shared/lib/hooks/use-debounce";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-export const searchParamsToFilters = (
-  params: URLSearchParams,
-): Omit<PublicBlogsFilters, "page" | "limit" | "totalPages" | "total"> => {
+export const searchParamsToFilters = (params: URLSearchParams) => {
   return {
     sort: (params.get("sort") as "newest" | "oldest") ?? "newest",
     author: params.get("author") ?? "",
@@ -14,14 +12,18 @@ export const searchParamsToFilters = (
   };
 };
 
-export const filtersToSearchParams = (
-  filters: Omit<PublicBlogsFilters, "page" | "limit" | "totalPages" | "total">,
-) => {
+export const filtersToSearchParams = (filters: {
+  sort: "newest" | "oldest";
+  author?: string;
+  search: string;
+  categories: string[];
+}) => {
   const params = new URLSearchParams();
 
   if (filters.sort !== "newest") params.set("sort", filters.sort);
   if (filters.search.trim()) params.set("search", filters.search.trim());
-  if (filters.author.trim()) params.set("author", filters.author.trim());
+  if (filters.author && filters.author.trim())
+    params.set("author", filters.author.trim());
   if (filters.categories.length > 0) {
     params.set("categories", filters.categories.join(","));
   }
@@ -51,7 +53,8 @@ export const useBlogsFilters = () => {
 
     setSearchParams(
       filtersToSearchParams({
-        ...filters,
+        categories: filters.categories,
+        sort: filters.sort,
         search: debouncedSearch,
         author: debouncedAuthor,
       }),
@@ -59,9 +62,7 @@ export const useBlogsFilters = () => {
     );
   }, [debouncedSearch, debouncedAuthor, filters, setSearchParams]);
 
-  const updateFilters = (
-    patch>,
-  ) => {
+  const updateFilters = (patch: Partial<BlogsUiFilters>) => {
     setSearchParams(
       filtersToSearchParams({
         ...filters,

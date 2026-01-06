@@ -1,13 +1,12 @@
 import type {
   ApiResponseWithBlogsAndPagination,
-  BlogsFilters,
-  BlogsPagination,
+  BlogsUiFilters,
 } from "@/shared/api/api-types";
 import { blogApi } from "@/shared/api/blog-api";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useCallback, type RefCallback } from "react";
 
-export const useBlogsFavoritesInfinite = (filters) => {
+export const useBlogsFavoritesInfinite = (filters: BlogsUiFilters) => {
   const {
     data,
     fetchNextPage,
@@ -20,7 +19,7 @@ export const useBlogsFavoritesInfinite = (filters) => {
     ApiResponseWithBlogsAndPagination,
     Error,
     InfiniteData<ApiResponseWithBlogsAndPagination>,
-    readonly [string, "favorites", Pick<BlogsPagination, "page" | "limit">],
+    readonly [string, "favorites", BlogsUiFilters],
     number
   >({
     queryKey: [blogApi.baseKey, "favorites", filters],

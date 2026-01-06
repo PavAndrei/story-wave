@@ -1,21 +1,14 @@
-import { blogApi } from "@/shared/api/api";
+import { blogApi } from "@/shared/api/blog-api";
 import { useMutation } from "@tanstack/react-query";
 
-type SaveDraftArgs = {
-  blogId?: string;
-  status: "draft" | "published";
-  title?: string;
-  content?: string;
-  categories?: string[];
-  coverImgUrl?: string | null;
-};
+import type { SaveBlogPayload } from "@/shared/api/api-types";
 
 export const useSaveDraft = () => {
   const mutation = useMutation({
     mutationFn: blogApi.saveBlog,
   });
 
-  const saveDraftFunction = async (data: SaveDraftArgs) => {
+  const saveDraftFunction = async (data: SaveBlogPayload) => {
     const result = await mutation.mutateAsync(data);
 
     return result.blog;

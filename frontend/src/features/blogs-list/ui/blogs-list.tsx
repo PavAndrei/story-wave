@@ -1,11 +1,14 @@
 import { Spinner } from "@/shared/ui/kit/spinner";
 import { BlogListItem } from "./blog-list-item";
-type Props = {
-  blogs: BlogListItem[];
-  isFetchingNextPage?: boolean;
-};
+import type { BlogDTO } from "@/shared/api/api-types";
 
-export const BlogsList = ({ blogs, isFetchingNextPage }: Props) => {
+export const BlogsList = ({
+  blogs,
+  isFetchingNextPage,
+}: {
+  blogs: BlogDTO[];
+  isFetchingNextPage?: boolean;
+}) => {
   return (
     <section>
       <ul className="flex flex-col gap-4 items-center">

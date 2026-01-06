@@ -1,6 +1,6 @@
 import type {
   ApiResponseWithBlogsAndPagination,
-  BlogsPagination,
+  BlogsUiFilters,
 } from "@/shared/api/api-types";
 import { blogApi } from "@/shared/api/blog-api";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
@@ -10,7 +10,7 @@ export const useRecentBlogs = ({
   filters,
   enabled,
 }: {
-  filters: Pick<BlogsPagination, "page" | "limit">;
+  filters: BlogsUiFilters;
   enabled: boolean | null;
 }) => {
   const {
@@ -25,7 +25,7 @@ export const useRecentBlogs = ({
     ApiResponseWithBlogsAndPagination,
     Error,
     InfiniteData<ApiResponseWithBlogsAndPagination>,
-    readonly [string, "recent", Pick<BlogsPagination, "page" | "limit">],
+    readonly [string, "recent", BlogsUiFilters],
     number
   >({
     queryKey: [blogApi.baseKey, "recent", filters],

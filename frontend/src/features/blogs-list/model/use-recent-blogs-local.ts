@@ -1,13 +1,5 @@
+import type { BlogDTO } from "@/shared/api/api-types";
 import { useCallback, useState } from "react";
-
-export type RecentBlogLS = {
-  id: string;
-  title: string;
-  excerpt?: string;
-  coverImgUrl?: string;
-  createdAt?: string;
-  visitedAt: string;
-};
 
 type Options = {
   enabled?: boolean;
@@ -15,7 +7,7 @@ type Options = {
 
 const RECENT_BLOGS_KEY = "recent_blogs";
 
-const readInitialState = (): RecentBlogLS[] => {
+const readInitialState = (): BlogDTO[] => {
   try {
     const raw = localStorage.getItem(RECENT_BLOGS_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -27,7 +19,7 @@ const readInitialState = (): RecentBlogLS[] => {
 export const useRecentBlogsLocalStorage = (options: Options = {}) => {
   const { enabled = true } = options;
 
-  const [blogs, setBlogs] = useState<RecentBlogLS[]>(
+  const [blogs, setBlogs] = useState<BlogDTO[]>(
     enabled ? readInitialState : [],
   );
 

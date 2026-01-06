@@ -55,25 +55,6 @@ export type SaveBlogPayload = {
   coverImgUrl?: string | null;
 };
 
-export type BlogsFilters = {
-  sort: "newest" | "oldest";
-  search: string;
-  categories: string[];
-
-  page: number;
-  limit: number;
-  totalPages: number;
-  total: number;
-};
-
-export type MyBlogsFilters = BlogsFilters & {
-  status?: "draft" | "published" | "archived";
-};
-
-export type PublicBlogsFilters = BlogsFilters & {
-  author: string;
-};
-
 export type ApiResponseWithBlogData = ApiResponse & {
   blog?: BlogDTO;
 };
@@ -107,6 +88,9 @@ export type UserDTO = {
   favorites: string[];
   recentBlogs: RecentBlog[];
   __v: number;
+
+  totalBlogs?: number;
+  totalViews?: number;
 };
 
 export type ApiResponseWithUserData = ApiResponse & {
@@ -147,3 +131,19 @@ export type ImageUrl = {
 };
 
 export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
+
+// Filters
+
+// UI
+export type BlogsUiFilters = {
+  sort: "newest" | "oldest";
+  search: string;
+  categories: string[];
+  author: string;
+};
+
+// API request
+export type BlogsApiFilters = BlogsUiFilters & {
+  page: number;
+  limit: number;
+};

@@ -1,12 +1,14 @@
 import { Spinner } from "@/shared/ui/kit/spinner";
-import { BlogGridCard, type BlogGridItem } from "./blog-grid-card";
+import { BlogGridCard } from "./blog-grid-card";
+import type { BlogDTO } from "@/shared/api/api-types";
 
-type Props = {
-  blogs: BlogGridItem[];
+export const BlogsGrid = ({
+  blogs,
+  isFetchingNextPage,
+}: {
+  blogs: BlogDTO[];
   isFetchingNextPage?: boolean;
-};
-
-export const BlogsGrid = ({ blogs, isFetchingNextPage }: Props) => {
+}) => {
   return (
     <section>
       <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">

@@ -1,15 +1,15 @@
 import { Flame, UserStar } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/kit/avatar";
-import type { Blog, User } from "@/shared/api/api";
 import { href, Link } from "react-router-dom";
 import { ROUTES } from "@/shared/model/routes";
+import type { BlogDTO, UserDTO } from "@/shared/api/api-types";
 
 export const BlogsListLayoutDiscoveryColumn = ({
   topBlogs,
   topAuthors,
 }: {
-  topBlogs: Blog[] | undefined;
-  topAuthors: User[] | undefined;
+  topBlogs?: BlogDTO[];
+  topAuthors?: UserDTO[];
 }) => {
   console.log("topAuthors", topAuthors);
   return (

@@ -1,8 +1,8 @@
 import { queryClient } from "@/shared/api/query-client";
 import { useMutation } from "@tanstack/react-query";
 import { startTransition, useOptimistic } from "react";
-import type { BlogFavoriteCardTogglerProps } from "./blog-favorite-card-toggler";
 import { blogApi } from "@/shared/api/blog-api";
+import type { BlogDTO } from "@/shared/api/api-types";
 
 type OptimisticFavoriteState = {
   isFavorite: boolean;
@@ -24,7 +24,7 @@ export const useToggleFavorite = () => {
     },
   });
 
-  const toggle = (blog: BlogFavoriteCardTogglerProps) => {
+  const toggle = (blog: BlogDTO) => {
     startTransition(async () => {
       const current = favorites[blog._id] ?? {
         isFavorite: blog.isFavorite ?? false,
@@ -44,9 +44,7 @@ export const useToggleFavorite = () => {
     });
   };
 
-  const getFavoritesState = (
-    blog: BlogFavoriteCardTogglerProps,
-  ): OptimisticFavoriteState => {
+  const getFavoritesState = (blog: BlogDTO): OptimisticFavoriteState => {
     return (
       favorites[blog._id] ?? {
         isFavorite: blog.isFavorite ?? false,
