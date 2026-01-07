@@ -9,16 +9,31 @@ import { BlogsListLayoutDiscoveryColumn } from "./ui/blogs-list-layout-discovery
 import { useState } from "react";
 import { useGetTopBlogs } from "./model/use-get-top-blogs";
 import { useBlogsTopAuthors } from "./model/use-blogs-top-authors";
+import { useRecentBlogs } from "./model/use-recent-blogs";
+import { useMyProfile } from "@/shared/model/user";
+import { useRecentBlogsLocalStorage } from "./model/use-recent-blogs-local";
 
 const BlogsListPage = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 
-  const { topBlogs } = useGetTopBlogs();
-  const { topAuthors } = useBlogsTopAuthors();
+  const { topBlogs, isLoading: isTopBlogsLoading } = useGetTopBlogs();
+  const { topAuthors, isLoading: isTopAuthorsLoading } = useBlogsTopAuthors();
+
+  const { userData } = useMyProfile();
 
   const filtersState = useBlogsFilters();
   const { blogs, cursorRef, isFetchingNextPage, isLoading, hasNextPage } =
     useBlogsInfinite(filtersState.filters);
+
+  const { blogs: recentBlogs, isLoading: isRecentBlogsLoading } =
+    useRecentBlogs({
+      filters: filtersState.filters,
+      enabled: !!userData,
+    });
+
+  const localRecentBlogs = useRecentBlogsLocalStorage({ enabled: !userData });
+
+  console.log("isTopAuthorsLoading: " + isTopAuthorsLoading);
 
   return (
     <BlogListLayout
@@ -38,11 +53,16 @@ const BlogsListPage = () => {
         <BlogsListLayoutDiscoveryColumn
           topBlogs={topBlogs}
           topAuthors={topAuthors}
+          recentBlogs={userData ? recentBlogs : localRecentBlogs.blogs}
+          isTopBlogsLoading={isTopBlogsLoading}
+          isTopAuthorsLoading={isTopAuthorsLoading}
+          isRecentBlogsLoading={isRecentBlogsLoading}
         />
       }
     >
       <BlogsListLayoutContent
         viewMode={viewMode}
+        enabled={true}
         items={blogs}
         isFetchingNextPage={isFetchingNextPage}
         cursorRef={cursorRef}

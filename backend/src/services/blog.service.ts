@@ -524,12 +524,7 @@ export const getRecentBlogs = async ({
 
   // 1️⃣ фильтрация + сортировка
   const filtered = user.recentBlogs
-    .filter(
-      (item) =>
-        item.blogId &&
-        item.blogId.status === 'published' &&
-        item.blogId.isDeleted !== true
-    )
+    .filter((item) => item.blogId && item.blogId.status === 'published')
     .sort(
       (a, b) => new Date(b.viewedAt).getTime() - new Date(a.viewedAt).getTime()
     );
@@ -542,6 +537,7 @@ export const getRecentBlogs = async ({
   // 2️⃣ пагинация
   const blogs = filtered.slice(start, end).map((item) => ({
     ...item.blogId,
+    title: item.blogId.title,
     viewedAt: item.viewedAt,
     isFavorite: favoriteSet.has(item.blogId._id.toString()),
   }));

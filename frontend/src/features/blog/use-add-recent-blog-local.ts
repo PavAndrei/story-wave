@@ -1,8 +1,6 @@
 import type { BlogDTO } from "@/shared/api/api-types";
 import { useEffect } from "react";
 
-export type RecentBlogLS = BlogDTO & { visitedAt: string };
-
 type Options = {
   enabled?: boolean;
   limit?: number;
@@ -14,7 +12,7 @@ export const useAddRecentBlogLocalStorage = ({
   blog,
   options,
 }: {
-  blog: Omit<RecentBlogLS, "visitedAt"> | null;
+  blog?: BlogDTO;
   options?: Options;
 }) => {
   const { enabled = true, limit = 20 } = options ?? {};
@@ -24,12 +22,12 @@ export const useAddRecentBlogLocalStorage = ({
 
     try {
       const raw = localStorage.getItem(RECENT_BLOGS_KEY);
-      const list: RecentBlogLS[] = raw ? JSON.parse(raw) : [];
+      const list: BlogDTO[] = raw ? JSON.parse(raw) : [];
 
       // удаляем дубликат
       const filtered = list.filter((item) => item._id !== blog._id);
 
-      const next: RecentBlogLS[] = [
+      const next: BlogDTO[] = [
         {
           ...blog,
           visitedAt: new Date().toISOString(),

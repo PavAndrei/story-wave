@@ -31,6 +31,8 @@ export type BlogDTO = {
   isFavorite?: boolean;
   isLiked?: boolean;
   __v: number;
+
+  visitedAt?: string;
 };
 
 export type RecentBlog = {
@@ -56,20 +58,20 @@ export type SaveBlogPayload = {
 };
 
 export type ApiResponseWithBlogData = ApiResponse & {
-  blog?: BlogDTO;
+  blog: BlogDTO;
 };
 
 export type ApiResponseWithMultipleBlogData = ApiResponse & {
-  blogs?: BlogDTO[];
+  blogs: BlogDTO[];
 };
 
 export type ApiResponseWithBlogsAndPagination = ApiResponse & {
-  blogs?: BlogDTO[];
+  blogs: BlogDTO[];
   pagination: BlogsPagination;
 };
 
 export type ToggleFavoriteBlogApiResponse = ApiResponse & {
-  data?: { isFavorite: boolean };
+  data: { isFavorite: boolean };
 };
 
 // Users

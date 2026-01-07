@@ -1,4 +1,4 @@
-import { uploadApi } from "@/shared/api/api";
+import { uploadApi } from "@/shared/api/upload-api";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 

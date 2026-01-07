@@ -10,7 +10,6 @@ import {
   mapImageUrlsToUploaded,
   mapImageUrlToUploaded,
 } from "@/shared/helpers/blog-mapper";
-import { blogApi } from "@/shared/api/blog-api";
 
 export const publishBlogSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }),

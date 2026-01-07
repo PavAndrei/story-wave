@@ -6,9 +6,12 @@ import { BlogsListLayoutSidebar } from "./ui/blogs-list-layout-sidebar";
 import { BlogsListLayoutTemplates } from "./ui/blogs-list-layout-templates";
 import { useBlogsFilters } from "./model/use-blogs-filters";
 import { useBlogsFavoritesInfinite } from "./model/use-blogs-favorites-infinity";
+import { useMyProfile } from "@/shared/model/user";
 
 const BlogsListFavoritePage = () => {
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+
+  const { userData } = useMyProfile();
 
   const filtersState = useBlogsFilters();
   const {
@@ -43,6 +46,7 @@ const BlogsListFavoritePage = () => {
       <BlogsListLayoutContent
         viewMode={viewMode}
         items={blogs}
+        enabled={!!userData}
         isFetchingNextPage={isFetchingNextPage}
         cursorRef={cursorRef}
         hasNextPage={hasNextPage}
