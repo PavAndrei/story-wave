@@ -6,3 +6,7 @@ export const commentSchema = z.object({
   parentCommentId: z.string().optional(),
   replyToUserId: z.string().optional(),
 });
+
+export const deleteCommentSchema = z.object({
+  commentId: z.string(),
+});

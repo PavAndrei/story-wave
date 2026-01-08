@@ -1,4 +1,4 @@
-import { CONFLICT, NOT_FOUND } from '../constants/http.js';
+import { CONFLICT, FORBIDDEN, NOT_FOUND } from '../constants/http.js';
 import CommentModel from '../models/comment.model.js';
 import mongoose from 'mongoose';
 import appAssert from '../utils/appAssert.js';
@@ -48,4 +48,29 @@ export const createComment = async ({
   });
 
   return comment;
+};
+
+export const deleteComment = async ({
+  commentId,
+  authorId,
+}: {
+  commentId: mongoose.Types.ObjectId;
+  authorId: mongoose.Types.ObjectId;
+}) => {
+  const comment = await CommentModel.findById(commentId);
+  appAssert(comment, NOT_FOUND, 'Comment not found');
+
+  appAssert(
+    comment.authorId.toString() === authorId.toString(),
+    FORBIDDEN,
+    'You can delete only your own comments'
+  );
+
+  if (comment.level === 0) {
+    await CommentModel.deleteMany({
+      rootCommentId: comment._id,
+    });
+  }
+
+  await CommentModel.deleteOne({ _id: comment._id });
 };

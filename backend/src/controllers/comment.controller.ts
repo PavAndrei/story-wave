@@ -1,10 +1,10 @@
-import { CREATED } from '../constants/http.js';
+import { CREATED, OK } from '../constants/http.js';
 import { Request, Response } from 'express';
-import { createComment } from '../services/comment.service.js';
-import { commentSchema } from './comment.schema.js';
+import { createComment, deleteComment } from '../services/comment.service.js';
+import { commentSchema, deleteCommentSchema } from './comment.schema.js';
 import mongoose from 'mongoose';
 
-export const createCommentController = async (req: Request, res: Response) => {
+export const createCommentHandler = async (req: Request, res: Response) => {
   const authorId = req.userId!;
 
   const request = commentSchema.parse(req.body);
@@ -23,5 +23,20 @@ export const createCommentController = async (req: Request, res: Response) => {
     success: true,
     message: 'Comment created successfully',
     comment,
+  });
+};
+
+export const deleteCommentHandler = async (req: Request, res: Response) => {
+  const authorId = req.userId!;
+  const { commentId } = deleteCommentSchema.parse(req.params);
+
+  await deleteComment({
+    commentId: new mongoose.Types.ObjectId(commentId),
+    authorId,
+  });
+
+  return res.status(OK).json({
+    success: true,
+    message: 'Comment deleted successfully',
   });
 };
