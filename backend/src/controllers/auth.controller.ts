@@ -28,7 +28,6 @@ import appAssert from '../utils/appAssert.js';
 // register controller wrapped into catchError function
 export const registerHandler = catchErrors(async (req, res) => {
   // validation
-  console.log(req.body);
   const request = registerSchema.parse({
     ...req.body,
   });

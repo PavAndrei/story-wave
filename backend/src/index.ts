@@ -16,6 +16,7 @@ import userRoutes from './routes/user.route.js';
 import sessionRoutes from './routes/session.route.js';
 import blogRoutes from './routes/blog.route.js';
 import uploadRoutes from './routes/upload.route.js';
+import commentRoute from './routes/comment.route.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/user', userRoutes);
 app.use('/session', setRequestExtensions, authenticate, sessionRoutes);
 app.use('/blog', blogRoutes);
 app.use('/upload', setRequestExtensions, authenticate, uploadRoutes);
+app.use('/comment', commentRoute);
 
 app.use(errorHandler);
 
