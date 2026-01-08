@@ -24,6 +24,8 @@ const BlogsListRecentPage = () => {
     enabled: !userData,
   });
 
+  const enableViewMode = blogs.length > 0 || local.blogs.length > 0;
+
   return (
     <BlogListLayout
       header={
@@ -32,6 +34,7 @@ const BlogsListRecentPage = () => {
           description="Your recently viewed blogs are listed here."
           viewMode={viewMode}
           changeViewMode={setViewMode}
+          enableViewMode={enableViewMode}
         />
       }
       sidebar={
@@ -46,6 +49,7 @@ const BlogsListRecentPage = () => {
       <BlogsListLayoutContent
         viewMode={viewMode}
         items={userData ? blogs : local.blogs}
+        enabled={true}
       />
     </BlogListLayout>
   );

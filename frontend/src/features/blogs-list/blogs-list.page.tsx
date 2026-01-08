@@ -43,6 +43,7 @@ const BlogsListPage = () => {
           description="Deep dives, industry trends, and expert perspectives to inform your decisions."
           viewMode={viewMode}
           changeViewMode={setViewMode}
+          enableViewMode={blogs.length > 0}
         />
       }
       sidebar={

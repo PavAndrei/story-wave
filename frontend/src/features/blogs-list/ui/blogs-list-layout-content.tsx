@@ -70,6 +70,53 @@ const BlogsListSkeleton = ({
   }
 };
 
+const NoBlogsWarning = () => {
+  return (
+    <section className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-700 bg-slate-200 p-6">
+      <div className="flex max-w-md flex-col items-center gap-4 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10">
+          <Lock className="h-6 w-6 text-cyan-600" />
+        </div>
+
+        <h2 className="text-lg font-semibold text-slate-800">No blogs found</h2>
+
+        <p className="text-sm text-slate-600">
+          We couldn&apos;t find any blogs that match your search criteria.
+        </p>
+      </div>
+    </section>
+  );
+};
+
+const NotAuthorizedWarning = () => {
+  return (
+    <section className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-700 bg-slate-200 p-6">
+      <div className="flex max-w-md flex-col items-center gap-4 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10">
+          <Lock className="h-6 w-6 text-cyan-600" />
+        </div>
+
+        <h2 className="text-lg font-semibold text-slate-800">
+          Authentication required
+        </h2>
+
+        <p className="text-sm text-slate-600">
+          This page is available only to authenticated users. Please sign in to
+          access personalized content, manage your data, and unlock all features
+          of the platform.
+        </p>
+
+        <Link
+          to={href(ROUTES.LOGIN)}
+          className="mt-2 inline-flex items-center gap-2 rounded-md bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-500"
+        >
+          Go to login
+        </Link>
+      </div>
+    </section>
+  );
+};
+
 export const BlogsListLayoutContent = ({
   items,
   isLoading,
@@ -87,33 +134,12 @@ export const BlogsListLayoutContent = ({
   viewMode: "list" | "grid";
   enabled: boolean;
 }) => {
-  if (!enabled) {
-    return (
-      <section className="flex min-h-[300px] items-center justify-center rounded-xl border border-slate-700 bg-slate-200 p-6">
-        <div className="flex max-w-md flex-col items-center gap-4 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500/10">
-            <Lock className="h-6 w-6 text-cyan-600" />
-          </div>
+  if (!enabled && !isLoading) {
+    return <NotAuthorizedWarning />;
+  }
 
-          <h2 className="text-lg font-semibold text-slate-800">
-            Authentication required
-          </h2>
-
-          <p className="text-sm text-slate-600">
-            This page is available only to authenticated users. Please sign in
-            to access personalized content, manage your data, and unlock all
-            features of the platform.
-          </p>
-
-          <Link
-            to={href(ROUTES.LOGIN)}
-            className="mt-2 inline-flex items-center gap-2 rounded-md bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-500"
-          >
-            Go to login
-          </Link>
-        </div>
-      </section>
-    );
+  if ((!items || items.length <= 0) && !isLoading) {
+    return <NoBlogsWarning />;
   }
 
   return (
@@ -130,7 +156,7 @@ export const BlogsListLayoutContent = ({
           )}
         </>
       )}
-
+      {isFetchingNextPage && <BlogsListSkeleton count={12} mode={viewMode} />}
       {hasNextPage && <div ref={cursorRef} className="h-10" />}
     </section>
   );

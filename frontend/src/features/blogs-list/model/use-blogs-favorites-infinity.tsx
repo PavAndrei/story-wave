@@ -6,7 +6,10 @@ import { blogApi } from "@/shared/api/blog-api";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useCallback, type RefCallback } from "react";
 
-export const useBlogsFavoritesInfinite = (filters: BlogsUiFilters) => {
+export const useBlogsFavoritesInfinite = (
+  filters: BlogsUiFilters,
+  retry: boolean,
+) => {
   const {
     data,
     fetchNextPage,
@@ -37,6 +40,8 @@ export const useBlogsFavoritesInfinite = (filters: BlogsUiFilters) => {
       const { page, totalPages } = lastPage.pagination;
       return page < totalPages ? page + 1 : undefined;
     },
+
+    retry: retry,
   });
 
   const cursorRef: RefCallback<HTMLDivElement> = useCallback(

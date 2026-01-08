@@ -21,7 +21,7 @@ const BlogsListFavoritePage = () => {
     isLoading,
     hasNextPage,
     pagination,
-  } = useBlogsFavoritesInfinite(filtersState.filters);
+  } = useBlogsFavoritesInfinite(filtersState.filters, !!userData);
 
   return (
     <BlogListLayout
@@ -31,6 +31,7 @@ const BlogsListFavoritePage = () => {
           description="Deep dives, industry trends, and expert perspectives to inform your decisions."
           viewMode={viewMode}
           changeViewMode={setViewMode}
+          enableViewMode={!!userData}
         />
       }
       sidebar={
