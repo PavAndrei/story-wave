@@ -99,3 +99,101 @@ export const editComment = async ({
 
   return comment;
 };
+
+export const getBlogComments = async ({
+  blogId,
+  page,
+  limit,
+}: {
+  blogId: mongoose.Types.ObjectId;
+  page: number;
+  limit: number;
+}) => {
+  const skip = (page - 1) * limit;
+
+  const [rootComments, totalItems] = await Promise.all([
+    CommentModel.find({
+      blogId,
+      level: 0,
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    CommentModel.countDocuments({
+      blogId,
+      level: 0,
+    }),
+  ]);
+
+  const rootIds = rootComments.map((c) => c._id);
+
+  const replies = await CommentModel.find({
+    rootCommentId: { $in: rootIds },
+    level: 1,
+  })
+    .sort({ createdAt: 1 })
+    .lean();
+
+  const repliesMap = new Map<string, any[]>();
+
+  replies.forEach((reply) => {
+    const key = reply.rootCommentId!.toString();
+    if (!repliesMap.has(key)) {
+      repliesMap.set(key, []);
+    }
+    repliesMap.get(key)!.push(reply);
+  });
+
+  const comments = rootComments.map((root) => ({
+    ...root,
+    replies: repliesMap.get(root._id.toString()) ?? [],
+  }));
+
+  return {
+    comments,
+    pagination: {
+      page,
+      limit,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    },
+  };
+};
+
+export const getUserComments = async ({
+  authorId,
+  page,
+  limit,
+}: {
+  authorId: mongoose.Types.ObjectId;
+  page: number;
+  limit: number;
+}) => {
+  const skip = (page - 1) * limit;
+
+  const [comments, totalItems] = await Promise.all([
+    CommentModel.find({
+      authorId: authorId,
+    })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+
+    CommentModel.countDocuments({
+      authorId: authorId,
+    }),
+  ]);
+
+  return {
+    comments,
+    pagination: {
+      page,
+      limit,
+      totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+    },
+  };
+};

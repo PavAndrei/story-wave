@@ -5,6 +5,8 @@ import {
   createCommentHandler,
   deleteCommentHandler,
   editCommentHandler,
+  getBlogCommentsHandler,
+  getUserCommentsHandler,
 } from '../controllers/comment.controller.js';
 
 const commentRoute = Router();
@@ -29,5 +31,14 @@ commentRoute.patch(
   authenticate,
   editCommentHandler
 );
+
+commentRoute.get(
+  '/my',
+  setRequestExtensions,
+  authenticate,
+  getUserCommentsHandler
+);
+
+commentRoute.get('/:id', getBlogCommentsHandler);
 
 export default commentRoute;

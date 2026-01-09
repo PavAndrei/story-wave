@@ -4,6 +4,8 @@ import {
   createComment,
   deleteComment,
   editComment,
+  getBlogComments,
+  getUserComments,
 } from '../services/comment.service.js';
 import { commentSchema, editCommentSchema } from './comment.schema.js';
 import mongoose from 'mongoose';
@@ -73,5 +75,42 @@ export const editCommentHandler = catchErrors(async (req, res) => {
     success: true,
     message: 'Comment updated successfully',
     comment: updatedComment,
+  });
+});
+
+export const getBlogCommentsHandler = catchErrors(async (req, res) => {
+  const blogId = req.params.id;
+  const { page = 1, limit = 10 } = req.query;
+
+  appAssert(blogId, NOT_FOUND, 'Invalid blog id');
+
+  const result = await getBlogComments({
+    blogId: new mongoose.Types.ObjectId(blogId),
+    page: Number(page),
+    limit: Number(limit),
+  });
+
+  return res.status(OK).json({
+    success: true,
+    message: "Blog's comments found",
+    ...result,
+  });
+});
+
+export const getUserCommentsHandler = catchErrors(async (req, res) => {
+  const authorId = req.userId!;
+
+  const { page = 1, limit = 12 } = req.query;
+
+  const result = await getUserComments({
+    authorId: new mongoose.Types.ObjectId(authorId),
+    page: Number(page),
+    limit: Number(limit),
+  });
+
+  return res.status(OK).json({
+    success: true,
+    message: "User's comments found",
+    ...result,
   });
 });
