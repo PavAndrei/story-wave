@@ -4,6 +4,7 @@ import { setRequestExtensions } from '../middleware/requestExtension.js';
 import {
   createCommentHandler,
   deleteCommentHandler,
+  editCommentHandler,
 } from '../controllers/comment.controller.js';
 
 const commentRoute = Router();
@@ -16,10 +17,17 @@ commentRoute.post(
 );
 
 commentRoute.delete(
-  '/:commentId',
+  '/:id',
   setRequestExtensions,
   authenticate,
   deleteCommentHandler
+);
+
+commentRoute.patch(
+  '/:id',
+  setRequestExtensions,
+  authenticate,
+  editCommentHandler
 );
 
 export default commentRoute;

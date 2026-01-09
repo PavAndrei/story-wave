@@ -57,6 +57,7 @@ export const deleteComment = async ({
   commentId: mongoose.Types.ObjectId;
   authorId: mongoose.Types.ObjectId;
 }) => {
+  console.log(commentId);
   const comment = await CommentModel.findById(commentId);
   appAssert(comment, NOT_FOUND, 'Comment not found');
 
@@ -73,4 +74,28 @@ export const deleteComment = async ({
   }
 
   await CommentModel.deleteOne({ _id: comment._id });
+};
+
+export const editComment = async ({
+  commentId,
+  authorId,
+  content,
+}: {
+  commentId: mongoose.Types.ObjectId;
+  authorId: mongoose.Types.ObjectId;
+  content: string;
+}) => {
+  const comment = await CommentModel.findById(commentId);
+  appAssert(comment, NOT_FOUND, 'Comment not found');
+
+  appAssert(
+    comment.authorId.toString() === authorId.toString(),
+    FORBIDDEN,
+    'You can edit only your own comments'
+  );
+
+  comment.content = content;
+  await comment.save();
+
+  return comment;
 };
