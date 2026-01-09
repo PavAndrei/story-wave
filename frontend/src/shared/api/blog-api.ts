@@ -5,9 +5,7 @@ import type {
   ApiResponseWithBlogData,
   ApiResponseWithBlogsAndPagination,
   ApiResponseWithMultipleBlogData,
-  BlogsPagination,
-  MyBlogsFilters,
-  PublicBlogsFilters,
+  Pagination,
   SaveBlogPayload,
   ToggleFavoriteBlogApiResponse,
   ToggleLikeApiResponse,
@@ -24,7 +22,14 @@ export const blogApi = {
     });
   },
 
-  getMyBlogs: (filters: MyBlogsFilters) => {
+  getMyBlogs: (filters: {
+    page: number;
+    limit: number;
+    status?: string;
+    sort?: string;
+    search?: string;
+    categories: string[];
+  }) => {
     const query = buildQueryString({
       page: String(filters.page),
       limit: String(filters.limit),
@@ -43,7 +48,14 @@ export const blogApi = {
     });
   },
 
-  getAllBlogs: (filters: PublicBlogsFilters) => {
+  getAllBlogs: (filters: {
+    page: number;
+    limit: number;
+    sort?: string;
+    search?: string;
+    author?: string;
+    categories: string[];
+  }) => {
     const query = buildQueryString({
       page: String(filters.page),
       limit: String(filters.limit),
@@ -65,7 +77,7 @@ export const blogApi = {
     );
   },
 
-  getFavoriteBlogs: (filters: Pick<BlogsPagination, "page" | "limit">) => {
+  getFavoriteBlogs: (filters: Pick<Pagination, "page" | "limit">) => {
     const query = buildQueryString({
       page: String(filters.page),
       limit: String(filters.limit),
@@ -80,7 +92,7 @@ export const blogApi = {
     );
   },
 
-  getRecentBlogs: (filters: Pick<BlogsPagination, "page" | "limit">) => {
+  getRecentBlogs: (filters: Pick<Pagination, "page" | "limit">) => {
     const query = buildQueryString({
       page: String(filters.page),
       limit: String(filters.limit),

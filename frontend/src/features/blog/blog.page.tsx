@@ -7,6 +7,11 @@ import { useBlogView } from "./use-blog-view";
 import { BlogFavoriteCardToggler } from "../blog-favorite";
 import { useAddRecentBlog } from "./use-add-recent-blog";
 import { useAddRecentBlogLocalStorage } from "./use-add-recent-blog-local";
+import {
+  CommentForm,
+  CommentsList,
+  usePublicCommentsInfinity,
+} from "../comments";
 
 const BlogPage = () => {
   const { blog } = useBlog();
@@ -23,6 +28,11 @@ const BlogPage = () => {
       enabled: !userData,
       limit: 10,
     },
+  });
+
+  const { comments, cursorRef, isLoading } = usePublicCommentsInfinity({
+    blogId: blog?._id || "",
+    enabled: !!blog,
   });
 
   if (!blog) return null;
@@ -55,6 +65,20 @@ const BlogPage = () => {
         {blog.viewsCount}
       </div>
       <BlogFavoriteCardToggler blog={blog} className="static" />
+
+      <section>
+        <h3>Comments</h3>
+        <CommentForm blogId={blog._id} />
+
+        {isLoading ? (
+          <div>Loading comments...</div>
+        ) : (
+          <>
+            <CommentsList comments={comments} />
+            <div ref={cursorRef} />
+          </>
+        )}
+      </section>
     </div>
   );
 };

@@ -41,7 +41,7 @@ export type RecentBlog = {
   viewedAt: string;
 };
 
-export type BlogsPagination = {
+export type Pagination = {
   page: number;
   limit: number;
   total: number;
@@ -67,7 +67,7 @@ export type ApiResponseWithMultipleBlogData = ApiResponse & {
 
 export type ApiResponseWithBlogsAndPagination = ApiResponse & {
   blogs: BlogDTO[];
-  pagination: BlogsPagination;
+  pagination: Pagination;
 };
 
 export type ToggleFavoriteBlogApiResponse = ApiResponse & {
@@ -133,6 +133,28 @@ export type ImageUrl = {
 };
 
 export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
+
+// Comments
+
+export type CommentDTO = {
+  _id: string;
+  blogId: string;
+  authorId: string;
+  content: string;
+  level: number;
+  parentCommentId: string | null;
+  rootCommentId: string | null;
+  replyToUserId: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
+  replies: CommentDTO[];
+};
+
+export type GetCommentsApiResponse = ApiResponse & {
+  comments: CommentDTO[];
+  pagination: Pagination;
+};
 
 // Filters
 
