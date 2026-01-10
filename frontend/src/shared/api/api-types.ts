@@ -138,22 +138,38 @@ export type UploadApiResponse = ApiResponse & { data?: ImageUrl[] };
 
 export type CommentDTO = {
   _id: string;
-  blogId: string;
-  authorId: string;
+  blog: {
+    _id: string;
+    title: string;
+  };
+  author: {
+    _id: string;
+    username: string;
+    avatarUrl?: string;
+  };
   content: string;
-  level: number;
+  level: 0 | 1;
   parentCommentId: string | null;
   rootCommentId: string | null;
   replyToUserId: string | null;
   createdAt: Date;
   updatedAt: Date;
   __v: number;
-  replies: CommentDTO[];
+  replies?: CommentDTO[];
 };
+
+export type CreateCommentApiResponse = ApiResponse & { comment: CommentDTO };
 
 export type GetCommentsApiResponse = ApiResponse & {
   comments: CommentDTO[];
   pagination: Pagination;
+};
+
+export type CreateCommentPayload = {
+  blogId: string;
+  content: string;
+  parentCommentId?: string;
+  replyToUserId?: string;
 };
 
 // Filters

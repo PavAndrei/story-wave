@@ -1,10 +1,22 @@
 import { buildQueryString } from "../model/url-params";
 import { apiInstance } from "./api-instance";
 
-import type { GetCommentsApiResponse } from "./api-types";
+import type {
+  CreateCommentApiResponse,
+  CreateCommentPayload,
+  GetCommentsApiResponse,
+} from "./api-types";
 
 export const commentApi = {
   baseKey: "comment",
+
+  createComment: (data: CreateCommentPayload) => {
+    return apiInstance<CreateCommentApiResponse>(`/comment`, {
+      method: "POST",
+      json: data,
+      credentials: "include",
+    });
+  },
 
   getPublicComments: ({
     blogId,

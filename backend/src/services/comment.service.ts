@@ -3,6 +3,32 @@ import CommentModel from '../models/comment.model.js';
 import mongoose from 'mongoose';
 import appAssert from '../utils/appAssert.js';
 
+const mapCommentWithAuthorAndBlog = (comment: any) => ({
+  _id: comment._id,
+  content: comment.content,
+  createdAt: comment.createdAt,
+  level: comment.level,
+
+  parentCommentId: comment.parentCommentId ?? null,
+  rootCommentId: comment.rootCommentId ?? null,
+  replyToUserId: comment.replyToUserId ?? null,
+
+  author: comment.authorId
+    ? {
+        _id: comment.authorId._id,
+        username: comment.authorId.username,
+        avatarUrl: comment.authorId.avatarUrl,
+      }
+    : null,
+
+  blog: comment.blogId
+    ? {
+        _id: comment.blogId._id,
+        title: comment.blogId.title,
+      }
+    : null,
+});
+
 type CreateCommentParams = {
   authorId: mongoose.Types.ObjectId;
   blogId: mongoose.Types.ObjectId;
@@ -26,7 +52,7 @@ export const createComment = async ({
     const parentComment = await CommentModel.findById(parentCommentId);
     appAssert(parentComment, NOT_FOUND, 'Parent comment not found');
     appAssert(
-      parentComment.level === 1,
+      parentComment.level < 1,
       CONFLICT,
       'Maximum comment nesting level reached'
     );
@@ -111,11 +137,14 @@ export const getBlogComments = async ({
 }) => {
   const skip = (page - 1) * limit;
 
+  // 1️⃣ Корневые комментарии
   const [rootComments, totalItems] = await Promise.all([
     CommentModel.find({
       blogId,
       level: 0,
     })
+      .populate('authorId', 'username avatarUrl')
+      .populate('blogId', 'title')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -129,13 +158,17 @@ export const getBlogComments = async ({
 
   const rootIds = rootComments.map((c) => c._id);
 
+  // 2️⃣ Ответы
   const replies = await CommentModel.find({
     rootCommentId: { $in: rootIds },
     level: 1,
   })
+    .populate('authorId', 'username avatarUrl')
+    .populate('blogId', 'title')
     .sort({ createdAt: 1 })
     .lean();
 
+  // 3️⃣ Группируем ответы
   const repliesMap = new Map<string, any[]>();
 
   replies.forEach((reply) => {
@@ -146,9 +179,12 @@ export const getBlogComments = async ({
     repliesMap.get(key)!.push(reply);
   });
 
+  // 4️⃣ Финальная структура
   const comments = rootComments.map((root) => ({
-    ...root,
-    replies: repliesMap.get(root._id.toString()) ?? [],
+    ...mapCommentWithAuthorAndBlog(root),
+    replies:
+      repliesMap.get(root._id.toString())?.map(mapCommentWithAuthorAndBlog) ??
+      [],
   }));
 
   return {
@@ -175,20 +211,22 @@ export const getUserComments = async ({
 
   const [comments, totalItems] = await Promise.all([
     CommentModel.find({
-      authorId: authorId,
+      authorId,
     })
+      .populate('authorId', 'username avatarUrl')
+      .populate('blogId', 'title')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .lean(),
 
     CommentModel.countDocuments({
-      authorId: authorId,
+      authorId,
     }),
   ]);
 
   return {
-    comments,
+    comments: comments.map(mapCommentWithAuthorAndBlog),
     pagination: {
       page,
       limit,
