@@ -15,6 +15,8 @@ type CommentFormProps = {
   onSuccess?: () => void;
 };
 
+const MAX_COMMENT_LENGTH = 500;
+
 export const CommentForm = ({
   blogId,
   mode = "comment",
@@ -28,9 +30,12 @@ export const CommentForm = ({
   const [content, setContent] = useState("");
   const { createComment, isLoading } = useCreateComment();
 
+  const length = content.length;
+  const isTooLong = length > MAX_COMMENT_LENGTH;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!content.trim() || isTooLong) return;
 
     createComment(
       {
@@ -56,6 +61,7 @@ export const CommentForm = ({
       onSubmit={handleSubmit}
       className="rounded-lg border border-slate-700 bg-slate-200 p-4"
     >
+      {/* Title */}
       <div className="mb-2 text-sm text-slate-600">
         {mode === "reply" && replyToUsername ? (
           <>
@@ -69,6 +75,7 @@ export const CommentForm = ({
         )}
       </div>
 
+      {/* Textarea */}
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
@@ -78,13 +85,30 @@ export const CommentForm = ({
             : "Write your comment..."
         }
         rows={3}
+        maxLength={MAX_COMMENT_LENGTH + 50} // защита от paste-спама
         className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
       />
 
-      <div className="mt-3 flex justify-end">
+      {/* Footer */}
+      <div className="mt-3 flex items-center justify-between">
+        {/* Counter */}
+        <span
+          className={[
+            "text-xs",
+            isTooLong
+              ? "text-red-600"
+              : length > MAX_COMMENT_LENGTH * 0.8
+                ? "text-cyan-600"
+                : "text-slate-500",
+          ].join(" ")}
+        >
+          {length} / {MAX_COMMENT_LENGTH}
+        </span>
+
+        {/* Submit */}
         <button
           type="submit"
-          disabled={!content.trim() || isLoading}
+          disabled={!content.trim() || isLoading || isTooLong}
           className="inline-flex items-center gap-2 rounded-md bg-cyan-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-cyan-500 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
           <Send className="h-4 w-4" />
