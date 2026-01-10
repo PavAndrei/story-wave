@@ -30,10 +30,11 @@ const BlogPage = () => {
     },
   });
 
-  const { comments, cursorRef, isLoading } = usePublicCommentsInfinity({
-    blogId: blog?._id || "",
-    enabled: !!blog,
-  });
+  const { comments, cursorRef, isLoading, isFetchingNextPage } =
+    usePublicCommentsInfinity({
+      blogId: blog?._id || "",
+      enabled: !!blog,
+    });
 
   if (!blog) return null;
 
@@ -70,14 +71,12 @@ const BlogPage = () => {
         <h3>Comments</h3>
         <CommentForm blogId={blog._id} />
 
-        {isLoading ? (
-          <div>Loading comments...</div>
-        ) : (
-          <>
-            <CommentsList comments={comments} />
-            <div ref={cursorRef} />
-          </>
-        )}
+        <CommentsList
+          comments={comments}
+          isLoading={isLoading}
+          cursorRef={cursorRef}
+          isFetchingNextPage={isFetchingNextPage}
+        />
       </section>
     </div>
   );
