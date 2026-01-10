@@ -35,4 +35,11 @@ export const commentApi = {
       method: "GET",
     });
   },
+
+  deleteComment: (commentId: string) => {
+    return apiInstance(`/comment/${commentId}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+  },
 };

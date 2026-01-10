@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CommentDTO } from "@/shared/api/api-types";
 import { CommentForm } from "./comment-form";
 import { Skeleton } from "@/shared/ui/kit/skeleton";
+import { useCommentDelete } from "./use-comment-delete";
 
 const SkeletonCommentsList = ({ count = 12 }: { count: number }) => {
   return (
@@ -44,6 +45,8 @@ export const CommentsList = ({
     userId?: string;
   } | null>(null);
 
+  const { deleteComment, isPending } = useCommentDelete();
+
   if (isLoading) return <SkeletonCommentsList count={10} />;
 
   if (!comments.length) {
@@ -81,18 +84,29 @@ export const CommentsList = ({
                 <p className="text-sm text-slate-700">{comment.content}</p>
 
                 {/* Reply button */}
-                <button
-                  onClick={() =>
-                    setReplyTo({
-                      commentId: comment._id,
-                      username: "author username",
-                      userId: comment.author._id,
-                    })
-                  }
-                  className="mt-2 text-xs font-medium text-cyan-600 hover:underline"
-                >
-                  Reply
-                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setReplyTo({
+                        commentId: comment._id,
+                        username: "author username",
+                        userId: comment.author._id,
+                      })
+                    }
+                    className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
+                  >
+                    Reply
+                  </button>
+
+                  <button
+                    onClick={() => deleteComment(comment._id)}
+                    disabled={isPending}
+                    className="mt-2 text-xs font-medium text-red-600 hover:underline cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -137,6 +151,16 @@ export const CommentsList = ({
                       </div>
 
                       <p className="text-sm text-slate-700">{reply.content}</p>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => deleteComment(reply._id)}
+                          disabled={isPending}
+                          className="mt-2 text-xs font-medium text-red-600 hover:underline cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
