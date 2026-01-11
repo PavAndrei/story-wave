@@ -102,6 +102,29 @@ export const deleteComment = async ({
   await CommentModel.deleteOne({ _id: comment._id });
 };
 
+type CommentPopulated = {
+  _id: mongoose.Types.ObjectId;
+  content: string;
+
+  authorId: {
+    _id: mongoose.Types.ObjectId;
+    username: string;
+    avatarUrl?: string;
+  };
+  blogId: {
+    _id: mongoose.Types.ObjectId;
+    title: string;
+  };
+
+  level: 0 | 1;
+  parentCommentId: mongoose.Types.ObjectId | null;
+  rootCommentId: mongoose.Types.ObjectId | null;
+  replyToUserId: mongoose.Types.ObjectId | null;
+
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export const editComment = async ({
   commentId,
   authorId,
@@ -111,6 +134,7 @@ export const editComment = async ({
   authorId: mongoose.Types.ObjectId;
   content: string;
 }) => {
+  // 1️⃣ Проверяем существование и права
   const comment = await CommentModel.findById(commentId);
   appAssert(comment, NOT_FOUND, 'Comment not found');
 
@@ -120,10 +144,41 @@ export const editComment = async ({
     'You can edit only your own comments'
   );
 
-  comment.content = content;
-  await comment.save();
+  // 2️⃣ Обновляем
+  await CommentModel.updateOne({ _id: commentId }, { $set: { content } });
 
-  return comment;
+  // 3️⃣ Забираем ОБНОВЛЁННЫЙ комментарий с populate
+  const populatedComment = await CommentModel.findById(commentId)
+    .populate('authorId', 'username avatarUrl')
+    .populate('blogId', 'title')
+    .lean<CommentPopulated>();
+
+  appAssert(populatedComment, NOT_FOUND, 'Comment not found');
+
+  // 4️⃣ Приводим к DTO-форме
+  return {
+    _id: populatedComment._id,
+    content: populatedComment.content,
+
+    author: {
+      _id: populatedComment.authorId._id,
+      username: populatedComment.authorId.username,
+      avatarUrl: populatedComment.authorId.avatarUrl ?? null,
+    },
+
+    blog: {
+      _id: populatedComment.blogId._id,
+      title: populatedComment.blogId.title,
+    },
+
+    level: populatedComment.level,
+    parentCommentId: populatedComment.parentCommentId?.toString() ?? null,
+    rootCommentId: populatedComment.rootCommentId?.toString() ?? null,
+    replyToUserId: populatedComment.replyToUserId?.toString() ?? null,
+
+    createdAt: populatedComment.createdAt,
+    updatedAt: populatedComment.updatedAt,
+  };
 };
 
 export const getBlogComments = async ({

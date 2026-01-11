@@ -58,11 +58,13 @@ export const deleteCommentHandler = catchErrors(async (req, res) => {
 export const editCommentHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
   const commentId = req.params.id;
+
   appAssert(
     mongoose.Types.ObjectId.isValid(commentId),
     NOT_FOUND,
     'Invalid comment id'
   );
+
   const { content } = editCommentSchema.parse(req.body);
 
   const updatedComment = await editComment({

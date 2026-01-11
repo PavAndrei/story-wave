@@ -1,4 +1,4 @@
-import { blogApi } from "@/shared/api/api";
+import { blogApi } from "@/shared/api/blog-api";
 import { queryClient } from "@/shared/api/query-client";
 import { useMutation } from "@tanstack/react-query";
 

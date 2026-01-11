@@ -1,5 +1,5 @@
-import { userApi } from "@/shared/api/api";
 import { queryClient } from "@/shared/api/query-client";
+import { userApi } from "@/shared/api/user-api";
 import { ROUTES } from "@/shared/model/routes";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";

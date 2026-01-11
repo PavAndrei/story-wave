@@ -3,6 +3,7 @@ import type { CommentDTO } from "@/shared/api/api-types";
 import { CommentForm } from "./comment-form";
 import { Skeleton } from "@/shared/ui/kit/skeleton";
 import { useCommentDelete } from "./use-comment-delete";
+import { useEditComment } from "./use-edit-comment";
 
 const SkeletonCommentsList = ({ count = 12 }: { count: number }) => {
   return (
@@ -47,6 +48,41 @@ export const CommentsList = ({
 
   const { deleteComment, isPending } = useCommentDelete();
 
+  const [editing, setEditing] = useState<{
+    commentId: string;
+    content: string;
+  } | null>(null);
+
+  const { editComment, isPending: isEditPending } = useEditComment();
+
+  const startEdit = (comment: CommentDTO) => {
+    setReplyTo(null);
+    setEditing({
+      commentId: comment._id,
+      content: comment.content,
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+  };
+
+  const submitEdit = () => {
+    if (!editing) return;
+
+    editComment(
+      {
+        commentId: editing.commentId,
+        content: editing.content,
+      },
+      {
+        onSuccess: () => {
+          setEditing(null);
+        },
+      },
+    );
+  };
+
   if (isLoading) return <SkeletonCommentsList count={10} />;
 
   if (!comments.length) {
@@ -81,19 +117,53 @@ export const CommentsList = ({
                   </span>
                 </div>
 
-                <p className="text-sm text-slate-700">{comment.content}</p>
+                {editing?.commentId === comment._id ? (
+                  <>
+                    <textarea
+                      value={editing.content}
+                      onChange={(e) =>
+                        setEditing((prev) =>
+                          prev ? { ...prev, content: e.target.value } : prev,
+                        )
+                      }
+                      rows={3}
+                      className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm"
+                    />
+
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        onClick={submitEdit}
+                        disabled={isEditPending}
+                        className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        {isEditPending ? "Saving..." : "Save"}
+                      </button>
+
+                      <button
+                        onClick={cancelEdit}
+                        disabled={isEditPending}
+                        className="rounded-md bg-slate-400 px-3 py-1 text-xs font-medium text-white"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-slate-700">{comment.content}</p>
+                )}
 
                 {/* Reply button */}
 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() =>
+                    onClick={() => {
+                      cancelEdit();
                       setReplyTo({
                         commentId: comment._id,
                         username: "author username",
                         userId: comment.author._id,
-                      })
-                    }
+                      });
+                    }}
                     className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
                   >
                     Reply
@@ -106,11 +176,17 @@ export const CommentsList = ({
                   >
                     Delete
                   </button>
+
+                  <button
+                    onClick={() => startEdit(comment)}
+                    className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
+                  >
+                    Edit
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Inline reply form */}
             {replyTo?.commentId === comment._id && (
               <div className="mt-3 pl-11">
                 <CommentForm
@@ -150,7 +226,44 @@ export const CommentsList = ({
                         </span>
                       </div>
 
-                      <p className="text-sm text-slate-700">{reply.content}</p>
+                      {editing?.commentId === reply._id ? (
+                        <>
+                          <textarea
+                            value={editing.content}
+                            onChange={(e) =>
+                              setEditing((prev) =>
+                                prev
+                                  ? { ...prev, content: e.target.value }
+                                  : prev,
+                              )
+                            }
+                            rows={2}
+                            className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm"
+                          />
+
+                          <div className="mt-2 flex gap-2">
+                            <button
+                              onClick={submitEdit}
+                              disabled={isEditPending}
+                              className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-medium text-white"
+                            >
+                              {isEditPending ? "Saving..." : "Save"}
+                            </button>
+
+                            <button
+                              onClick={cancelEdit}
+                              disabled={isEditPending}
+                              className="rounded-md bg-slate-400 px-3 py-1 text-xs font-medium text-white"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm text-slate-700">
+                          {reply.content}
+                        </p>
+                      )}
 
                       <div className="flex items-center gap-2">
                         <button
@@ -159,6 +272,13 @@ export const CommentsList = ({
                           className="mt-2 text-xs font-medium text-red-600 hover:underline cursor-pointer"
                         >
                           Delete
+                        </button>
+
+                        <button
+                          onClick={() => startEdit(reply)}
+                          className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
+                        >
+                          Edit
                         </button>
                       </div>
                     </div>

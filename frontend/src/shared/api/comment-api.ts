@@ -5,6 +5,7 @@ import type {
   CreateCommentApiResponse,
   CreateCommentPayload,
   GetCommentsApiResponse,
+  GetCommentApiResponse,
 } from "./api-types";
 
 export const commentApi = {
@@ -40,6 +41,14 @@ export const commentApi = {
     return apiInstance(`/comment/${commentId}`, {
       method: "DELETE",
       credentials: "include",
+    });
+  },
+
+  editComment: (commentId: string, data: { content: string }) => {
+    return apiInstance<GetCommentApiResponse>(`/comment/${commentId}`, {
+      method: "PATCH",
+      credentials: "include",
+      json: data,
     });
   },
 };

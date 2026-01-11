@@ -165,6 +165,10 @@ export type GetCommentsApiResponse = ApiResponse & {
   pagination: Pagination;
 };
 
+export type GetCommentApiResponse = ApiResponse & {
+  comment: CommentDTO;
+};
+
 export type CreateCommentPayload = {
   blogId: string;
   content: string;
