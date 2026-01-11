@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { CommentDTO } from "@/shared/api/api-types";
 import { CommentForm } from "./comment-form";
 import { Skeleton } from "@/shared/ui/kit/skeleton";
-import { useCommentDelete } from "./use-comment-delete";
-import { useEditComment } from "./use-edit-comment";
+import { useCommentDelete } from "../model/use-comment-delete";
+import { useEditComment } from "../model/use-edit-comment";
 
 const SkeletonCommentsList = ({ count = 12 }: { count: number }) => {
   return (
@@ -28,6 +28,10 @@ const SkeletonCommentsList = ({ count = 12 }: { count: number }) => {
     </ul>
   );
 };
+
+const MAX_COMMENT_LENGTH = 500;
+
+const clampContent = (value: string) => value.slice(0, MAX_COMMENT_LENGTH);
 
 export const CommentsList = ({
   comments,
@@ -83,6 +87,21 @@ export const CommentsList = ({
     );
   };
 
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Esc → cancel
+    if (e.key === "Escape") {
+      e.preventDefault();
+      cancelEdit();
+      return;
+    }
+
+    // Ctrl/Cmd + Enter → submit
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      submitEdit();
+    }
+  };
+
   if (isLoading) return <SkeletonCommentsList count={10} />;
 
   if (!comments.length) {
@@ -123,17 +142,57 @@ export const CommentsList = ({
                       value={editing.content}
                       onChange={(e) =>
                         setEditing((prev) =>
-                          prev ? { ...prev, content: e.target.value } : prev,
+                          prev
+                            ? {
+                                ...prev,
+                                content: clampContent(e.target.value),
+                              }
+                            : prev,
                         )
                       }
                       rows={3}
+                      maxLength={MAX_COMMENT_LENGTH}
+                      onKeyDown={handleEditKeyDown}
                       className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm"
                     />
+
+                    <div className="mt-1 text-right text-xs text-slate-500">
+                      <span
+                        className={
+                          editing.content.length >= MAX_COMMENT_LENGTH
+                            ? "text-red-600"
+                            : ""
+                        }
+                      >
+                        {editing.content.length}
+                      </span>
+                      / {MAX_COMMENT_LENGTH}
+                    </div>
+
+                    <div className="mt-1 flex justify-between text-xs text-slate-500">
+                      <span>Ctrl / Cmd + Enter to save</span>
+                      <span>
+                        <span
+                          className={
+                            editing.content.length >= MAX_COMMENT_LENGTH
+                              ? "text-red-600"
+                              : ""
+                          }
+                        >
+                          {editing.content.length}
+                        </span>
+                        / {MAX_COMMENT_LENGTH}
+                      </span>
+                    </div>
 
                     <div className="mt-2 flex gap-2">
                       <button
                         onClick={submitEdit}
-                        disabled={isEditPending}
+                        disabled={
+                          isEditPending ||
+                          !editing.content.trim() ||
+                          editing.content.length > MAX_COMMENT_LENGTH
+                        }
                         className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-medium text-white"
                       >
                         {isEditPending ? "Saving..." : "Save"}
@@ -229,22 +288,44 @@ export const CommentsList = ({
                       {editing?.commentId === reply._id ? (
                         <>
                           <textarea
+                            onKeyDown={handleEditKeyDown}
                             value={editing.content}
                             onChange={(e) =>
                               setEditing((prev) =>
                                 prev
-                                  ? { ...prev, content: e.target.value }
+                                  ? {
+                                      ...prev,
+                                      content: clampContent(e.target.value),
+                                    }
                                   : prev,
                               )
                             }
                             rows={2}
+                            maxLength={MAX_COMMENT_LENGTH}
                             className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm"
                           />
+
+                          <div className="mt-1 text-right text-xs text-slate-500">
+                            <span
+                              className={
+                                editing.content.length >= MAX_COMMENT_LENGTH
+                                  ? "text-red-600"
+                                  : ""
+                              }
+                            >
+                              {editing.content.length}
+                            </span>
+                            / {MAX_COMMENT_LENGTH}
+                          </div>
 
                           <div className="mt-2 flex gap-2">
                             <button
                               onClick={submitEdit}
-                              disabled={isEditPending}
+                              disabled={
+                                isEditPending ||
+                                !editing.content.trim() ||
+                                editing.content.length > MAX_COMMENT_LENGTH
+                              }
                               className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-medium text-white"
                             >
                               {isEditPending ? "Saving..." : "Save"}

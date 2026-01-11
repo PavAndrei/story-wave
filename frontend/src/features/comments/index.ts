@@ -1,5 +1,5 @@
-import { CommentForm } from "./comment-form";
-import { CommentsList } from "./comments-list";
-import { usePublicCommentsInfinity } from "./use-public-comments-infinity";
+import { CommentForm } from "./ui/comment-form";
+import { CommentsList } from "./ui/comments-list copy";
+import { usePublicCommentsInfinity } from "./model/use-public-comments-infinity";
 
 export { CommentForm, CommentsList, usePublicCommentsInfinity };

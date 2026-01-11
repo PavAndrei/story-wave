@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Send } from "lucide-react";
-import { useCreateComment } from "./use-create-comment";
+import { useCreateComment } from "../model/use-create-comment";
+import { MAX_COMMENT_LENGTH } from "../constants";
 
 type CommentFormMode = "comment" | "reply";
 
@@ -14,8 +15,6 @@ type CommentFormProps = {
 
   onSuccess?: () => void;
 };
-
-const MAX_COMMENT_LENGTH = 500;
 
 export const CommentForm = ({
   blogId,
@@ -32,6 +31,22 @@ export const CommentForm = ({
 
   const length = content.length;
   const isTooLong = length > MAX_COMMENT_LENGTH;
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Esc → cancel (только для reply)
+    if (e.key === "Escape" && mode === "reply") {
+      e.preventDefault();
+      onSuccess?.();
+      return;
+    }
+
+    // Ctrl / Cmd + Enter → submit
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      const form = e.currentTarget.form;
+      form?.requestSubmit();
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,13 +94,14 @@ export const CommentForm = ({
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        onKeyDown={handleKeyDown}
         placeholder={
           mode === "reply" && replyToUsername
             ? `Reply to @${replyToUsername}...`
             : "Write your comment..."
         }
         rows={3}
-        maxLength={MAX_COMMENT_LENGTH + 50} // защита от paste-спама
+        maxLength={MAX_COMMENT_LENGTH + 50}
         className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
       />
 
@@ -114,6 +130,10 @@ export const CommentForm = ({
           <Send className="h-4 w-4" />
           {isLoading ? "Posting..." : "Post"}
         </button>
+        <div className="flex justify-between text-xs text-slate-500">
+          <span>Ctrl / Cmd + Enter to send</span>
+          {mode === "reply" && <span>Esc to cancel</span>}
+        </div>
       </div>
     </form>
   );
