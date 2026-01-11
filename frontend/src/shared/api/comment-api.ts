@@ -6,6 +6,8 @@ import type {
   CreateCommentPayload,
   GetCommentsApiResponse,
   GetCommentApiResponse,
+  ApiResponse,
+  Like,
 } from "./api-types";
 
 export const commentApi = {
@@ -50,5 +52,15 @@ export const commentApi = {
       credentials: "include",
       json: data,
     });
+  },
+
+  toggleLike: (commentId: string) => {
+    return apiInstance<ApiResponse & { data: Like }>(
+      `/comment/${commentId}/like`,
+      {
+        method: "PATCH",
+        credentials: "include",
+      },
+    );
   },
 };

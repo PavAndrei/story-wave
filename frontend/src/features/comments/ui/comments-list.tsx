@@ -1,9 +1,10 @@
-import { useState } from "react";
 import type { CommentDTO } from "@/shared/api/api-types";
-import { CommentForm } from "./comment-form";
-import { Skeleton } from "@/shared/ui/kit/skeleton";
+import { useCommentActions } from "../model/use-comment-actions";
 import { useCommentDelete } from "../model/use-comment-delete";
 import { useEditComment } from "../model/use-edit-comment";
+import { CommentItem } from "./comment-item";
+import { Skeleton } from "@/shared/ui/kit/skeleton";
+import { useToggleLike } from "../model/use-toggle-like";
 
 const SkeletonCommentsList = ({ count = 12 }: { count: number }) => {
   return (
@@ -29,78 +30,23 @@ const SkeletonCommentsList = ({ count = 12 }: { count: number }) => {
   );
 };
 
-const MAX_COMMENT_LENGTH = 500;
-
-const clampContent = (value: string) => value.slice(0, MAX_COMMENT_LENGTH);
-
-export const CommentsList = ({
-  comments,
-  isLoading,
-  cursorRef,
-  isFetchingNextPage,
-}: {
+type CommentsListProps = {
   comments: CommentDTO[];
   isLoading?: boolean;
   cursorRef?: React.Ref<HTMLDivElement>;
   isFetchingNextPage?: boolean;
-}) => {
-  const [replyTo, setReplyTo] = useState<{
-    commentId: string;
-    username?: string;
-    userId?: string;
-  } | null>(null);
+};
 
-  const { deleteComment, isPending } = useCommentDelete();
-
-  const [editing, setEditing] = useState<{
-    commentId: string;
-    content: string;
-  } | null>(null);
-
-  const { editComment, isPending: isEditPending } = useEditComment();
-
-  const startEdit = (comment: CommentDTO) => {
-    setReplyTo(null);
-    setEditing({
-      commentId: comment._id,
-      content: comment.content,
-    });
-  };
-
-  const cancelEdit = () => {
-    setEditing(null);
-  };
-
-  const submitEdit = () => {
-    if (!editing) return;
-
-    editComment(
-      {
-        commentId: editing.commentId,
-        content: editing.content,
-      },
-      {
-        onSuccess: () => {
-          setEditing(null);
-        },
-      },
-    );
-  };
-
-  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Esc → cancel
-    if (e.key === "Escape") {
-      e.preventDefault();
-      cancelEdit();
-      return;
-    }
-
-    // Ctrl/Cmd + Enter → submit
-    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-      e.preventDefault();
-      submitEdit();
-    }
-  };
+export const CommentsList = ({
+  comments,
+  cursorRef,
+  isFetchingNextPage,
+  isLoading,
+}: CommentsListProps) => {
+  const actions = useCommentActions();
+  const deleteMutation = useCommentDelete();
+  const editMutation = useEditComment();
+  const toggleLike = useToggleLike();
 
   if (isLoading) return <SkeletonCommentsList count={10} />;
 
@@ -116,258 +62,14 @@ export const CommentsList = ({
     <>
       <ul className="flex flex-col gap-4">
         {comments.map((comment) => (
-          <li
+          <CommentItem
             key={comment._id}
-            className="rounded-lg border border-slate-700 bg-slate-200 p-4"
-          >
-            {/* Root comment */}
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-slate-700">
-                author
-              </div>
-
-              <div className="flex-1">
-                <div className="mb-1 flex items-center gap-2 text-sm">
-                  <span className="font-medium text-slate-800">
-                    author username
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                {editing?.commentId === comment._id ? (
-                  <>
-                    <textarea
-                      value={editing.content}
-                      onChange={(e) =>
-                        setEditing((prev) =>
-                          prev
-                            ? {
-                                ...prev,
-                                content: clampContent(e.target.value),
-                              }
-                            : prev,
-                        )
-                      }
-                      rows={3}
-                      maxLength={MAX_COMMENT_LENGTH}
-                      onKeyDown={handleEditKeyDown}
-                      className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm"
-                    />
-
-                    <div className="mt-1 text-right text-xs text-slate-500">
-                      <span
-                        className={
-                          editing.content.length >= MAX_COMMENT_LENGTH
-                            ? "text-red-600"
-                            : ""
-                        }
-                      >
-                        {editing.content.length}
-                      </span>
-                      / {MAX_COMMENT_LENGTH}
-                    </div>
-
-                    <div className="mt-1 flex justify-between text-xs text-slate-500">
-                      <span>Ctrl / Cmd + Enter to save</span>
-                      <span>
-                        <span
-                          className={
-                            editing.content.length >= MAX_COMMENT_LENGTH
-                              ? "text-red-600"
-                              : ""
-                          }
-                        >
-                          {editing.content.length}
-                        </span>
-                        / {MAX_COMMENT_LENGTH}
-                      </span>
-                    </div>
-
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        onClick={submitEdit}
-                        disabled={
-                          isEditPending ||
-                          !editing.content.trim() ||
-                          editing.content.length > MAX_COMMENT_LENGTH
-                        }
-                        className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-medium text-white"
-                      >
-                        {isEditPending ? "Saving..." : "Save"}
-                      </button>
-
-                      <button
-                        onClick={cancelEdit}
-                        disabled={isEditPending}
-                        className="rounded-md bg-slate-400 px-3 py-1 text-xs font-medium text-white"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-slate-700">{comment.content}</p>
-                )}
-
-                {/* Reply button */}
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      cancelEdit();
-                      setReplyTo({
-                        commentId: comment._id,
-                        username: "author username",
-                        userId: comment.author._id,
-                      });
-                    }}
-                    className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
-                  >
-                    Reply
-                  </button>
-
-                  <button
-                    onClick={() => deleteComment(comment._id)}
-                    disabled={isPending}
-                    className="mt-2 text-xs font-medium text-red-600 hover:underline cursor-pointer"
-                  >
-                    Delete
-                  </button>
-
-                  <button
-                    onClick={() => startEdit(comment)}
-                    className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
-                  >
-                    Edit
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {replyTo?.commentId === comment._id && (
-              <div className="mt-3 pl-11">
-                <CommentForm
-                  blogId={comment.blog._id}
-                  mode="reply"
-                  parentCommentId={comment._id}
-                  replyToUserId={comment.author._id}
-                  replyToUsername={comment.author.username}
-                  onSuccess={() => setReplyTo(null)}
-                />
-
-                <button
-                  onClick={() => setReplyTo(null)}
-                  className="mt-2 text-xs text-slate-500 hover:underline"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
-            {/* Replies */}
-            {comment.replies && comment.replies.length > 0 && (
-              <ul className="mt-4 flex flex-col gap-3 border-l border-slate-600 pl-6">
-                {comment.replies.map((reply) => (
-                  <li key={reply._id} className="flex items-start gap-3">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-300 text-xs font-medium text-slate-700">
-                      author
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="mb-1 flex items-center gap-2 text-sm">
-                        <span className="font-medium text-slate-800">
-                          author username
-                        </span>
-                        <span className="text-xs text-slate-500">
-                          {new Date(reply.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      {editing?.commentId === reply._id ? (
-                        <>
-                          <textarea
-                            onKeyDown={handleEditKeyDown}
-                            value={editing.content}
-                            onChange={(e) =>
-                              setEditing((prev) =>
-                                prev
-                                  ? {
-                                      ...prev,
-                                      content: clampContent(e.target.value),
-                                    }
-                                  : prev,
-                              )
-                            }
-                            rows={2}
-                            maxLength={MAX_COMMENT_LENGTH}
-                            className="w-full resize-none rounded-md border border-slate-700 bg-slate-100 px-3 py-2 text-sm"
-                          />
-
-                          <div className="mt-1 text-right text-xs text-slate-500">
-                            <span
-                              className={
-                                editing.content.length >= MAX_COMMENT_LENGTH
-                                  ? "text-red-600"
-                                  : ""
-                              }
-                            >
-                              {editing.content.length}
-                            </span>
-                            / {MAX_COMMENT_LENGTH}
-                          </div>
-
-                          <div className="mt-2 flex gap-2">
-                            <button
-                              onClick={submitEdit}
-                              disabled={
-                                isEditPending ||
-                                !editing.content.trim() ||
-                                editing.content.length > MAX_COMMENT_LENGTH
-                              }
-                              className="rounded-md bg-cyan-600 px-3 py-1 text-xs font-medium text-white"
-                            >
-                              {isEditPending ? "Saving..." : "Save"}
-                            </button>
-
-                            <button
-                              onClick={cancelEdit}
-                              disabled={isEditPending}
-                              className="rounded-md bg-slate-400 px-3 py-1 text-xs font-medium text-white"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-sm text-slate-700">
-                          {reply.content}
-                        </p>
-                      )}
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => deleteComment(reply._id)}
-                          disabled={isPending}
-                          className="mt-2 text-xs font-medium text-red-600 hover:underline cursor-pointer"
-                        >
-                          Delete
-                        </button>
-
-                        <button
-                          onClick={() => startEdit(reply)}
-                          className="mt-2 text-xs font-medium text-cyan-600 hover:underline cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
+            comment={comment}
+            actions={actions}
+            deleteMutation={deleteMutation}
+            editMutation={editMutation}
+            toggleLike={toggleLike}
+          />
         ))}
       </ul>
       {isFetchingNextPage && <SkeletonCommentsList count={12} />}

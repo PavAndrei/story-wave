@@ -13,6 +13,8 @@ const mapCommentWithAuthorAndBlog = (comment: any) => ({
   rootCommentId: comment.rootCommentId ?? null,
   replyToUserId: comment.replyToUserId ?? null,
 
+  likesCount: comment.likesCount ?? 0,
+
   author: comment.authorId
     ? {
         _id: comment.authorId._id,
@@ -181,14 +183,24 @@ export const editComment = async ({
   };
 };
 
+const isCommentLikedByUser = (
+  comment: { likedBy?: mongoose.Types.ObjectId[] },
+  userId?: mongoose.Types.ObjectId | null
+) => {
+  if (!userId) return false;
+  return comment.likedBy?.some((id) => id.toString() === userId.toString());
+};
+
 export const getBlogComments = async ({
   blogId,
   page,
   limit,
+  userId,
 }: {
   blogId: mongoose.Types.ObjectId;
   page: number;
   limit: number;
+  userId?: mongoose.Types.ObjectId | null;
 }) => {
   const skip = (page - 1) * limit;
 
@@ -237,9 +249,12 @@ export const getBlogComments = async ({
   // 4️⃣ Финальная структура
   const comments = rootComments.map((root) => ({
     ...mapCommentWithAuthorAndBlog(root),
+    isLiked: isCommentLikedByUser(root, userId),
     replies:
-      repliesMap.get(root._id.toString())?.map(mapCommentWithAuthorAndBlog) ??
-      [],
+      repliesMap.get(root._id.toString())?.map((reply) => ({
+        ...mapCommentWithAuthorAndBlog(reply),
+        isLiked: isCommentLikedByUser(reply, userId),
+      })) ?? [],
   }));
 
   return {

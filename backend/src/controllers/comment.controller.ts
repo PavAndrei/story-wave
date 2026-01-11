@@ -12,6 +12,7 @@ import { commentSchema, editCommentSchema } from './comment.schema.js';
 import mongoose from 'mongoose';
 import catchErrors from '../utils/catchErrors.js';
 import appAssert from '../utils/appAssert.js';
+import { verifyToken } from '../utils/jwt.js';
 
 export const createCommentHandler = catchErrors(async (req, res) => {
   const authorId = req.userId!;
@@ -87,10 +88,20 @@ export const getBlogCommentsHandler = catchErrors(async (req, res) => {
 
   appAssert(blogId, NOT_FOUND, 'Invalid blog id');
 
+  const accessToken = req.cookies.accessToken;
+  const { payload } = verifyToken(accessToken || '');
+
+  let userId;
+
+  if (payload) {
+    userId = payload.userId;
+  }
+
   const result = await getBlogComments({
     blogId: new mongoose.Types.ObjectId(blogId),
     page: Number(page),
     limit: Number(limit),
+    userId,
   });
 
   return res.status(OK).json({

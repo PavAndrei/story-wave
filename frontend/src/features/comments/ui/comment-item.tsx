@@ -4,6 +4,8 @@ import type { useCommentDelete } from "../model/use-comment-delete";
 import type { useEditComment } from "../model/use-edit-comment";
 import { CommentForm } from "./comment-form";
 import { MAX_COMMENT_LENGTH } from "../constants";
+import { useToggleLike } from "../model/use-toggle-like";
+import { Heart } from "lucide-react";
 
 const clampContent = (value: string) => value.slice(0, MAX_COMMENT_LENGTH);
 
@@ -12,6 +14,7 @@ type Props = {
   actions: ReturnType<typeof useCommentActions>;
   deleteMutation: ReturnType<typeof useCommentDelete>;
   editMutation: ReturnType<typeof useEditComment>;
+  toggleLike: ReturnType<typeof useToggleLike>;
 };
 
 export const CommentItem = ({
@@ -19,6 +22,7 @@ export const CommentItem = ({
   actions,
   deleteMutation,
   editMutation,
+  toggleLike,
 }: Props) => {
   const isEditing = actions.editing?.commentId === comment._id;
   const isReplying = actions.replyTo?.commentId === comment._id;
@@ -48,6 +52,11 @@ export const CommentItem = ({
       submitEdit();
     }
   };
+
+  console.log(comment.likesCount);
+
+  const { toggle, getLikeState } = toggleLike;
+  const { isLiked, likesCount } = getLikeState(comment);
 
   return (
     <li className="rounded-lg border border-slate-700 bg-slate-200 p-4">
@@ -144,6 +153,18 @@ export const CommentItem = ({
             >
               Edit
             </button>
+            <button
+              type="button"
+              className="flex items-center gap-2"
+              onClick={() => toggle(comment)}
+            >
+              <Heart
+                className={
+                  isLiked ? "fill-red-500 text-red-500" : "text-slate-500"
+                }
+              />
+              <span>{likesCount}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -179,6 +200,7 @@ export const CommentItem = ({
               actions={actions}
               deleteMutation={deleteMutation}
               editMutation={editMutation}
+              toggleLike={toggleLike}
             />
           ))}
         </ul>
