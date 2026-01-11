@@ -290,3 +290,40 @@ export const getUserComments = async ({
     },
   };
 };
+
+export const toggleCommentLike = async ({
+  commentId,
+  userId,
+}: {
+  commentId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+}) => {
+  const comment = await CommentModel.findById(commentId);
+
+  appAssert(comment, NOT_FOUND, 'Comment not found');
+
+  const userIdStr = userId.toString();
+
+  const alreadyLiked = comment.likedBy.some(
+    (id) => id.toString() === userIdStr
+  );
+
+  if (alreadyLiked) {
+    // unlike
+    comment.likedBy = comment.likedBy.filter(
+      (id) => id.toString() !== userIdStr
+    );
+    comment.likesCount = Math.max(0, comment.likesCount - 1);
+  } else {
+    // like
+    comment.likedBy.push(userId);
+    comment.likesCount += 1;
+  }
+
+  await comment.save();
+
+  return {
+    likesCount: comment.likesCount,
+    isLiked: !alreadyLiked,
+  };
+};

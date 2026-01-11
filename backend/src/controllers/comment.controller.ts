@@ -6,6 +6,7 @@ import {
   editComment,
   getBlogComments,
   getUserComments,
+  toggleCommentLike,
 } from '../services/comment.service.js';
 import { commentSchema, editCommentSchema } from './comment.schema.js';
 import mongoose from 'mongoose';
@@ -114,5 +115,27 @@ export const getUserCommentsHandler = catchErrors(async (req, res) => {
     success: true,
     message: "User's comments found",
     ...result,
+  });
+});
+
+export const toggleCommentLikeHandler = catchErrors(async (req, res) => {
+  const userId = req.userId!;
+  const commentId = req.params.id;
+
+  appAssert(
+    mongoose.Types.ObjectId.isValid(commentId),
+    NOT_FOUND,
+    'Invalid comment id'
+  );
+
+  const result = await toggleCommentLike({
+    commentId: new mongoose.Types.ObjectId(commentId),
+    userId: new mongoose.Types.ObjectId(userId),
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: result.isLiked ? 'Comment liked' : 'Like removed from comment',
+    data: result,
   });
 });

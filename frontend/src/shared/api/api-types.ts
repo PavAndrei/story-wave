@@ -155,6 +155,11 @@ export type CommentDTO = {
   createdAt: Date;
   updatedAt: Date;
   __v: number;
+
+  likesCount: number;
+  likedBy: string[];
+  isLiked?: boolean;
+
   replies?: CommentDTO[];
 };
 

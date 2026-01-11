@@ -15,6 +15,9 @@ export interface CommentDocument extends mongoose.Document {
 
   replyToUserId?: mongoose.Types.ObjectId | null;
 
+  likesCount: number;
+  likedBy: mongoose.Types.ObjectId[];
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -64,6 +67,17 @@ const commentSchema = new mongoose.Schema<CommentDocument>(
       ref: 'User',
       default: null,
     },
+
+    likesCount: {
+      type: Number,
+      default: 0,
+    },
+    likedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   { timestamps: true }
 );

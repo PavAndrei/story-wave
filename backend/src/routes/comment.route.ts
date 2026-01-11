@@ -7,6 +7,7 @@ import {
   editCommentHandler,
   getBlogCommentsHandler,
   getUserCommentsHandler,
+  toggleCommentLikeHandler,
 } from '../controllers/comment.controller.js';
 
 const commentRoute = Router();
@@ -37,6 +38,13 @@ commentRoute.get(
   setRequestExtensions,
   authenticate,
   getUserCommentsHandler
+);
+
+commentRoute.patch(
+  '/:id/like',
+  setRequestExtensions,
+  authenticate,
+  toggleCommentLikeHandler
 );
 
 commentRoute.get('/:id', getBlogCommentsHandler);
