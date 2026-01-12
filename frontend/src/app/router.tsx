@@ -1,5 +1,5 @@
 import { ROUTES } from "../shared/model/routes";
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { App } from "./app";
 import { Providers } from "./providers";
 import { ProtectedRoute } from "./protected-route";
@@ -99,7 +99,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTES.HOME,
-        loader: () => redirect(ROUTES.BLOGS),
+        lazy: () => import("@/features/home/home.page"),
       },
     ],
   },

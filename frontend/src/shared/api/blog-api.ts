@@ -107,10 +107,13 @@ export const blogApi = {
     );
   },
 
-  getTopBlogs: () => {
-    return apiInstance<ApiResponseWithMultipleBlogData>(`/blog/top`, {
-      method: "GET",
-    });
+  getTopBlogs: (limit?: number) => {
+    return apiInstance<ApiResponseWithMultipleBlogData>(
+      `/blog/top${limit && `?limit=${limit}`}`,
+      {
+        method: "GET",
+      },
+    );
   },
 
   getBlogById: (id: string) => {
